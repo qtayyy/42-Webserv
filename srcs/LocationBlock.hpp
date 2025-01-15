@@ -6,7 +6,7 @@
 /*   By: qtay <qtay@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/12 15:21:29 by qtay              #+#    #+#             */
-/*   Updated: 2025/01/12 19:50:03 by qtay             ###   ########.fr       */
+/*   Updated: 2025/01/15 15:30:07 by qtay             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,13 +14,19 @@
 # define LOCATIONBLOCK_HPP
 
 #include "Block.hpp"
+#include "ServerBlock.hpp"
 #include "../includes/Webserv.hpp"
 
+class ServerBlock;
 class LocationBlock : public Block
 {
 	public:
 		LocationBlock(void) : Block() {};
+		LocationBlock(ServerBlock *parent) : _parentServerBlock(parent) {}
 		~LocationBlock(void) {};
+
+		int		parseLocation(std::vector<std::string> args, int i);
+		void	initDefaultLocationBlockConfig(void);
 
 		// Setters
 		void	setUri(std::vector<std::string> args = std::vector<std::string>());
@@ -35,6 +41,7 @@ class LocationBlock : public Block
 		void	printBlock(void);
 
 	private:
+		ServerBlock	*_parentServerBlock;
 		std::string	_uri; // the uri that will "trigger" this location block
 		std::string	_alias; // 3rd requirement for routes (see subject PDF)
 		std::pair<int, std::string>	_return; // redirection
