@@ -6,7 +6,7 @@
 /*   By: qtay <qtay@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/12 16:34:35 by qtay              #+#    #+#             */
-/*   Updated: 2025/01/12 17:00:50 by qtay             ###   ########.fr       */
+/*   Updated: 2025/01/14 15:46:28 by qtay             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,5 +24,13 @@ int	main(int argc, char **argv)
 	}
 	if (argc == 2)
 		defaultPath = argv[1];
-	Cluster	cluster(defaultPath);
+	try
+	{
+		Cluster	cluster(defaultPath);
+		cluster.parse();
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+	}
 }
