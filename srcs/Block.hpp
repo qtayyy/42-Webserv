@@ -6,7 +6,7 @@
 /*   By: qtay <qtay@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/11 17:32:28 by qtay              #+#    #+#             */
-/*   Updated: 2025/01/11 23:38:01 by qtay             ###   ########.fr       */
+/*   Updated: 2025/01/15 13:40:24 by qtay             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@
 class Block
 {
 	public:
-		Block(void) {};
+		Block(void) : _autoindex(-1), _clientMaxBodySize(0) {}; // -1 and 0 indicate they haven't been set
 		virtual ~Block(void) {};
 
 		virtual void	printBlock(void) = 0;
@@ -44,7 +44,7 @@ class Block
 		std::vector<std::string>			getIndex(void) { return (this->_index); };
 		std::map<int, std::string>			getErrorPage(void) { return (this->_errorPage); };
 		std::vector<std::string>			getLimitExcept(void) { return (this->_limitExcept); };
-		bool								getAutoindex(void) { return (this->_autoindex); };
+		int									getAutoindex(void) { return (this->_autoindex); };
 		std::map<std::string, std::string>	getCgiScript(void) {return (this->_cgiScript); };
 		unsigned long long					getClientMaxBodySize(void) {return (this->_clientMaxBodySize); };
 
@@ -59,7 +59,7 @@ class Block
 		std::vector<std::string>			_index;
 		std::map<int, std::string>			_errorPage; // TBD
 		std::vector<std::string>			_limitExcept;
-		bool								_autoindex;
+		int									_autoindex;
 		std::map<std::string, std::string>	_cgiScript;
 		unsigned long long					_clientMaxBodySize;
 

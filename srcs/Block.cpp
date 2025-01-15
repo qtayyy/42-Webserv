@@ -6,29 +6,11 @@
 /*   By: qtay <qtay@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/10 14:05:46 by qtay              #+#    #+#             */
-/*   Updated: 2025/01/12 16:37:51 by qtay             ###   ########.fr       */
+/*   Updated: 2025/01/15 13:55:24 by qtay             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Block.hpp"
-
-// =============================== CONSTRUCTOR ===============================
-
-/**
- * @brief	Default constructor sets up a default server if no config is provided
- * 
- * NOTE:	Removing it cuz I think it's better to settle mandatory unfilled
- * 			fields after the setters as it allows us to handle duplicates
- * 			easily if needed.
- */
-// Block::Block(void)
-// 	: _root("/var/www"), _autoindex(false), _clientMaxBodySize(1000000)
-// {
-// 	setIndex();
-// 	setCgiScript();
-// 	setErrorPage();
-// 	setLimitExcept();
-// }
 
 // ================================= SETTERS =================================
 
@@ -120,12 +102,10 @@ void	Block::setIndex(std::vector<std::string> args)
 		this->_index.clear();
 		for (std::vector<std::string>::iterator it = args.begin(); it != args.end(); it++)
 		{
-			if (std::find(_index.begin(), _index.end(), *it) == _index.end())
+			if (std::find(_index.begin(), _index.end(), *it) == _index.end()) // Only add if it's not duplicated
 				this->_index.push_back(*it);
 		}
-			
 	}
-
 }
 
 /**
@@ -138,17 +118,17 @@ void Block::setAutoindex(std::vector<std::string> args)
 {
 	if (args.size() != 1)
 	{
-		this->_autoindex = false;
+		this->_autoindex = 0;
 		if (!args.empty())
 			std::cerr << RED "autoindex error: invalid num of args. Autoindex set to 'off'\n" RESET;
 	}
 	else if (args[0] == "on")
-		this->_autoindex = true;
+		this->_autoindex = 1;
 	else if (args[0] == "off")
-		this->_autoindex = false;
+		this->_autoindex = 0;
 	else
 	{
-		this->_autoindex = false;
+		this->_autoindex = 0;
 		std::cerr << RED "autoindex error: invalid arg type: " + args[0] + ". Autoindex set to 'off'\n" RESET;
 	}
 }
@@ -178,9 +158,8 @@ void			Block::setRoot(std::vector<std::string> args)
 void	Block::initDefaultLimitExcept(void)
 {
 	this->_limitExcept.clear();
-	this->_limitExcept.push_back("GET");
-	this->_limitExcept.push_back("POST");
-	this->_limitExcept.push_back("DELETE");
+	for (std::set<std::string>::iterator it = validMethods.begin(); it != validMethods.end(); it++)
+		this->_limitExcept.push_back(*it);
 }
 
 /**
