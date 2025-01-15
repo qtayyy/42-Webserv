@@ -23,6 +23,8 @@
  * 			f. Execute CGI based on a specific file extension
  * 			g. Can upload files and configure where to save them
  */
+
+class	LocationBlock;
 class ServerBlock : public Block
 {
 	public:
@@ -34,13 +36,13 @@ class ServerBlock : public Block
 		// Setters
 		void	setListen(std::vector<std::string> args = std::vector<std::string>());
 		void	setServerName(std::vector<std::string> args = std::vector<std::string>());
-		void	setLocation(std::vector<std::string> args = std::vector<std::string>());
+		// void	setLocation(std::vector<std::string> args = std::vector<std::string>());
 
 		// Getters
 		std::vector<std::pair<uint32_t, int>>	getListen(void) { return (this->_listen); };
 		std::vector<std::string>	getServerName(void) { return (this->_serverName); };
 
-		// parseServer
+		int	parseServer(std::vector<std::string> tokens, int i);
 
 	private:
 		std::vector<std::pair<uint32_t, int>>	_listen; // ip:port
@@ -49,7 +51,9 @@ class ServerBlock : public Block
 
 		static std::map<std::string, void (ServerBlock::*)(std::vector<std::string>)>	serverParseMap;
 		static std::map<std::string, void (ServerBlock::*)(std::vector<std::string>)>	initServerMap(void);
-		uint32_t ipToInt(const std::string &ip); // helper function
+
+		void		initDefaultServerBlockConfig(void);
+		uint32_t	ipToInt(const std::string &ip); // helper function
 };
 
 std::string	intToIp(uint32_t ip); // private?

@@ -6,11 +6,114 @@
 /*   By: qtay <qtay@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/11 21:53:55 by qtay              #+#    #+#             */
-/*   Updated: 2025/01/12 19:58:17 by qtay             ###   ########.fr       */
+/*   Updated: 2025/01/15 15:40:21 by qtay             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ServerBlock.hpp"
+
+// ============================= PARSE CONFIG FILE ============================
+
+void	ServerBlock::initDefaultServerBlockConfig(void)
+{
+	if (_root == "")
+		setRoot();
+	if (_index.empty())
+		setIndex();
+	if (_listen.empty())
+		setListen();
+	if (_limitExcept.empty())
+		setLimitExcept();
+	if (_autoindex == -1)
+		setAutoindex();
+	if (_clientMaxBodySize == 0)
+		setClientMaxBodySize();
+	if (_errorPage.empty())
+		setErrorPage();
+}
+
+/**
+ * @brief	Parses all server blocks in the config file.
+ * @return	Returns the number of tokens parsed or -1 if an error is found.
+ */
+int	ServerBlock::parseServer(std::vector<std::string> tokens, int i)
+{
+	bool		isDirective = true;
+	std::string	directive;
+	std::vector<std::string> args;
+
+	if (tokens[i++] != "{")
+		return (-1);
+	for (; i < tokens.size() - 1; i++)
+	{
+		if (tokens[i] == "}")
+			break ;
+		if (tokens[i] == ";")
+			isDirective = true;
+		else if (serverParseMap.find(tokens[i]) != serverParseMap.end() && isDirective) // is directive
+		{
+			if (directive != "")
+			{
+				// std::cout << "Args: ";
+				// for (size_t i = 0; i < args.size(); i++)
+				// 	std::cout << args[i] << " ";
+				// std::cout << "\n";
+				(this->*ServerBlock::serverParseMap[directive])(args);
+				args.clear(); directive.clear();
+			}
+			directive = tokens[i];
+			isDirective = false;
+			// std::cout << "Directive: " << directive << "; ";
+		}
+		else if (tokens[i] == "location" && isDirective)
+		{
+			if (directive != "") // hmmm a bit ugly
+			{
+				// std::cout << "Args: ";
+				// for (size_t i = 0; i < args.size(); i++)
+				// 	std::cout << args[i] << " ";
+				// std::cout << "\n";
+				(this->*ServerBlock::serverParseMap[directive])(args);
+				args.clear(); directive.clear();
+			}
+			LocationBlock	location(this);
+			 if ((i = location.parseLocation(tokens, i)) < 0)
+				return (i);
+			this->_location.push_back(location);
+			isDirective = true;
+		}
+		else if (!isDirective)
+			args.push_back(tokens[i]);
+		else
+		{
+			std::cerr << RED"config error: unknown directive: " << tokens[i] << "\n" << RESET;
+			return (-2);
+		}
+	}
+	if (directive != "") // hmmm a bit ugly
+	{
+		// std::cout << "Args: ";
+		// for (size_t i = 0; i < args.size(); i++)
+		// 	std::cout << args[i] << " ";
+		// std::cout << "\n";
+		(this->*ServerBlock::serverParseMap[directive])(args);
+		args.clear(); directive.clear();
+	}
+	if (tokens[i] != "}")
+		return (-1);
+	initDefaultServerBlockConfig();
+	for (size_t i = 0; i < _location.size(); i++)
+		_location[i].initDefaultLocationBlockConfig();
+	// printBlock();
+	// if (!_location.empty())
+	// {
+	// 	for (size_t i = 0; i < _location.size(); i++)
+	// 	{
+	// 		_location[i].printBlock();
+	// 	}
+	// }
+	return (i);
+}
 
 // ================================= SETTERS =================================
 
@@ -95,15 +198,15 @@ void	ServerBlock::setServerName(std::vector<std::string> args)
 }
 
 // Most likely not needed ... (jz create a Location block and start calling)
-void	ServerBlock::setLocation(std::vector<std::string> args)
-{
-	if (args.size() < 1)
-	{
-		std::cerr << RED "location error: missing uri\n" RESET;
-		return ;
-	}
-	// Map of function ptrs to call the appropriate functions
-}
+// void	ServerBlock::setLocation(std::vector<std::string> args)
+// {
+// 	if (args.size() < 1)
+// 	{
+// 		std::cerr << RED "location error: missing uri\n" RESET;
+// 		return ;
+// 	}
+// 	// Map of function ptrs to call the appropriate functions
+// }
 
 // ================================== UTILS ==================================
 
@@ -113,7 +216,7 @@ void	ServerBlock::setLocation(std::vector<std::string> args)
 void	ServerBlock::printBlock()
 {
 	std::cout << "root: " << this->getRoot() << "\n";
-	std::cout << "autoindex: " << std::boolalpha << this->getAutoindex() << "\n";
+	std::cout << "autoindex: " << this->getAutoindex() << "\n";
 	std::cout << "client max body size: " << this->getClientMaxBodySize() << "\n";
 	std::vector<std::string> allowedMethods = this->getLimitExcept();
 	for (std::vector<std::string>::iterator it = allowedMethods.begin(); it != allowedMethods.end(); it++)
@@ -130,6 +233,7 @@ void	ServerBlock::printBlock()
 	std::vector<std::string> servernames = this->getServerName();
 	for (std::vector<std::string>::iterator it = servernames.begin(); it != servernames.end(); it++)
 		std::cout << "server names: "  << *it << std::endl;
+	std::cout << "\n";
 }
 
 std::string	intToIp(uint32_t ip)
@@ -169,37 +273,37 @@ std::map<std::string, void (ServerBlock::*)(std::vector<std::string>)>
 
 std::map<std::string, void (ServerBlock::*)(std::vector<std::string>)> ServerBlock::serverParseMap = initServerMap();
 
-int	main()
-{
-	ServerBlock test;
-	std::vector<std::string> maxsize = {"240000"};
-	std::vector<std::string> root = {"/newroot/haha"};//, "/another/one"};
-	std::vector<std::string> autoindex = {"on"};
-	std::vector<std::string> methods = {"GET", "DELETE"};
-	std::vector<std::string> indexes = {"newindex.html", "newnew.htm"};
-	std::vector<std::string> newcgi = {".cgi", "/mycgipath"};
-	std::vector<std::string> listen1 = {"3434"};
-	// std::vector<std::string> listen2 = {"13434"};
-	std::vector<std::string> servernames = {"example.com", "example2.com"};
+// int	main()
+// {
+// 	ServerBlock test;
+// 	std::vector<std::string> maxsize = {"240000"};
+// 	std::vector<std::string> root = {"/newroot/haha"};//, "/another/one"};
+// 	std::vector<std::string> autoindex = {"on"};
+// 	std::vector<std::string> methods = {"GET", "DELETE"};
+// 	std::vector<std::string> indexes = {"newindex.html", "newnew.htm"};
+// 	std::vector<std::string> newcgi = {".cgi", "/mycgipath"};
+// 	std::vector<std::string> listen1 = {"3434"};
+// 	// std::vector<std::string> listen2 = {"13434"};
+// 	std::vector<std::string> servernames = {"example.com", "example2.com"};
 
-	std::cout << "[ BEFORE ]\n";
-	test.printBlock();
-	try
-	{
-		test.setRoot(root); 
-		test.setAutoindex(autoindex);
-		test.setClientMaxBodySize(maxsize);
-		test.setLimitExcept(methods);
-		test.setIndex(indexes);
-		test.setCgiScript(newcgi);
-		test.setListen(listen1);
-		// test.setListen(listen2);
-		test.setServerName(servernames);
-	}
-	catch(const std::exception& e)
-	{
-		std::cerr << e.what() << '\n';
-	}
-	std::cout << "\n[ AFTER ]\n";
-	test.printBlock();
-}
+// 	std::cout << "[ BEFORE ]\n";
+// 	test.printBlock();
+// 	try
+// 	{
+// 		test.setRoot(root); 
+// 		test.setAutoindex(autoindex);
+// 		test.setClientMaxBodySize(maxsize);
+// 		test.setLimitExcept(methods);
+// 		test.setIndex(indexes);
+// 		test.setCgiScript(newcgi);
+// 		test.setListen(listen1);
+// 		// test.setListen(listen2);
+// 		test.setServerName(servernames);
+// 	}
+// 	catch(const std::exception& e)
+// 	{
+// 		std::cerr << e.what() << '\n';
+// 	}
+// 	std::cout << "\n[ AFTER ]\n";
+// 	test.printBlock();
+// }
