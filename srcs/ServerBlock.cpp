@@ -6,7 +6,7 @@
 /*   By: qtay <qtay@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/11 21:53:55 by qtay              #+#    #+#             */
-/*   Updated: 2025/01/15 15:40:21 by qtay             ###   ########.fr       */
+/*   Updated: 2025/01/20 13:46:25 by qtay             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,10 @@
 
 // ============================= PARSE CONFIG FILE ============================
 
+/**
+ * @brief	Sets up mandatory values in a server block if they are not
+ * 			specified by the config file.
+ */
 void	ServerBlock::initDefaultServerBlockConfig(void)
 {
 	if (_root == "")
@@ -34,7 +38,8 @@ void	ServerBlock::initDefaultServerBlockConfig(void)
 
 /**
  * @brief	Parses all server blocks in the config file.
- * @return	Returns the number of tokens parsed or -1 if an error is found.
+ * @return	Returns the index of the last parsed token or -1 if an error is
+ * 			found.
  */
 int	ServerBlock::parseServer(std::vector<std::string> tokens, int i)
 {
@@ -54,25 +59,16 @@ int	ServerBlock::parseServer(std::vector<std::string> tokens, int i)
 		{
 			if (directive != "")
 			{
-				// std::cout << "Args: ";
-				// for (size_t i = 0; i < args.size(); i++)
-				// 	std::cout << args[i] << " ";
-				// std::cout << "\n";
 				(this->*ServerBlock::serverParseMap[directive])(args);
 				args.clear(); directive.clear();
 			}
 			directive = tokens[i];
 			isDirective = false;
-			// std::cout << "Directive: " << directive << "; ";
 		}
 		else if (tokens[i] == "location" && isDirective)
 		{
 			if (directive != "") // hmmm a bit ugly
 			{
-				// std::cout << "Args: ";
-				// for (size_t i = 0; i < args.size(); i++)
-				// 	std::cout << args[i] << " ";
-				// std::cout << "\n";
 				(this->*ServerBlock::serverParseMap[directive])(args);
 				args.clear(); directive.clear();
 			}
@@ -92,10 +88,6 @@ int	ServerBlock::parseServer(std::vector<std::string> tokens, int i)
 	}
 	if (directive != "") // hmmm a bit ugly
 	{
-		// std::cout << "Args: ";
-		// for (size_t i = 0; i < args.size(); i++)
-		// 	std::cout << args[i] << " ";
-		// std::cout << "\n";
 		(this->*ServerBlock::serverParseMap[directive])(args);
 		args.clear(); directive.clear();
 	}
@@ -104,14 +96,9 @@ int	ServerBlock::parseServer(std::vector<std::string> tokens, int i)
 	initDefaultServerBlockConfig();
 	for (size_t i = 0; i < _location.size(); i++)
 		_location[i].initDefaultLocationBlockConfig();
-	// printBlock();
-	// if (!_location.empty())
-	// {
-	// 	for (size_t i = 0; i < _location.size(); i++)
-	// 	{
-	// 		_location[i].printBlock();
-	// 	}
-	// }
+	printBlock();
+	for (size_t i = 0; i < _location.size(); i++)
+		_location[i].printBlock();
 	return (i);
 }
 
@@ -171,7 +158,7 @@ void	ServerBlock::setListen(std::vector<std::string> args)
 	{
 		std::cerr << RED "listen error: duplicated port\n" RESET;
 		return ;
-	}	
+	}
 	_listen.push_back(newListen);
 }
 
@@ -197,21 +184,10 @@ void	ServerBlock::setServerName(std::vector<std::string> args)
 	}
 }
 
-// Most likely not needed ... (jz create a Location block and start calling)
-// void	ServerBlock::setLocation(std::vector<std::string> args)
-// {
-// 	if (args.size() < 1)
-// 	{
-// 		std::cerr << RED "location error: missing uri\n" RESET;
-// 		return ;
-// 	}
-// 	// Map of function ptrs to call the appropriate functions
-// }
-
 // ================================== UTILS ==================================
 
 /**
- * Print all directives and their values in the server block.
+ * @brief	Prints all directives and their values in the server block.
  */
 void	ServerBlock::printBlock()
 {
@@ -234,20 +210,6 @@ void	ServerBlock::printBlock()
 	for (std::vector<std::string>::iterator it = servernames.begin(); it != servernames.end(); it++)
 		std::cout << "server names: "  << *it << std::endl;
 	std::cout << "\n";
-}
-
-std::string	intToIp(uint32_t ip)
-{
-	if (ip > 4294967295) // max ip (double check)
-		return ("");
-
-	struct in_addr	addr;
-	addr.s_addr = htonl(ip);
-
-	const char*	ipStr = inet_ntoa(addr);
-	if (ipStr == NULL)
-		return ("");
-    return (std::string(ipStr));
 }
 
 // ================================= STATIC =================================

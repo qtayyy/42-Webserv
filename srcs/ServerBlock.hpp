@@ -56,6 +56,4 @@ class ServerBlock : public Block
 		uint32_t	ipToInt(const std::string &ip); // helper function
 };
 
-std::string	intToIp(uint32_t ip); // private?
-
 #endif
