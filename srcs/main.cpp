@@ -6,7 +6,7 @@
 /*   By: qtay <qtay@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/12 16:34:35 by qtay              #+#    #+#             */
-/*   Updated: 2025/01/14 15:46:28 by qtay             ###   ########.fr       */
+/*   Updated: 2025/01/20 09:27:04 by qtay             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,8 @@ int	main(int argc, char **argv)
 	{
 		Cluster	cluster(defaultPath);
 		cluster.parse();
+		cluster.init();
+		cluster.run();
 	}
 	catch(const std::exception& e)
 	{

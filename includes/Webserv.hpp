@@ -11,6 +11,16 @@
 #include <limits>
 #include <algorithm>
 #include <fstream>
+#include <netdb.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <poll.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 #define BLACK "\001\033[30m\002"
 #define RED "\001\033[31m\002"
@@ -24,5 +34,7 @@
 #define LIGHT_GRAY "\001\033[37m\002"
 #define BEIGE "\001\033[93m\002"
 #define RESET "\001\033[0m\002"
+
+std::string	intToIp(uint32_t ip);
 
 #endif
