@@ -7,7 +7,7 @@
 #include <set>
 #include <iomanip>
 #include <arpa/inet.h>
-#include <cstdint>
+#include <stdint.h>
 #include <limits>
 #include <algorithm>
 #include <fstream>
@@ -21,6 +21,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sstream>
 
 #define BLACK "\001\033[30m\002"
 #define RED "\001\033[31m\002"

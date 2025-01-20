@@ -6,7 +6,7 @@
 /*   By: qtay <qtay@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/12 17:06:29 by qtay              #+#    #+#             */
-/*   Updated: 2025/01/20 13:31:06 by qtay             ###   ########.fr       */
+/*   Updated: 2025/01/20 14:07:59 by qtay             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
  */
 Cluster::~Cluster(void)
 {
-	for (size_t i = 0; i < _numOfFds; i++)
+	for (int i = 0; i < _numOfFds; i++)
 	{
 		close(_pollFds[i].fd);
 	}
@@ -52,7 +52,7 @@ void	Cluster::parse(void)
 // HELPER FUNCTION FOR CLUSTER::PARSE()
 std::vector<std::string>	Cluster::tokenizeConfig(std::string &configPath)
 {
-	std::ifstream configFile(configPath);
+	std::ifstream configFile(configPath.c_str());
 
 	if (!configFile.is_open())
 		throw ClusterException( RED + configPath + ": No such file or directory" RESET);
@@ -85,14 +85,16 @@ std::vector<std::string>	Cluster::tokenizeConfig(std::string &configPath)
 // HELPER FUNCTION FOR CLUSTER::PARSE()
 void	Cluster::mapIPPortToServer(void)
 {
-	std::vector<std::pair<uint32_t, int>>	listens;
+	std::vector<std::pair<uint32_t, int> >	listens;
+	std::stringstream	ss;
 	std::string	IPPort;
 	for (size_t i = 0; i < _servers.size(); i++)
 	{
 		listens = _servers[i].getListen();
 		for (size_t j = 0; j < listens.size(); j++)
 		{
-			IPPort = intToIp(listens[j].first) + ":" + std::to_string(listens[j].second);
+			ss << listens[j].second;
+			IPPort = intToIp(listens[j].first) + ":" + ss.str();
 			_IPPortToServer[IPPort].push_back(&_servers[i]);
 		}
 	}
@@ -101,7 +103,7 @@ void	Cluster::mapIPPortToServer(void)
 // HELPER FUNCTION FOR CLUSTER::PARSE()
 void	Cluster::parseConfig(std::vector<std::string> tokens)
 {
-	for (int i = 0; i < tokens.size(); i++)
+	for (int i = 0; i < (int)tokens.size(); i++)
 	{
 		if (tokens[i++] == "server")
 		{
@@ -129,7 +131,7 @@ void	Cluster::init(void)
 	std::string Port;
 	size_t	colonPos;
 
-	for (std::map<std::string, std::vector<ServerBlock *>>::iterator it = _IPPortToServer.begin(); it != _IPPortToServer.end(); it++)
+	for (std::map<std::string, std::vector<ServerBlock *> >::iterator it = _IPPortToServer.begin(); it != _IPPortToServer.end(); it++)
 	{
 		IPPort = it->first;
 		colonPos = IPPort.find(":");
@@ -216,7 +218,7 @@ void	Cluster::run(void)
 			perror("poll");
 			throw ClusterException("");
 		}
-		for (size_t i = 0; i < _numOfFds; i++)
+		for (int i = 0; i < _numOfFds; i++)
 		{
 			if (_pollFds[i].revents & (POLLIN | POLLHUP)) // If an fd is ready for reading
 			{

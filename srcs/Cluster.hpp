@@ -31,8 +31,8 @@ class Cluster
 		int													_numOfFds;
 
 		std::vector<ServerBlock>							_servers;
-		std::map<std::string, std::vector<ServerBlock *>>	_IPPortToServer;
-		std::map<int, std::vector<ServerBlock *>>			_listenerToServer;
+		std::map<std::string, std::vector<ServerBlock *> >	_IPPortToServer;
+		std::map<int, std::vector<ServerBlock *> >			_listenerToServer;
 
 		std::map<int, Client *>								_clients;
 

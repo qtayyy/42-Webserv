@@ -6,7 +6,7 @@
 /*   By: qtay <qtay@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/11 21:53:55 by qtay              #+#    #+#             */
-/*   Updated: 2025/01/20 13:46:25 by qtay             ###   ########.fr       */
+/*   Updated: 2025/01/20 14:10:28 by qtay             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ int	ServerBlock::parseServer(std::vector<std::string> tokens, int i)
 
 	if (tokens[i++] != "{")
 		return (-1);
-	for (; i < tokens.size() - 1; i++)
+	for (; i < (int)(tokens.size() - 1); i++)
 	{
 		if (tokens[i] == "}")
 			break ;
@@ -203,8 +203,8 @@ void	ServerBlock::printBlock()
 	std::map<std::string, std::string> allCGIs = this->getCgiScript();
 	for (std::map<std::string, std::string>::iterator it = allCGIs.begin(); it != allCGIs.end(); it++)
 		std::cout << "cgi extension: "  << it->first << "; cgi path: " << it->second << std::endl;
-	std::vector<std::pair<uint32_t, int>> allListens = this->getListen();
-	for (std::vector<std::pair<uint32_t, int>>::iterator it = allListens.begin(); it != allListens.end(); it++)
+	std::vector<std::pair<uint32_t, int> > allListens = this->getListen();
+	for (std::vector<std::pair<uint32_t, int> >::iterator it = allListens.begin(); it != allListens.end(); it++)
 		std::cout << "ip: "  << intToIp(it->first) << "; port: " << it->second << std::endl;
 	std::vector<std::string> servernames = this->getServerName();
 	for (std::vector<std::string>::iterator it = servernames.begin(); it != servernames.end(); it++)

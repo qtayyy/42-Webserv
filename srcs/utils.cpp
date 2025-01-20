@@ -6,7 +6,7 @@
 /*   By: qtay <qtay@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/20 13:46:42 by qtay              #+#    #+#             */
-/*   Updated: 2025/01/20 13:46:43 by qtay             ###   ########.fr       */
+/*   Updated: 2025/01/20 14:11:42 by qtay             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,6 @@
  */
 std::string	intToIp(uint32_t ip)
 {
-	if (ip > 4294967295) // max ip (double check)
-		return ("");
-
 	struct in_addr	addr;
 	addr.s_addr = htonl(ip);
 

@@ -6,7 +6,7 @@
 /*   By: qtay <qtay@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/10 14:05:46 by qtay              #+#    #+#             */
-/*   Updated: 2025/01/15 13:55:24 by qtay             ###   ########.fr       */
+/*   Updated: 2025/01/20 13:58:09 by qtay             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ void	Block::setClientMaxBodySize(std::vector<std::string> args)
 		return ;
 	}
 	unsigned long long size;
-	std::istringstream iss(args.at(0));
+	std::stringstream iss(args.at(0));
 	iss >> size;
 	if (iss.fail())
 	{

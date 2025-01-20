@@ -39,13 +39,13 @@ class ServerBlock : public Block
 		// void	setLocation(std::vector<std::string> args = std::vector<std::string>());
 
 		// Getters
-		std::vector<std::pair<uint32_t, int>>	getListen(void) { return (this->_listen); };
+		std::vector<std::pair<uint32_t, int> >	getListen(void) { return (this->_listen); };
 		std::vector<std::string>	getServerName(void) { return (this->_serverName); };
 
 		int	parseServer(std::vector<std::string> tokens, int i);
 
 	private:
-		std::vector<std::pair<uint32_t, int>>	_listen; // ip:port
+		std::vector<std::pair<uint32_t, int> >	_listen; // ip:port
 		std::vector<std::string>				_serverName; // set up or not (default is localhost, can we not use DNS resolution?)
 		std::vector<LocationBlock>				_location;
 

@@ -6,7 +6,7 @@
 /*   By: qtay <qtay@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/12 15:21:32 by qtay              #+#    #+#             */
-/*   Updated: 2025/01/20 13:35:33 by qtay             ###   ########.fr       */
+/*   Updated: 2025/01/20 14:09:21 by qtay             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,14 +47,14 @@ int	LocationBlock::parseLocation(std::vector<std::string> tokens, int i)
 	std::string	directive;
 	std::vector<std::string> args;
 
-	if (i + 2 < tokens.size())
+	if (i + 2 < (int)tokens.size())
 	{
 		this->_uri = tokens[++i];
 		if (tokens[++i] != "{")
 			return (-1);
 		i++;
 	}
-	for (i; i < tokens.size() - 1; i++)
+	for (; i < (int)(tokens.size() - 1); i++)
 	{
 		if (tokens[i] == "}")
 			break ;
