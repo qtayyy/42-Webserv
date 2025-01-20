@@ -6,7 +6,7 @@
 /*   By: qtay <qtay@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/12 15:21:32 by qtay              #+#    #+#             */
-/*   Updated: 2025/01/15 15:29:35 by qtay             ###   ########.fr       */
+/*   Updated: 2025/01/20 13:35:33 by qtay             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,8 @@
 // ============================= PARSE CONFIG FILE ============================
 
 /**
- * @brief	Initializes attributes that are not overriden using values from its
- * 			parent server.
+ * @brief	Initializes attributes that are not overriden by the location
+ * 			block itself. Values are taken from the parent server.
  */
 void	LocationBlock::initDefaultLocationBlockConfig(void)
 {
@@ -35,6 +35,12 @@ void	LocationBlock::initDefaultLocationBlockConfig(void)
 	if (_clientMaxBodySize == 0)
 		_clientMaxBodySize = _parentServerBlock->getClientMaxBodySize();
 }
+
+/**
+ * @brief	Parses directives and arguments in a location block.
+ * @return	Returns the index of the last parsed token or -1 if an error is
+ * 			found.
+ */
 int	LocationBlock::parseLocation(std::vector<std::string> tokens, int i)
 {
 	bool		isDirective = true;
@@ -58,47 +64,27 @@ int	LocationBlock::parseLocation(std::vector<std::string> tokens, int i)
 		{
 			if (directive != "")
 			{
-				// std::cout << " Args: ";
-				// for (size_t i = 0; i < args.size(); i++)
-				// 	std::cout << args[i] << " ";
-				// std::cout << "\n" << RESET;
 				(this->*LocationBlock::locationParseMap[directive])(args);
 				args.clear(); directive.clear();
 			}
 			directive = tokens[i];
 			isDirective = false;
-			// std::cout << "Location directive: " << directive << "; ";
 		}
 		else if (!isDirective)
 			args.push_back(tokens[i]);
 		else
 		{
 			std::cerr << RED"config error: unknown directive: " << tokens[i] << "\n" << RESET;
-			return (-2);
+			return (-1);
 		}
 	}
 	if (directive != "")
 	{
-		// std::cout << "Args: ";
-		// for (size_t i = 0; i < args.size(); i++)
-		// 	std::cout << args[i] << " ";
-		// std::cout << "\n";
-		// std::cout << YELLOW"directive: " << directive;
-		// std::cout << " Args: ";
-		// for (size_t i = 0; i < args.size(); i++)
-		// 	std::cout << args[i] << " ";
-		// std::cout << "\n" << RESET;
-		// if (LocationBlock::locationParseMap.find(directive) == LocationBlock::locationParseMap.end())
-		// {
-		// 	std::cerr << RED "config file error: unknown directive\n" RESET;
-		// 	return (-2);
-		// }
 		(this->*LocationBlock::locationParseMap[directive])(args);
 		args.clear(); directive.clear();
 	}
 	if (tokens[i] != "}")
 		return (-1);
-	// initDefaultLocationBlockConfig();
 	return (i);
 }
 
@@ -157,7 +143,7 @@ std::map<std::string, void (LocationBlock::*)(std::vector<std::string>)>	Locatio
 {
 	std::map<std::string, void (LocationBlock::*)(std::vector<std::string>)>	locationMap;
 
-	locationMap["location"] = &LocationBlock::setUri; // KIV
+	// locationMap["location"] = &LocationBlock::setUri; // KIV
 	locationMap["alias"] = &LocationBlock::setAlias;
 	locationMap["autoindex"] = &LocationBlock::setAutoindex;
 	locationMap["cgi_script"] = &LocationBlock::setCgiScript;
