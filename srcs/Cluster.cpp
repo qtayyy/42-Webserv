@@ -6,7 +6,7 @@
 /*   By: qtay <qtay@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/12 17:06:29 by qtay              #+#    #+#             */
-/*   Updated: 2025/01/20 14:07:59 by qtay             ###   ########.fr       */
+/*   Updated: 2025/01/21 18:24:39 by qtay             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ void	Cluster::parse(void)
 		tokens = tokenizeConfig(this->_configPath);
 		parseConfig(tokens);
 		mapIPPortToServer();
-		std::cout << GREEN "Config file parsing complete\n" RESET;
+		std::cout << GREEN "Config file parsing complete.\n" RESET;
 	}
 	catch(const std::exception& e)
 	{
@@ -55,7 +55,7 @@ std::vector<std::string>	Cluster::tokenizeConfig(std::string &configPath)
 	std::ifstream configFile(configPath.c_str());
 
 	if (!configFile.is_open())
-		throw ClusterException( RED + configPath + ": No such file or directory" RESET);
+		throw ClusterException(RED + configPath + ": No such file or directory" RESET);
 	std::string	line;
 	std::vector<std::string>	tokens;
 	while (std::getline(configFile, line))
@@ -63,6 +63,8 @@ std::vector<std::string>	Cluster::tokenizeConfig(std::string &configPath)
 		line = strTrim(line, " \t");
 		if (!line.empty() && line[0] == '#')
 			continue ;
+		if (!line.empty() && (line[line.size() - 1] != '{' && line[line.size() - 1] != '}') && line[line.size() - 1] != ';')
+			throw ClusterException(RED "Config file error: missing semicolon" RESET);
 		size_t	start = 0, end;
 		while (start < line.size())
 		{
@@ -93,6 +95,8 @@ void	Cluster::mapIPPortToServer(void)
 		listens = _servers[i].getListen();
 		for (size_t j = 0; j < listens.size(); j++)
 		{
+			ss.str("");
+			ss.clear();
 			ss << listens[j].second;
 			IPPort = intToIp(listens[j].first) + ":" + ss.str();
 			_IPPortToServer[IPPort].push_back(&_servers[i]);
@@ -113,7 +117,7 @@ void	Cluster::parseConfig(std::vector<std::string> tokens)
 			this->_servers.push_back(server);
 		}
 		else
-			throw ClusterException(RED + _configPath + " error: unknown directive: " + tokens[i] + RESET);
+			throw ClusterException(RED + _configPath + " error: unknown directive: '" + tokens[--i] + "'" RESET);
 	}
 }
 
@@ -166,6 +170,7 @@ int		Cluster::createListenerSocket(std::string IP, std::string Port)
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 
+	// std::cout << "intended: " << IP << ":" << Port << "\n";
 	if ((status = getaddrinfo(IP.c_str(), Port.c_str(), &hints, &addr_list)) != 0)
 	{
 		std::cerr << RED "getaddrinfo error: " << gai_strerror(status) << RESET << std::endl;
@@ -177,9 +182,10 @@ int		Cluster::createListenerSocket(std::string IP, std::string Port)
 		if (listener < 0)
 			continue ;
 		if (fcntl(listener, F_SETFL, O_NONBLOCK) < 0 ||
-			setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) < 0 ||
+			setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) < 0 ||
 			bind(listener, ptr->ai_addr, ptr->ai_addrlen) < 0)
 		{
+			std::cerr << RED "sth went wrong\n" RESET;
 			close(listener);
 			continue ;
 		}
@@ -190,6 +196,10 @@ int		Cluster::createListenerSocket(std::string IP, std::string Port)
 		std::cerr << RED "socket, fcntl, setsockopt or bind error" RESET<< std::endl;
 		return (-1);
 	}
+	struct sockaddr_in	actual_addr;
+	socklen_t	addr_len = sizeof(actual_addr);
+	getsockname(listener, (struct sockaddr *)&actual_addr, &addr_len);
+	std::cout << YELLOW "Bound to port: " << ntohs(actual_addr.sin_port) << std::endl << RESET;
 	freeaddrinfo(addr_list);
 	if (listen(listener, 100) == -1)
 	{
