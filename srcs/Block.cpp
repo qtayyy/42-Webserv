@@ -6,7 +6,7 @@
 /*   By: qtay <qtay@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/10 14:05:46 by qtay              #+#    #+#             */
-/*   Updated: 2025/01/20 13:58:09 by qtay             ###   ########.fr       */
+/*   Updated: 2025/01/21 17:41:31 by qtay             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ void			Block::setErrorPage(std::vector<std::string> args)
 {
 	if (args.size() < 2)
 	{
-		// initDefaultErrorPage(); // TO BE DEFINED
+		initDefaultErrorPage();
 		if (!args.empty())
 			std::cerr << RED "error_page error: invalid num of args. Resetting to default error pages...\n" RESET;
 		return ;
@@ -36,12 +36,22 @@ void			Block::setErrorPage(std::vector<std::string> args)
 		errorCode = std::atoi(args.at(i).c_str());
 		if (errorCode < 400 || errorCode > 599)
 		{
-			// initDefaultErrorPage(); // TO BE DEFINED
+			initDefaultErrorPage();
 			std::cerr << RED "error_page error: invalid error code. Resetting to default error pages...\n" RESET;
 			return ;
 		}
 		this->_errorPage[errorCode] = errorPagePath;
 	}
+}
+
+void	Block::initDefaultErrorPage(void)
+{
+	this->_errorPage[301] = "/var/www/error301.html";
+	this->_errorPage[404] = "/var/www/error404.html";
+	this->_errorPage[405] = "/var/www/error405.html";
+	this->_errorPage[406] = "/var/www/error406.html";
+	this->_errorPage[413] = "/var/www/error413.html";
+	this->_errorPage[500] = "/var/www/error500.html";
 }
 
 /**
@@ -67,6 +77,8 @@ void	Block::setClientMaxBodySize(std::vector<std::string> args)
 		std::cerr << RED "client_max_body_size: invalid arg type. Resetting to default...\n" RESET;
 		return ;
 	}
+	if (this->_clientMaxBodySize != -1)
+		std::cerr << RED "Warning: client_max_body_size already exists. Overrding with new size\n" RESET;
 	this->_clientMaxBodySize = size;
 }
 
@@ -99,6 +111,8 @@ void	Block::setIndex(std::vector<std::string> args)
 		this->_index.push_back("index.html");
 	else
 	{
+		if (!this->_index.empty())
+			std::cerr << RED "Warning: index already exists. Overriding with new indexes...\n" RESET;
 		this->_index.clear();
 		for (std::vector<std::string>::iterator it = args.begin(); it != args.end(); it++)
 		{
@@ -151,7 +165,11 @@ void			Block::setRoot(std::vector<std::string> args)
 			this->_root = "/var/www";
 	}
 	else
-		this->_root = args.at(0);
+	{
+		if (this->_root != "")
+			std::cerr << RED "Warning: root already exists. Overriding with new root...\n" RESET;
+		this->_root = args.at(0);	
+	}
 }
 
 // HELPER FUNCTION FOR SETLIMITEXCEPT()
