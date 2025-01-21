@@ -6,7 +6,7 @@
 /*   By: qtay <qtay@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/12 16:34:35 by qtay              #+#    #+#             */
-/*   Updated: 2025/01/20 09:27:04 by qtay             ###   ########.fr       */
+/*   Updated: 2025/01/21 18:03:31 by qtay             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 int	main(int argc, char **argv)
 {
-	std::string	defaultPath = "somedefaultpath";
+	std::string	defaultPath = "conf/good/custom.conf";
 	if (argc > 2)
 	{
 		std::cerr << RED "Usage error: invalid num of args\n" <<

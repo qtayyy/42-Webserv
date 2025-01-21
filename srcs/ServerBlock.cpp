@@ -6,7 +6,7 @@
 /*   By: qtay <qtay@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/11 21:53:55 by qtay              #+#    #+#             */
-/*   Updated: 2025/01/20 14:10:28 by qtay             ###   ########.fr       */
+/*   Updated: 2025/01/21 17:46:40 by qtay             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,10 +30,10 @@ void	ServerBlock::initDefaultServerBlockConfig(void)
 		setLimitExcept();
 	if (_autoindex == -1)
 		setAutoindex();
-	if (_clientMaxBodySize == 0)
+	if (_clientMaxBodySize == -1)
 		setClientMaxBodySize();
-	if (_errorPage.empty())
-		setErrorPage();
+	if (_errorPage.empty()) // Change this part so that all error pages have a default
+		setErrorPage(); // change
 }
 
 /**
@@ -82,8 +82,8 @@ int	ServerBlock::parseServer(std::vector<std::string> tokens, int i)
 			args.push_back(tokens[i]);
 		else
 		{
-			std::cerr << RED"config error: unknown directive: " << tokens[i] << "\n" << RESET;
-			return (-2);
+			std::cerr << RED"config error: unknown directive: '" << tokens[i] << "'\n" << RESET;
+			return (-1);
 		}
 	}
 	if (directive != "") // hmmm a bit ugly
@@ -209,6 +209,9 @@ void	ServerBlock::printBlock()
 	std::vector<std::string> servernames = this->getServerName();
 	for (std::vector<std::string>::iterator it = servernames.begin(); it != servernames.end(); it++)
 		std::cout << "server names: "  << *it << std::endl;
+	std::map<int, std::string> errorpages = this->getErrorPage();
+	for (std::map<int, std::string>::iterator it = errorpages.begin(); it != errorpages.end(); it++)
+		std::cout << "error code: " << it->first << " " << it->second << std::endl;
 	std::cout << "\n";
 }
 
