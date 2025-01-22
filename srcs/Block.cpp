@@ -6,7 +6,7 @@
 /*   By: qtay <qtay@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/10 14:05:46 by qtay              #+#    #+#             */
-/*   Updated: 2025/01/21 17:41:31 by qtay             ###   ########.fr       */
+/*   Updated: 2025/01/22 18:24:16 by qtay             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ void			Block::setErrorPage(std::vector<std::string> args)
 {
 	if (args.size() < 2)
 	{
-		initDefaultErrorPage();
+		// initDefaultErrorPage();
 		if (!args.empty())
 			std::cerr << RED "error_page error: invalid num of args. Resetting to default error pages...\n" RESET;
 		return ;
@@ -36,23 +36,23 @@ void			Block::setErrorPage(std::vector<std::string> args)
 		errorCode = std::atoi(args.at(i).c_str());
 		if (errorCode < 400 || errorCode > 599)
 		{
-			initDefaultErrorPage();
-			std::cerr << RED "error_page error: invalid error code. Resetting to default error pages...\n" RESET;
-			return ;
+			// initDefaultErrorPage(); // generate dynamically
+			std::cerr << RED "error_page error: invalid error code.\n" RESET;
+			continue ;
 		}
 		this->_errorPage[errorCode] = errorPagePath;
 	}
 }
 
-void	Block::initDefaultErrorPage(void)
-{
-	this->_errorPage[301] = "/var/www/error301.html";
-	this->_errorPage[404] = "/var/www/error404.html";
-	this->_errorPage[405] = "/var/www/error405.html";
-	this->_errorPage[406] = "/var/www/error406.html";
-	this->_errorPage[413] = "/var/www/error413.html";
-	this->_errorPage[500] = "/var/www/error500.html";
-}
+// void	Block::initDefaultErrorPage(void)
+// {
+// 	this->_errorPage[301] = "/var/www/error301.html";
+// 	this->_errorPage[404] = "/var/www/error404.html";
+// 	this->_errorPage[405] = "/var/www/error405.html";
+// 	this->_errorPage[406] = "/var/www/error406.html";
+// 	this->_errorPage[413] = "/var/www/error413.html";
+// 	this->_errorPage[500] = "/var/www/error500.html";
+// }
 
 /**
  * @brief	Sets up max client HTTP request size to e.g., prevent DOS attacks.

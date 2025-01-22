@@ -6,7 +6,7 @@
 /*   By: qtay <qtay@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/11 21:53:55 by qtay              #+#    #+#             */
-/*   Updated: 2025/01/21 17:46:40 by qtay             ###   ########.fr       */
+/*   Updated: 2025/01/22 18:22:53 by qtay             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,8 +32,8 @@ void	ServerBlock::initDefaultServerBlockConfig(void)
 		setAutoindex();
 	if (_clientMaxBodySize == -1)
 		setClientMaxBodySize();
-	if (_errorPage.empty()) // Change this part so that all error pages have a default
-		setErrorPage(); // change
+	// if (_errorPage.empty()) // Change to dynamically generate
+	// 	setErrorPage(); // change
 }
 
 /**
