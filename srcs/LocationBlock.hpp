@@ -6,7 +6,7 @@
 /*   By: qtay <qtay@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/12 15:21:29 by qtay              #+#    #+#             */
-/*   Updated: 2025/01/15 15:30:07 by qtay             ###   ########.fr       */
+/*   Updated: 2025/01/22 18:29:07 by qtay             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,8 @@ class LocationBlock : public Block
 		static std::map<std::string, void (LocationBlock::*)(std::vector<std::string>)>	locationParseMap;
 		static std::map<std::string, void (LocationBlock::*)(std::vector<std::string>)>	initLocationMap(void);
 
+		void	inheritErrorPages(std::map<int, std::string> parentErrorPages);
+		void	inheritCgiScripts(std::map<std::string, std::string> parentCgiScripts);
 };
 
 #endif

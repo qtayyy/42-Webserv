@@ -6,7 +6,7 @@
 /*   By: qtay <qtay@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/12 15:21:32 by qtay              #+#    #+#             */
-/*   Updated: 2025/01/21 17:47:34 by qtay             ###   ########.fr       */
+/*   Updated: 2025/01/22 18:33:13 by qtay             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,14 +26,34 @@ void	LocationBlock::initDefaultLocationBlockConfig(void)
 		_autoindex = _parentServerBlock->getAutoindex();
 	if (_index.empty())
 		_index = _parentServerBlock->getIndex(); // Deep copy..?
-	if (_errorPage.empty()) // Change this part so that all error pages have a default
-		_errorPage = _parentServerBlock->getErrorPage();
+	// if (_errorPage.empty()) // Change this part so that all error pages have a default
+	// 	_errorPage = _parentServerBlock->getErrorPage();
 	if (_limitExcept.empty())
 		_limitExcept = _parentServerBlock->getLimitExcept();
-	if (_cgiScript.empty())
-		_cgiScript = _parentServerBlock->getCgiScript();
+	// if (_cgiScript.empty())
+	// 	_cgiScript = _parentServerBlock->getCgiScript();
 	if (_clientMaxBodySize == -1)
 		_clientMaxBodySize = _parentServerBlock->getClientMaxBodySize();
+	inheritErrorPages(_parentServerBlock->getErrorPage());
+	inheritCgiScripts(_parentServerBlock->getCgiScript());
+}
+
+void	LocationBlock::inheritErrorPages(std::map<int, std::string> parentErrorPages)
+{
+	for (std::map<int, std::string>::iterator it = parentErrorPages.begin(); it != parentErrorPages.end(); it++)
+	{
+		if (this->_errorPage.find(it->first) == this->_errorPage.end())
+			this->_errorPage[it->first] = it->second;
+	}
+}
+
+void	LocationBlock::inheritCgiScripts(std::map<std::string, std::string> parentCgiScripts)
+{
+	for (std::map<std::string, std::string>::iterator it = parentCgiScripts.begin(); it != parentCgiScripts.end(); it++)
+	{
+		if (this->_cgiScript.find(it->first) == this->_cgiScript.end())
+			this->_cgiScript[it->first] = it->second;
+	}
 }
 
 /**
