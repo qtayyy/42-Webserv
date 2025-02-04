@@ -14,7 +14,7 @@ WHITE='\033[0;97m'
 NAME	= webserv
 
 CC		= c++
-CFLAGS	= -Werror -Wextra -Wall -std=c++98 #-g3 -fsanitize=address
+CFLAGS	= -std=c++98 #-Werror -Wextra -Wall  #-g3 -fsanitize=address
 
 #---------Sources--------#
 SRC_PATH = ./srcs/
