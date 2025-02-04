@@ -235,7 +235,14 @@ void	Cluster::run(void)
 				if (_listenerToServer.find(_pollFds[i].fd) != _listenerToServer.end())
 					handleNewClient(_pollFds[i].fd);
 				else // Note: if client disconnects, have to close its fd and remove from the poll struct
+				{
 					this->_clients[_pollFds[i].fd]->handleRequest(); // Ethan's part
+					send(_pollFds[i].fd, "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>HELLO</h1></body></html>", 100, 0);
+					close(_pollFds[i].fd);
+					_clients.erase(_pollFds[i].fd);
+					_pollFds[i] = _pollFds[--_numOfFds]; // Remove the fd from the poll array
+					i--; // Adjust the index to check the swapped fd
+				}
 			}
 			if (_pollFds[i].revents & POLLOUT) // // If an fd is ready for writing
 			{
