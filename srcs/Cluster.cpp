@@ -249,7 +249,7 @@ void	Cluster::run(void)
 				{
 					this->_clients[_pollFds[i].fd]->handleRequest(); // Ethan's part
 
-					HttpRequest request = mockRequest("public", "test.csv");
+					HttpRequest request = mockRequest("test.csv", "test.csv");
 
 					HttpResponse response = HttpResponse::createHttpResponse(request);
 					send(_pollFds[i].fd, response.getFinalResponseMsg().c_str(), response.getFinalResponseMsg().size(), 0);

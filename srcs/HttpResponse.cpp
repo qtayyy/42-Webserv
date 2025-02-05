@@ -45,12 +45,14 @@ string reroutePath(const string &urlPath) {
 
     pathMap["cgi-bin"] = "";
 
-    string reroutedPath = "resources/" + urlPath;
+    string reroutedPath = string(ROOT_RESOURCE_PATH) + "/" + urlPath;
     for (stringDict::const_iterator it = pathMap.begin(); it != pathMap.end(); ++it) {
         if (startsWith(urlPath, it->first)) {
             reroutedPath = (it->second + urlPath);
         }
     }
+
+    std::cout << "rerouted path" << RED << reroutedPath << RESET << std::endl;
 
     if (!doesPathExist(reroutedPath)) {
         return "";
