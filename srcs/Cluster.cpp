@@ -210,6 +210,17 @@ int		Cluster::createListenerSocket(std::string IP, std::string Port)
 	return (listener);
 }
 
+HttpRequest mockRequest(string path, string path_info) {
+    HttpRequest request;
+
+    request.setParam("path", path);
+    request.setParam("path_info", path_info);
+    request.setParam("query_string", "name=John&age=30");
+    request.setParam("method", "GET");
+
+    return request;
+}
+
 // ============================== RUN ALL SERVERS =============================
 
 /**
@@ -237,7 +248,11 @@ void	Cluster::run(void)
 				else // Note: if client disconnects, have to close its fd and remove from the poll struct
 				{
 					this->_clients[_pollFds[i].fd]->handleRequest(); // Ethan's part
-					send(_pollFds[i].fd, "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>HELLO</h1></body></html>", 100, 0);
+
+					HttpRequest request = mockRequest("public", "test.csv");
+
+					HttpResponse response = HttpResponse::createHttpResponse(request);
+					send(_pollFds[i].fd, response.getFinalResponseMsg().c_str(), response.getFinalResponseMsg().size(), 0);
 					close(_pollFds[i].fd);
 					_clients.erase(_pollFds[i].fd);
 					_pollFds[i] = _pollFds[--_numOfFds]; // Remove the fd from the poll array

@@ -1,7 +1,7 @@
 #ifndef CGI_HPP
 #define CGI_HPP
 
-#include "Header.hpp"
+#include "../includes/Webserv.hpp"
 
 
 

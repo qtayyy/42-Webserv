@@ -1,7 +1,7 @@
 #ifndef HTTPREQUEST_HPP
 #define HTTPREQUEST_HPP
 
-#include "Header.hpp"
+#include "../includes/Webserv.hpp"
 
 enum HttpMethod 
 {

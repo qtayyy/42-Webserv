@@ -1,7 +1,7 @@
 #ifndef HTTP_RESPONSE_HPP
 #define HTTP_RESPONSE_HPP
 
-#include "Header.hpp"
+#include "../includes/Webserv.hpp"
 #include "HttpRequest.hpp"
 #include "StatusHandler.hpp"
 #include "Utils.hpp"

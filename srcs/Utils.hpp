@@ -1,7 +1,7 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
-#include "Header.hpp"
+#include "../includes/Webserv.hpp"
 
 bool isDirectory(const string& path);
 bool endsWith(const string& str, const string& suffix);

@@ -5,6 +5,9 @@
 #include "Exception.hpp"
 #include "ServerBlock.hpp"
 #include "Client.hpp"
+#include "HttpRequest.hpp"
+#include "HttpResponse.hpp"
+
 class Cluster
 {
 	public:

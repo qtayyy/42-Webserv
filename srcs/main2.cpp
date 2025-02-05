@@ -1,118 +1,95 @@
-#include "CGI.hpp"
-#include "HttpException.hpp"
+#include "HttpRequest.hpp"
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <vector>
+#include <sys/stat.h>
+#include <dirent.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <cstring>
+#include <arpa/inet.h>
+#include "StatusHandler.hpp"
+#include "Utils.hpp"
+#include <iostream>
+#include <string>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include "HttpResponse.hpp"
 
-string CGIHandler::waitForCGIResponse(int *pipefd, pid_t pid, int &exitStatus) {
-    // Parent process
-    string response = "";
+// string getUrlFromRequest(const string& request) {
+//     std::istringstream requestStream(request);
+//     string method, url, protocol;
+//     requestStream >> method >> url >> protocol;
 
-    close(pipefd[1]);
-    dup2(pipefd[0], STDIN_FILENO);
+//     return url;
+// }
 
-    int status;
-    waitpid(pid, &status, 0);
+HttpRequest mockRequest(string path, string path_info) {
+    HttpRequest request;
 
-    if (WIFSIGNALED(status)) {
-        int signal = WTERMSIG(status);
-        std::cout<< RED << "Child process was terminated by signal: " << signal << RESET << std::endl;
-        throw HttpException(500);
-    }
+    request.setParam("path", path);
+    request.setParam("path_info", path_info);
+    request.setParam("query_string", "name=John&age=30");
+    request.setParam("method", "GET");
 
-    char buffer[1024];
-    ssize_t bytesRead;
-    while ((bytesRead = read(pipefd[0], buffer, sizeof(buffer) - 1)) > 0) {
-        buffer[bytesRead] = '\0';
-        response += buffer;
-    }
-    close(pipefd[0]);
-
-    exitStatus = WEXITSTATUS(status);
-    return response;
+    return request;
 }
 
-void setEnvironmentVariables(stringDict envVars) {
-    for (stringDict::const_iterator it = envVars.begin(); it != envVars.end(); ++it) {
-        setenv(it->first.c_str(), it->second.c_str(), 1);
-    }
-}
+int main(int ac, char **av) {
 
-CGIHandler::CGIHandler() {
+    // Change to root directory
+    chdir("..");
+    string root = getcwd(NULL, 0);
 
-}
-
-CGIHandler::~CGIHandler() {
-
-}
-
-void CGIHandler::exec (
-    int *pipefd, 
-    const string& cgiScriptPath, 
-    const string& queryString, 
-    const string& requestedFilepath) {
-    // Child process
-    close(pipefd[0]); 
-    setEnvironmentVariables(this->envVars);
-
-    dup2(pipefd[1], STDOUT_FILENO);
-    close(pipefd[1]);
-
-    execl("/usr/bin/python3", "python3", cgiScriptPath.c_str(), requestedFilepath.c_str(), NULL);
+    int server_fd, new_socket;
+    struct sockaddr_in address;
+    int addrlen = sizeof(address);
     
-    perror(("execl failed: " + cgiScriptPath).c_str());
-    exit(1);
-}
+
+    // Initialize request
+    string path_info = "test.csv";
+    if (av[2] != NULL) 
+        path_info = av[2];
+    HttpRequest request = mockRequest(av[1], path_info);
+    request.printInfo();
 
 
+    // Creating socket file descriptor
+    if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) { perror("socket failed"); exit(EXIT_FAILURE); }
 
-string CGIHandler::handleCgiRequest(const string& cgiScriptPath, const string& queryString, const string requestedFilepath, int &exitStatus) {
-    int pipefd[2];
+    // Forcefully attaching socket to the port 8080
+    int opt = 1;
+    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt))) { perror("setsockopt"); exit(EXIT_FAILURE); }
 
-    if (pipe(pipefd) == -1) 
-        throw std::runtime_error("pipe failed: " + string(strerror(errno)));
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_port = htons(PORT);
 
-    pid_t pid = fork();
+    // Forcefully attaching socket to the port 8080
+    if (bind(server_fd, (struct sockaddr*)&address, sizeof(address)) < 0) { perror("bind failed"); exit(EXIT_FAILURE); }
+    
+    // Listen
+    if (listen(server_fd, 3) < 0) { perror("listen"); exit(EXIT_FAILURE); }
 
-    if (pid < 0) throw std::runtime_error("fork failed: " + string(strerror(errno)));
+    // wait for connection
+    while (true) {
+        std::cout << "Waiting for a connection..." << std::endl;
 
-    if (pid == 0) {
-        this->exec(pipefd, cgiScriptPath, queryString, requestedFilepath);
+        // Connect
+        if ((new_socket = accept(server_fd, (struct sockaddr*)&address, (socklen_t*)&addrlen)) < 0) { 
+            perror("accept"); exit(EXIT_FAILURE); 
+        }
+            
+        char buffer[BUFFER_SIZE] = {0};
+        int valread = read(new_socket, buffer, BUFFER_SIZE);
+
+        //std::cout << BLUE << "Received request:\n" << buffer << RESET << std::endl ;
+
+        HttpResponse response = HttpResponse::createHttpResponse(request);
+        std::cout << GREEN << "Response:\n" << response.getFinalResponseMsg() << RESET << std::endl;
+        send(new_socket, response.getFinalResponseMsg().c_str(), response.getFinalResponseMsg().size(), 0);
+        close(new_socket);
     }
-    else {
-        // pid_t monitorPid = fork();
-
-        // if (monitorPid < 0) 
-        //     throw std::runtime_error("fork failed: " + string(strerror(errno)));
-
-        // if (monitorPid == 0) {
-        //     // Detach the monitor process
-        //     if (setsid() < 0) {
-        //         throw std::runtime_error("setsid failed: " + string(strerror(errno)));
-        //     }
-
-        //     // Monitor process
-        //     sleep(CGI_TIMOUT);
-        //     std::ofstream logFile("/home/cooper/coreProgram/webserv_correct/webserv_redo/resources/log.txt");
-        //     if (kill(pid, 0) == 0) {
-        //         logFile << "Child process is still running.\n";
-        //         kill(pid, SIGKILL);
-        //         logFile.close();
-        //         exit(504); // Exit with 504 status code
-        //     } else {
-        //         logFile << "Child process has already terminated.\n";
-        //     }
-        //     logFile.close();
-        //     exit(0);
-        // }
-        // Main process continues without waiting for the monitor process
-        return waitForCGIResponse(pipefd, pid, exitStatus);
-    }
-
-    return "";
-}
-
-void CGIHandler::setEnv(string key, string value) {
-    envVars[key] = value;
-}
-
-string CGIHandler::getEnv(string key) {
-    return envVars[key];
 }

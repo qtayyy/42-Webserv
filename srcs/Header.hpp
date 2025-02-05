@@ -28,10 +28,7 @@
 #define CONTENT_TYPE_JPG "image/jpeg"
 #define CONTENT_TYPE_GIF "image/gif"
 
-#define RED "\033[1;31m"
-#define BLUE "\033[1;34m"
-#define RESET "\033[0m"
-#define GREEN "\033[1;32m"
+
 
 #define ROOT_RESOURCE_PATH "resources"
 #define CGI_BIN_PATH "cgi-bin"

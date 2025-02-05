@@ -87,13 +87,13 @@ string shouldPageOverride(int statusCode) {
 }
 
 HttpResponse createErrorHTTPResponse(int statusCode) {
-    string resourcePath = reroutePath(shouldPageOverride(statusCode));
+    string resourcePath = "/home/cooper/coreProgram/qi_ter_webserv/public/error.html";
     
     string fileContent = StatusHandler(statusCode).generateErrorPage(resourcePath);
     
     
     string statusMessage = StatusHandler::CodeToMessage(statusCode);
-
+    std::cout << "message: " << RED << fileContent << RESET << std::endl;
     return HttpResponse(fileContent, HttpResponse::getContentType(resourcePath), statusCode);
 }
 
@@ -224,7 +224,7 @@ HttpResponse HttpResponse::createHttpResponse(HttpRequest &request) {
     } 
     
     catch (const HttpException& e) {
-        std::cout << RED << e.what() << RESET << std::endl;
+        std::cout << RED << "error: " << e.what() << RESET << e.getStatusCode() << std::endl;
         return createErrorHTTPResponse(e.getStatusCode());
     }
 }
