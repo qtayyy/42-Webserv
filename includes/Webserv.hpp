@@ -77,7 +77,7 @@ std::string	intToIp(uint32_t ip);
 typedef std::string string;
 typedef std::map<string, string> stringDict;
 
-#define AUTO_INDEX_ON false
+#define AUTO_INDEX_ON true
 
 
 

@@ -37,11 +37,12 @@ public:
 
     static string decideCGIToUse(string resourcePath);
     static string getContentType(const string& resourcePath);
+    string reroutePath(const string &urlPath);
     static string createHttpResponseString(
-        const string& fileContent, 
-        const string& resourceType, 
-        const string& statusCode, 
-        const string& statusMessage);
+        const string &fileContent,
+        const string &resourceType,
+        const string &statusCode,
+        const string &statusMessage);
     void setHttpResponseSelf(string content, string resourceType, int statusCode);
     static HttpResponse createHttpErrorResponse(int statusCode);
     static string generateAutoIndexHtml(string path);
@@ -49,6 +50,7 @@ public:
 
     void callCGIResponse(string cgiPath, string fileToHandle, HttpRequest request);
     HttpResponse(HttpRequest &request, ServerBlock *ServerBlock);
+    void initErrorHttpResponse(int statusCode);
 };
 
 #endif // HTTP_RESPONSE_HPP

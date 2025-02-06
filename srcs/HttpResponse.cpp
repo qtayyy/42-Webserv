@@ -40,7 +40,7 @@ string HttpResponse::getContentType(const string& resourcePath) {
     return "text/plain";
 }
 
-string reroutePath(const string &urlPath) {
+string HttpResponse::reroutePath(const string &urlPath) {
     stringDict pathMap;
 
     pathMap["cgi-bin"] = "";
@@ -84,17 +84,6 @@ void HttpResponse::setHttpResponseSelf(string content, string resourceType, int 
     this->finalResponseMsg = createHttpResponseString(content, resourceType, to_string(statusCode), message);
 }
 
-string shouldPageOverride(int statusCode) {
-    std::map<int, string> pageOverride;
-    pageOverride[404] = "error2.html";
-    //pageOverride[403] = "error2.html";
-    pageOverride[405] = "error2.html";
-    
-    if (pageOverride.find(statusCode) != pageOverride.end()) {
-        return pageOverride[statusCode];
-    }
-    return "error.html";
-}
 
 HttpResponse createErrorHTTPResponse(int statusCode) {
     string resourcePath = "/home/cooper/coreProgram/qi_ter_webserv/public/error.html";
@@ -144,7 +133,7 @@ HttpResponse::HttpResponse(string content, string contentType, int statusCode) {
 }
 
 void HttpResponse::callCGIResponse(string cgiPath, string fileToHandle, HttpRequest request) {
-    string absolutePath = getAbsolutePath(reroutePath(fileToHandle));
+    string absolutePath = getAbsolutePath(this->reroutePath(fileToHandle));
 
     cgiPath = getAbsolutePath(cgiPath);
     request.printInfo();
@@ -180,17 +169,11 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *ServerBlock) {
     string path = request.getParam("path");
 
     std::vector<std::string> allowedMethods = ServerBlock->getLimitExcept();
+    std::cout << "limit except" << ServerBlock->getLimitExcept().size() << std::endl;
 
     try {
-        for (int i = 0; i < allowedMethods.size(); i++) {
-            if (request.getMethod() == allowedMethods[i]) {
-                std::cout << GREEN << "Method is supported" << RESET << std::endl;
-                break;
-            }
-            if (i == allowedMethods.size() - 1) {
-                throw HttpException(405);
-            }
-        }
+        if (std::find(allowedMethods.begin(), allowedMethods.end(), request.getMethod()) == allowedMethods.end())
+            throw HttpException(405);
 
         string reroutedPath = reroutePath(path);
         string content = readFileContent(reroutedPath);
@@ -199,15 +182,17 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *ServerBlock) {
             if (containsIndexFile(reroutedPath)) {
                 try {
                     this->setHttpResponseSelf(readFileContent(reroutedPath + "/index.html"), CONTENT_TYPE_HTML, 200);
+                    std::cout << GREEN << "index file found" << RESET << std::endl;
                 }
                 catch (const HttpException& e) {
                     std::cout<< RED << "invalid access" << RESET << std::endl;
                 }
+                return ;
             }
             
-            if (AUTO_INDEX_ON) {
-            std::cout << GREEN << "Auto index is on" << RESET << std::endl;
+            else if (AUTO_INDEX_ON) {
                 string autoIndex = generateAutoIndexHtml(reroutedPath);
+                std::cout << "auto index html :" << autoIndex << std::endl;
                 this->setHttpResponseSelf(autoIndex, CONTENT_TYPE_HTML, 200);
             } 
             
@@ -215,161 +200,38 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *ServerBlock) {
                 throw HttpException(403);
             }
         }
-
-        // Check if CGI handling is required for the resource
-        string cgiToUse = decideCGIToUse(path);
-
-        // If CGI handling is required, reroute the path to the CGI script
-        if (!cgiToUse.empty()) {
-            this->callCGIResponse(cgiToUse, path, request);
-        }
-        else if (isCGI(path)) {
-            this->callCGIResponse(path, request.getParam("path_info"), request);
-        }
+        
         else {
-            this->setHttpResponseSelf(content, getContentType(reroutedPath), 200);
+            // Check if CGI handling is required for the resource
+            string cgiToUse = decideCGIToUse(path);
+
+            // If CGI handling is required, reroute the path to the CGI script
+            if (!cgiToUse.empty()) {
+                this->callCGIResponse(cgiToUse, path, request);
+            }
+            else if (isCGI(path)) {
+                this->callCGIResponse(path, request.getParam("path_info"), request);
+            }
+            else {
+                this->setHttpResponseSelf(content, getContentType(reroutedPath), 200);
+            }
+
+            std::cout << this->getFinalResponseMsg() << std::endl;
         }
 
-        std::cout << this->getFinalResponseMsg() << std::endl;
     } 
     
 
     catch (const HttpException& e) {
         std::cout << RED << "error: " << e.what() << RESET << e.getStatusCode() << std::endl;
-        //return createErrorHTTPResponse(e.getStatusCode());
+        this->initErrorHttpResponse(e.getStatusCode());
     }
 }
 
-// HttpResponse::HttpResponse(HttpRequest &request, ServerBlock &ServerBlock) {
-//     string path = request.getParam("path");
 
-//     std::vector<std::string> allowedMethods;
-//     allowedMethods.push_back("GET");
-//     allowedMethods.push_back("POST");
-//     allowedMethods.push_back("DELETE");
-    
-
-//     try {
-//         for (int i = 0; i < allowedMethods.size(); i++) {
-//             if (request.getMethod() == allowedMethods[i]) {
-//                 std::cout << GREEN << "Method is supported" << RESET << std::endl;
-//                 break;
-//             }
-//             if (i == allowedMethods.size() - 1) {
-//                 throw HttpException(405);
-//             }
-//         }
-
-//         string reroutedPath = reroutePath(path);
-//         string content = readFileContent(reroutedPath);
-
-//         if (isDirectory(reroutedPath)) {
-//             if (containsIndexFile(reroutedPath)) {
-//                 try {
-//                     return HttpResponse(readFileContent(reroutedPath + "/index.html"), CONTENT_TYPE_HTML, 200);
-//                 }
-//                 catch (const HttpException& e) {
-//                     std::cout<< RED << "invalid access" << RESET << std::endl;
-//                 }
-//             }
-            
-//             if (AUTO_INDEX_ON) {
-//             std::cout << GREEN << "Auto index is on" << RESET << std::endl;
-//                 string autoIndex = generateAutoIndexHtml(reroutedPath);
-//                 return HttpResponse(autoIndex, CONTENT_TYPE_HTML, 200);
-//             } 
-            
-//             else {
-//                 throw HttpException(403);
-//             }
-//         }
-
-//         // Check if CGI handling is required for the resource
-//         string cgiToUse = decideCGIToUse(path);
-
-//         // If CGI handling is required, reroute the path to the CGI script
-//         if (!cgiToUse.empty()) {
-//             return callCGIResponse(cgiToUse, path, request);
-//         }
-//         else if (isCGI(path)) {
-//             return callCGIResponse(path, request.getParam("path_info"), request);
-//         }
-//         else
-//             return HttpResponse(content, getContentType(reroutedPath), 200);
-
-//     } 
-    
-//     catch (const HttpException& e) {
-//         std::cout << RED << "error: " << e.what() << RESET << e.getStatusCode() << std::endl;
-//         return createErrorHTTPResponse(e.getStatusCode());
-//     }
-// }
-
-// HttpResponse HttpResponse::createHttpResponse(HttpRequest &request) {
-//     string path = request.getParam("path");
-
-//     std::vector<std::string> allowedMethods;
-//     allowedMethods.push_back("GET");
-//     allowedMethods.push_back("POST");
-//     allowedMethods.push_back("DELETE");
-    
-
-//     try {
-//         for (int i = 0; i < allowedMethods.size(); i++) {
-//             if (request.getMethod() == allowedMethods[i]) {
-//                 std::cout << GREEN << "Method is supported" << RESET << std::endl;
-//                 break;
-//             }
-//             if (i == allowedMethods.size() - 1) {
-//                 throw HttpException(405);
-//             }
-//         }
-
-//         string reroutedPath = reroutePath(path);
-//         string content = readFileContent(reroutedPath);
-
-//         if (isDirectory(reroutedPath)) {
-//             if (containsIndexFile(reroutedPath)) {
-//                 try {
-//                     return HttpResponse(readFileContent(reroutedPath + "/index.html"), CONTENT_TYPE_HTML, 200);
-//                 }
-//                 catch (const HttpException& e) {
-//                     std::cout<< RED << "invalid access" << RESET << std::endl;
-//                 }
-//             }
-            
-//             if (AUTO_INDEX_ON) {
-//             std::cout << GREEN << "Auto index is on" << RESET << std::endl;
-//                 string autoIndex = generateAutoIndexHtml(reroutedPath);
-//                 return HttpResponse(autoIndex, CONTENT_TYPE_HTML, 200);
-//             } 
-            
-//             else {
-//                 throw HttpException(403);
-//             }
-//         }
-
-//         // Check if CGI handling is required for the resource
-//         string cgiToUse = decideCGIToUse(path);
-
-//         // If CGI handling is required, reroute the path to the CGI script
-//         if (!cgiToUse.empty()) {
-//             return callCGIResponse(cgiToUse, path, request);
-//         }
-//         else if (isCGI(path)) {
-//             return callCGIResponse(path, request.getParam("path_info"), request);
-//         }
-//         else
-//             return HttpResponse(content, getContentType(reroutedPath), 200);
-
-//     } 
-    
-//     catch (const HttpException& e) {
-//         std::cout << RED << "error: " << e.what() << RESET << e.getStatusCode() << std::endl;
-//         return createErrorHTTPResponse(e.getStatusCode());
-//     }
-// }
-
+void HttpResponse::initErrorHttpResponse(int statusCode) {
+    this->setHttpResponseSelf(StatusHandler(statusCode).generateErrorPage("public/error.html"), CONTENT_TYPE_HTML, statusCode);
+}
 
 
 /*
