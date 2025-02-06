@@ -251,7 +251,7 @@ void	Cluster::run(void)
 
 					HttpRequest request = mockRequest("test.csv", "test.csv");
 
-					HttpResponse response = HttpResponse::createHttpResponse(request);
+					HttpResponse response = HttpResponse(request, &_servers[0]);
 					send(_pollFds[i].fd, response.getFinalResponseMsg().c_str(), response.getFinalResponseMsg().size(), 0);
 					close(_pollFds[i].fd);
 					_clients.erase(_pollFds[i].fd);

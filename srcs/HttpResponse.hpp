@@ -7,6 +7,7 @@
 #include "Utils.hpp"
 #include "HttpException.hpp"
 #include "CGI.hpp"
+#include "ServerBlock.hpp"
 
 typedef std::map<string, string> stringDict;
 
@@ -21,8 +22,11 @@ private:
     string  contentType;
     string  finalResponseMsg;
 
+    ServerBlock *_serverBlockRef;
+
 public:
     HttpResponse(string content, string contentType, int statusCode);
+    HttpResponse(HttpRequest &request, ServerBlock &ServerBlock);
 
     string getRawContent() const { return rawContent; }
     int getContentLength() const { return contentLength; }
@@ -38,9 +42,13 @@ public:
         const string& resourceType, 
         const string& statusCode, 
         const string& statusMessage);
+    void setHttpResponseSelf(string content, string resourceType, int statusCode);
     static HttpResponse createHttpErrorResponse(int statusCode);
     static string generateAutoIndexHtml(string path);
     static HttpResponse createHttpResponse(HttpRequest &request);
+
+    void callCGIResponse(string cgiPath, string fileToHandle, HttpRequest request);
+    HttpResponse(HttpRequest &request, ServerBlock *ServerBlock);
 };
 
 #endif // HTTP_RESPONSE_HPP
