@@ -185,7 +185,6 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *ServerBlock) {
                     std::cout << GREEN << "index file found" << RESET << std::endl;
                 }
                 catch (const HttpException& e) {
-                    std::cout<< RED << "invalid access" << RESET << std::endl;
                 }
                 return ;
             }
@@ -220,7 +219,6 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *ServerBlock) {
         }
 
     } 
-    
 
     catch (const HttpException& e) {
         std::cout << RED << "error: " << e.what() << RESET << e.getStatusCode() << std::endl;
@@ -230,7 +228,23 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *ServerBlock) {
 
 
 void HttpResponse::initErrorHttpResponse(int statusCode) {
-    this->setHttpResponseSelf(StatusHandler(statusCode).generateErrorPage("public/error.html"), CONTENT_TYPE_HTML, statusCode);
+    if (!this->_serverBlockRef->getErrorPage().empty() && 
+        this->_serverBlockRef->getErrorPage().find(statusCode) != this->_serverBlockRef->getErrorPage().end()) {
+        string errorPage = reroutePath(this->_serverBlockRef->getErrorPage()[statusCode]);
+
+        std::cout << "error page: " << errorPage << std::endl;
+        std::cout << "size : " << this->_serverBlockRef->getErrorPage().size() << std::endl;
+        try {
+            this->setHttpResponseSelf(readFileContent(errorPage), CONTENT_TYPE_HTML, statusCode);
+        }
+        catch (const HttpException& e) {
+            this->setHttpResponseSelf(StatusHandler(500).generateErrorPage("public/error.html"), CONTENT_TYPE_HTML, 500);
+        }
+    } 
+    
+    else {
+        this->setHttpResponseSelf(StatusHandler(statusCode).generateErrorPage("public/error.html"), CONTENT_TYPE_HTML, statusCode);
+    }
 }
 
 
