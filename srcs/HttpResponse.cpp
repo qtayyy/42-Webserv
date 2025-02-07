@@ -45,7 +45,7 @@ string HttpResponse::reroutePath(const string &urlPath) {
 
     pathMap["cgi-bin"] = "";
 
-    string reroutedPath = this->_serverBlockRef->getRoot() + "/" + urlPath;
+    string reroutedPath = this->_locationBlockRef->getRoot() + "/" + urlPath;
     for (stringDict::const_iterator it = pathMap.begin(); it != pathMap.end(); ++it) {
         if (startsWith(urlPath, it->first)) {
             reroutedPath = (it->second + urlPath);
@@ -163,12 +163,28 @@ bool HttpResponse::containsIndexFile(string path) {
     return doesPathExist(path + "/index.html");
 }
 
-HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *ServerBlock) {
-    this->_serverBlockRef = ServerBlock;
+HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
+    this->_serverBlockRef = serverBlock;
 
     string path = request.getParam("path");
 
-    std::vector<std::string> limitExcept = ServerBlock->getLimitExcept();
+
+    // get current location
+
+    std::vector<LocationBlock>locations = serverBlock->getLocation();
+    //iterate through each item of Locaation
+
+    LocationBlock *locationBlock = NULL;
+    for (std::vector<LocationBlock>::iterator it = locations.begin(); it != locations.end(); ++it) {
+        if (startsWith(path, it->getUri()) && (locationBlock == NULL || it->getUri().size() > locationBlock->getUri().size())) {
+            locationBlock = &(*it);
+        }
+    }
+
+    this->_locationBlockRef = locationBlock;
+
+    std::vector<std::string> limitExcept = this->_locationBlockRef->getLimitExcept();
+    std::cout << "found location block" << this->_locationBlockRef->getUri() << std::endl;
 
     try {
         if (std::find(limitExcept.begin(), limitExcept.end(), request.getMethod()) == limitExcept.end())
@@ -183,14 +199,17 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *ServerBlock) {
                     this->setHttpResponseSelf(readFileContent(reroutedPath + "/index.html"), CONTENT_TYPE_HTML, 200);
                     std::cout << GREEN << "index file found" << RESET << std::endl;
                 } catch (const HttpException& e) { }
+                
                 return ;
             }
             
-            else if (AUTO_INDEX_ON) {
+            else if (serverBlock->getAutoindex()) {
                 string autoIndex = generateAutoIndexHtml(reroutedPath);
                 std::cout << "auto index html :" << autoIndex << std::endl;
                 this->setHttpResponseSelf(autoIndex, CONTENT_TYPE_HTML, 200);
-            } else {
+            } 
+            
+            else {
                 throw HttpException(403);
             }
         }
@@ -200,13 +219,12 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *ServerBlock) {
             string cgiToUse = decideCGIToUse(path);
 
             // If CGI handling is required, reroute the path to the CGI script
-            if (!cgiToUse.empty()) {
+            if (!cgiToUse.empty())
                 this->callCGIResponse(cgiToUse, path, request);
-            } else if (isCGI(path)) {
+            else if (isCGI(path))
                 this->callCGIResponse(path, request.getParam("path_info"), request);
-            } else {
+            else
                 this->setHttpResponseSelf(content, getContentType(reroutedPath), 200);
-            }
 
             std::cout << this->getFinalResponseMsg() << std::endl;
         }
@@ -221,9 +239,9 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *ServerBlock) {
 
 
 void HttpResponse::initErrorHttpResponse(int statusCode) {
-    if (!this->_serverBlockRef->getErrorPage().empty() && 
-        this->_serverBlockRef->getErrorPage().find(statusCode) != this->_serverBlockRef->getErrorPage().end()) {
-        string errorPage = reroutePath(this->_serverBlockRef->getErrorPage()[statusCode]);
+    if (!this->_locationBlockRef->getErrorPage().empty() && 
+        this->_locationBlockRef->getErrorPage().find(statusCode) != this->_locationBlockRef->getErrorPage().end()) {
+        string errorPage = reroutePath(this->_locationBlockRef->getErrorPage()[statusCode]);
 
         try {
             this->setHttpResponseSelf(readFileContent(errorPage), CONTENT_TYPE_HTML, statusCode);

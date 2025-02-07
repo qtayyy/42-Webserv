@@ -48,7 +48,7 @@ class LocationBlock : public Block
 
 		static std::map<std::string, void (LocationBlock::*)(std::vector<std::string>)>	locationParseMap;
 		static std::map<std::string, void (LocationBlock::*)(std::vector<std::string>)>	initLocationMap(void);
-
+	
 		void	inheritErrorPages(std::map<int, std::string> parentErrorPages);
 		void	inheritCgiScripts(std::map<std::string, std::string> parentCgiScripts);
 };

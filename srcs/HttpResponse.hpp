@@ -23,7 +23,10 @@ private:
     string  finalResponseMsg;
 
     ServerBlock *_serverBlockRef;
+    LocationBlock *_locationBlockRef;
     static bool containsIndexFile(string path);
+
+std::vector<LocationBlock>::iterator getRelevantLocationBlock(ServerBlock *serverBlock, string path);
 
 public:
     HttpResponse(string content, string contentType, int statusCode);

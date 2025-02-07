@@ -44,6 +44,8 @@ class ServerBlock : public Block
 
 		int	parseServer(std::vector<std::string> tokens, int i);
 
+		std::vector<LocationBlock>	getLocation(void) { return (this->_location); };
+
 	private:
 		std::vector<std::pair<uint32_t, int> >	_listen; // ip:port
 		std::vector<std::string>				_serverName; // set up or not (default is localhost, can we not use DNS resolution?)
