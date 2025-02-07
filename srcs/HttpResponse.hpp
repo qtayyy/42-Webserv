@@ -24,9 +24,13 @@ private:
 
     ServerBlock *_serverBlockRef;
     LocationBlock *_locationBlockRef;
-    static bool containsIndexFile(string path);
+    string containsIndexFile(string path);
 
-std::vector<LocationBlock>::iterator getRelevantLocationBlock(ServerBlock *serverBlock, string path);
+    LocationBlock *getRelevantLocationBlock(const string &path, ServerBlock *serverBlock);
+
+    void initRedirectResponse(string &redirectUrl, int statusCode);
+
+    std::vector<LocationBlock>::iterator getRelevantLocationBlock(ServerBlock *serverBlock, string path);
 
 public:
     HttpResponse(string content, string contentType, int statusCode);

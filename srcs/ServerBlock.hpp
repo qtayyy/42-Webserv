@@ -44,7 +44,7 @@ class ServerBlock : public Block
 
 		int	parseServer(std::vector<std::string> tokens, int i);
 
-		std::vector<LocationBlock>	getLocation(void) { return (this->_location); };
+		std::vector<LocationBlock>	*getLocation(void) { return (&this->_location); };
 
 	private:
 		std::vector<std::pair<uint32_t, int> >	_listen; // ip:port

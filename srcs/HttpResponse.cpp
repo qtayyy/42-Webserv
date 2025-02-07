@@ -159,34 +159,50 @@ void HttpResponse::callCGIResponse(string cgiPath, string fileToHandle, HttpRequ
     this->setHttpResponseSelf(response_content, CONTENT_TYPE_HTML, 200);
 }
 
-bool HttpResponse::containsIndexFile(string path) {
-    return doesPathExist(path + "/index.html");
+string HttpResponse::containsIndexFile(string path) {
+    const std::vector<std::string>& indices = this->_serverBlockRef->getIndex();
+    for (std::vector<std::string>::const_iterator it = indices.begin(); it != indices.end(); ++it) {
+        if (doesPathExist(path + "/" + *it)) {
+            return path + "/" + *it;
+        }
+    }
+
+    return "";
 }
 
-HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
-    this->_serverBlockRef = serverBlock;
-
-    string path = request.getParam("path");
-
-
-    // get current location
-
-    std::vector<LocationBlock>locations = serverBlock->getLocation();
-    //iterate through each item of Locaation
-
-    LocationBlock *locationBlock = NULL;
-    for (std::vector<LocationBlock>::iterator it = locations.begin(); it != locations.end(); ++it) {
+LocationBlock* HttpResponse::getRelevantLocationBlock(const string& path, ServerBlock* serverBlock) {
+    std::vector<LocationBlock> *locations = serverBlock->getLocation();
+    LocationBlock* locationBlock = NULL;
+    for (std::vector<LocationBlock>::iterator it = locations->begin(); it != locations->end(); ++it) {
         if (startsWith(path, it->getUri()) && (locationBlock == NULL || it->getUri().size() > locationBlock->getUri().size())) {
             locationBlock = &(*it);
         }
     }
+    
+    return locationBlock;
+}
 
-    this->_locationBlockRef = locationBlock;
+void HttpResponse::initRedirectResponse(string & redirectUrl, int statusCode) {
+    this->setHttpResponseSelf("", CONTENT_TYPE_HTML, statusCode);
+    this->finalResponseMsg += "Location: " + redirectUrl + "\r\n";
+}
+
+
+HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
+    string path = request.getParam("path");
+    
+    this->_serverBlockRef = serverBlock;
+    this->_locationBlockRef = getRelevantLocationBlock(path, serverBlock);
 
     std::vector<std::string> limitExcept = this->_locationBlockRef->getLimitExcept();
-    std::cout << "found location block" << this->_locationBlockRef->getUri() << std::endl;
 
     try {
+        // std::pair<int, std::string> redirectInfo = this->_locationBlockRef->getReturn();
+        // if (!redirectInfo.second.empty()) {
+        //     this->initRedirectResponse(redirectInfo.second, redirectInfo.first);
+        //     return;
+        // }
+
         if (std::find(limitExcept.begin(), limitExcept.end(), request.getMethod()) == limitExcept.end())
             throw HttpException(405);
 
@@ -194,18 +210,18 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
         string content = readFileContent(reroutedPath);
 
         if (isDirectory(reroutedPath)) {
-            if (HttpResponse::containsIndexFile(reroutedPath)) {
+            string indexFile = containsIndexFile(reroutedPath);
+            
+            if (!indexFile.empty()) {
                 try {
-                    this->setHttpResponseSelf(readFileContent(reroutedPath + "/index.html"), CONTENT_TYPE_HTML, 200);
-                    std::cout << GREEN << "index file found" << RESET << std::endl;
+                    this->setHttpResponseSelf(readFileContent(indexFile), CONTENT_TYPE_HTML, 200);
                 } catch (const HttpException& e) { }
                 
-                return ;
+                return;
             }
             
             else if (serverBlock->getAutoindex()) {
                 string autoIndex = generateAutoIndexHtml(reroutedPath);
-                std::cout << "auto index html :" << autoIndex << std::endl;
                 this->setHttpResponseSelf(autoIndex, CONTENT_TYPE_HTML, 200);
             } 
             
@@ -228,7 +244,6 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
 
             std::cout << this->getFinalResponseMsg() << std::endl;
         }
-
     } 
 
     catch (const HttpException& e) {
