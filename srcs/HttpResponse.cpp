@@ -181,10 +181,19 @@ LocationBlock* HttpResponse::getRelevantLocationBlock(const string& path, Server
     
     return locationBlock;
 }
-
 void HttpResponse::initRedirectResponse(string & redirectUrl, int statusCode) {
-    this->setHttpResponseSelf("", CONTENT_TYPE_HTML, statusCode);
-    this->finalResponseMsg += "Location: " + redirectUrl + "\r\n";
+    this->rawContent = "";
+    this->contentType = CONTENT_TYPE_HTML;
+    this->statusCode = statusCode;
+    this->message = StatusHandler::CodeToMessage(statusCode);
+    
+    std::stringstream response;
+    response << PROTOCOL << " " << statusCode << " " << message << "\r\n";
+    response << "Location: " + redirectUrl + "\r\n";
+    response << "Content-Length: 0\r\n";
+    response << "Content-Type: " << CONTENT_TYPE_HTML << "\r\n\r\n";
+    
+    this->finalResponseMsg = response.str();
 }
 
 
@@ -197,11 +206,11 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
     std::vector<std::string> limitExcept = this->_locationBlockRef->getLimitExcept();
 
     try {
-        // std::pair<int, std::string> redirectInfo = this->_locationBlockRef->getReturn();
-        // if (!redirectInfo.second.empty()) {
-        //     this->initRedirectResponse(redirectInfo.second, redirectInfo.first);
-        //     return;
-        // }
+        std::pair<int, std::string> redirectInfo = this->_locationBlockRef->getReturn();
+        if (!redirectInfo.second.empty()) {
+            this->initRedirectResponse(redirectInfo.second, redirectInfo.first);
+            return;
+        }
 
         if (std::find(limitExcept.begin(), limitExcept.end(), request.getMethod()) == limitExcept.end())
             throw HttpException(405);
