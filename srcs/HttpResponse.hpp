@@ -23,6 +23,7 @@ private:
     string  finalResponseMsg;
 
     ServerBlock *_serverBlockRef;
+    static bool containsIndexFile(string path);
 
 public:
     HttpResponse(string content, string contentType, int statusCode);

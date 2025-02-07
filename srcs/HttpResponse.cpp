@@ -45,7 +45,7 @@ string HttpResponse::reroutePath(const string &urlPath) {
 
     pathMap["cgi-bin"] = "";
 
-    string reroutedPath = string(ROOT_RESOURCE_PATH) + "/" + urlPath;
+    string reroutedPath = this->_serverBlockRef->getRoot() + "/" + urlPath;
     for (stringDict::const_iterator it = pathMap.begin(); it != pathMap.end(); ++it) {
         if (startsWith(urlPath, it->first)) {
             reroutedPath = (it->second + urlPath);
@@ -159,7 +159,7 @@ void HttpResponse::callCGIResponse(string cgiPath, string fileToHandle, HttpRequ
     this->setHttpResponseSelf(response_content, CONTENT_TYPE_HTML, 200);
 }
 
-bool containsIndexFile(string path) {
+bool HttpResponse::containsIndexFile(string path) {
     return doesPathExist(path + "/index.html");
 }
 
@@ -168,24 +168,21 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *ServerBlock) {
 
     string path = request.getParam("path");
 
-    std::vector<std::string> allowedMethods = ServerBlock->getLimitExcept();
-    std::cout << "limit except" << ServerBlock->getLimitExcept().size() << std::endl;
+    std::vector<std::string> limitExcept = ServerBlock->getLimitExcept();
 
     try {
-        if (std::find(allowedMethods.begin(), allowedMethods.end(), request.getMethod()) == allowedMethods.end())
+        if (std::find(limitExcept.begin(), limitExcept.end(), request.getMethod()) == limitExcept.end())
             throw HttpException(405);
 
         string reroutedPath = reroutePath(path);
         string content = readFileContent(reroutedPath);
 
         if (isDirectory(reroutedPath)) {
-            if (containsIndexFile(reroutedPath)) {
+            if (HttpResponse::containsIndexFile(reroutedPath)) {
                 try {
                     this->setHttpResponseSelf(readFileContent(reroutedPath + "/index.html"), CONTENT_TYPE_HTML, 200);
                     std::cout << GREEN << "index file found" << RESET << std::endl;
-                }
-                catch (const HttpException& e) {
-                }
+                } catch (const HttpException& e) { }
                 return ;
             }
             
@@ -193,9 +190,7 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *ServerBlock) {
                 string autoIndex = generateAutoIndexHtml(reroutedPath);
                 std::cout << "auto index html :" << autoIndex << std::endl;
                 this->setHttpResponseSelf(autoIndex, CONTENT_TYPE_HTML, 200);
-            } 
-            
-            else {
+            } else {
                 throw HttpException(403);
             }
         }
@@ -207,11 +202,9 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *ServerBlock) {
             // If CGI handling is required, reroute the path to the CGI script
             if (!cgiToUse.empty()) {
                 this->callCGIResponse(cgiToUse, path, request);
-            }
-            else if (isCGI(path)) {
+            } else if (isCGI(path)) {
                 this->callCGIResponse(path, request.getParam("path_info"), request);
-            }
-            else {
+            } else {
                 this->setHttpResponseSelf(content, getContentType(reroutedPath), 200);
             }
 
@@ -232,12 +225,9 @@ void HttpResponse::initErrorHttpResponse(int statusCode) {
         this->_serverBlockRef->getErrorPage().find(statusCode) != this->_serverBlockRef->getErrorPage().end()) {
         string errorPage = reroutePath(this->_serverBlockRef->getErrorPage()[statusCode]);
 
-        std::cout << "error page: " << errorPage << std::endl;
-        std::cout << "size : " << this->_serverBlockRef->getErrorPage().size() << std::endl;
         try {
             this->setHttpResponseSelf(readFileContent(errorPage), CONTENT_TYPE_HTML, statusCode);
-        }
-        catch (const HttpException& e) {
+        } catch (const HttpException& e) {
             this->setHttpResponseSelf(StatusHandler(500).generateErrorPage("public/error.html"), CONTENT_TYPE_HTML, 500);
         }
     } 

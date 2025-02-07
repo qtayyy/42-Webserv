@@ -249,10 +249,10 @@ void	Cluster::run(void)
 				{
 					this->_clients[_pollFds[i].fd]->handleRequest(); // Ethan's part
 
-					HttpRequest request = mockRequest("dir2asndkasld", "test.csv");
+					HttpRequest request = mockRequest("/dir2", "test.csv");
 
 					HttpResponse response = HttpResponse(request, &_servers[0]);
-					send(_pollFds[i].fd, response.getFinalResponseMsg().c_str(), response.getFinalResponseMsg().size(), 0);
+					send(_pollFds[i].fd, response.getFinalResponseMsg().c_str(), response.getContentLength(), 0);
 					close(_pollFds[i].fd);
 					_clients.erase(_pollFds[i].fd);
 					_pollFds[i] = _pollFds[--_numOfFds]; // Remove the fd from the poll array
