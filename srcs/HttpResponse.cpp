@@ -16,11 +16,10 @@ stringDict HttpResponse::createContentTypeMap() {
 const stringDict HttpResponse::contentTypeMap = HttpResponse::createContentTypeMap();
 
 string HttpResponse::decideCGIToUse(string resourcePath) {
-    stringDict CGIHandling;
-    CGIHandling[".csv"] = "csv_handler.py";
+    stringDict cgiScripts = this->_locationBlockRef->getCgiScript();
 
     // check if cgi handling is required
-    for (stringDict::const_iterator it = CGIHandling.begin(); it != CGIHandling.end(); ++it) {
+    for (stringDict::const_iterator it = cgiScripts.begin(); it != cgiScripts.end(); ++it) {
         if (endsWith(resourcePath, it->first)) {
             return (CGI_BIN_PATH + string("/") + it->second);
         }
@@ -196,14 +195,39 @@ void HttpResponse::initRedirectResponse(string & redirectUrl, int statusCode) {
     this->finalResponseMsg = response.str();
 }
 
+string HttpResponse::applyAlias(string& path) {
+    std::vector<LocationBlock> *locations = this->_serverBlockRef->getLocation();
+    for (std::vector<LocationBlock>::iterator it = locations->begin(); it != locations->end(); ++it) {
+        string alias = it->getAlias();
+        if (!alias.empty() && startsWith(path, it->getUri())) {
+            string newPath = alias + path.substr(it->getUri().length());
+            return newPath;
+        }
+    }
+    
+    return path;
+}
+
 
 HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
     string path = request.getParam("path");
     
+    
     this->_serverBlockRef = serverBlock;
     this->_locationBlockRef = getRelevantLocationBlock(path, serverBlock);
+    
+    path = applyAlias(path);
+    
+    stringList limitExcept = this->_locationBlockRef->getLimitExcept();
 
-    std::vector<std::string> limitExcept = this->_locationBlockRef->getLimitExcept();
+    // std::cout << "alias" << this->_locationBlockRef->getAlias() << std::endl;
+
+    // if (this->_locationBlockRef->getAlias() != "") {
+    //     request.setParam("path", this->_locationBlockRef->getAlias());
+    //     path = this->_locationBlockRef->getAlias();
+    // }
+
+
 
     try {
         std::pair<int, std::string> redirectInfo = this->_locationBlockRef->getReturn();

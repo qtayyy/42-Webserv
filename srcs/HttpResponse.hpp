@@ -30,6 +30,8 @@ private:
 
     void initRedirectResponse(string &redirectUrl, int statusCode);
 
+    string applyAlias(string &path);
+
     std::vector<LocationBlock>::iterator getRelevantLocationBlock(ServerBlock *serverBlock, string path);
 
 public:
@@ -43,7 +45,7 @@ public:
     string getContentType() const { return contentType; }
     string getFinalResponseMsg() const { return finalResponseMsg; }
 
-    static string decideCGIToUse(string resourcePath);
+    string decideCGIToUse(string resourcePath);
     static string getContentType(const string& resourcePath);
     string reroutePath(const string &urlPath);
     static string createHttpResponseString(
