@@ -6,6 +6,7 @@
 #include "StatusHandler.hpp"
 #include "Utils.hpp"
 #include "HttpException.hpp"
+#include <ctime>
 #include "CGI.hpp"
 #include "ServerBlock.hpp"
 
@@ -34,33 +35,49 @@ private:
 
     std::vector<LocationBlock>::iterator getRelevantLocationBlock(ServerBlock *serverBlock, string path);
 
+    int httpStatusCode;       // HTTP status code (e.g., 404, 500)
+    string errorMessage;      // Short error message
+    string details;           // Detailed explanation
+    string requestUrl;        // URL that caused the error
+    string method;            // HTTP method (GET, POST, etc.)
+    std::time_t timestamp;    // Error occurrence time
+
+    std::pair<std::string, std::string> CodeToMessage(int code) const;
+    string createErrorPage(string errorPagePath, int statusCode) const;
+    void displayError() const;
+
 public:
     HttpResponse(string content, string contentType, int statusCode);
     HttpResponse(HttpRequest &request, ServerBlock &ServerBlock);
 
-    string getRawContent() const { return rawContent; }
-    int getContentLength() const { return contentLength; }
-    int getStatusCode() const { return statusCode; }
-    string getMessage() const { return message; }
-    string getContentType() const { return contentType; }
-    string getFinalResponseMsg() const { return finalResponseMsg; }
+    string getRawContent() const;
+    int    getContentLength() const;
+    int    getStatusCode() const;
+    string getMessage() const;
+    string getContentType() const;
+    string getFinalResponseMsg() const;
+    string getRequestUrl() const;
+    string getMethod() const;
+
+    bool isCGI(const string &resourcePath);
 
     string decideCGIToUse(string resourcePath);
     static string getContentType(const string& resourcePath);
     string reroutePath(const string &urlPath);
-    static string createHttpResponseString(
-        const string &fileContent,
-        const string &resourceType,
-        const string &statusCode,
-        const string &statusMessage);
-    void setHttpResponseSelf(string content, string resourceType, int statusCode);
-    static HttpResponse createHttpErrorResponse(int statusCode);
-    static string generateAutoIndexHtml(string path);
+    static string createResponseString(const string &fileContent, const string &resourceType, const string &statusCode, const string &statusMessage);
+    static string createAutoIndexHtml(string path);
     static HttpResponse createHttpResponse(HttpRequest &request);
 
-    void callCGIResponse(string cgiPath, string fileToHandle, HttpRequest request);
-    HttpResponse(HttpRequest &request, ServerBlock *ServerBlock);
+    void initHttpResponseSelf(string content, string resourceType, int statusCode);
+    void initCGIResponse(string cgiPath, string fileToHandle, HttpRequest request);
     void initErrorHttpResponse(int statusCode);
+
+    HttpResponse(HttpRequest &request, ServerBlock *ServerBlock);
+
+    HttpResponse(int code, const string& message, const string& detail, const string& url, const string& reqMethod);
+    HttpResponse(int code);
+
+
 };
 
 #endif // HTTP_RESPONSE_HPP

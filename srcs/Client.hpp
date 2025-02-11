@@ -7,7 +7,9 @@ class Client
 		Client(void) {};
 		~Client(void) {};
 
-		void	handleRequest(void) {};
+		void	handleRequest(void) {
+			
+		};
 		void	handleResponse(void) {};
 
 	private:

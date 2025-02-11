@@ -248,20 +248,18 @@ void	Cluster::run(void)
 				else // Note: if client disconnects, have to close its fd and remove from the poll struct
 				{
 					this->_clients[_pollFds[i].fd]->handleRequest(); // Ethan's part
-
-					HttpRequest request = mockRequest("/alias_test/alias_test", "test.csv");
-
-					HttpResponse response = HttpResponse(request, &_servers[0]);
-					send(_pollFds[i].fd, response.getFinalResponseMsg().c_str(), response.getContentLength(), 0);
-					close(_pollFds[i].fd);
-					_clients.erase(_pollFds[i].fd);
-					_pollFds[i] = _pollFds[--_numOfFds]; // Remove the fd from the poll array
-					i--; // Adjust the index to check the swapped fd
+					_pollFds[i].events = POLLOUT;
 				}
 			}
-			if (_pollFds[i].revents & POLLOUT) // // If an fd is ready for writing
+			if (_pollFds[i].revents & POLLOUT) // If an fd is ready for writing
 			{
-				this->_clients[_pollFds[i].fd]->handleResponse(); // Sheldon's part
+				HttpRequest request = mockRequest("/dir2", "test.csv");
+				HttpResponse response = HttpResponse(request, &_servers[0]);
+				send(_pollFds[i].fd, response.getFinalResponseMsg().c_str(), response.getContentLength(), 0);
+				close(_pollFds[i].fd);
+				_clients.erase(_pollFds[i].fd);
+				_pollFds[i] = _pollFds[--_numOfFds]; // Remove the fd from the poll array
+				i--; // Adjust the index to check the swapped fd
 			}
 		}
 	}
