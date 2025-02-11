@@ -259,6 +259,7 @@ void	Cluster::run(void)
 				close(_pollFds[i].fd);
 				_clients.erase(_pollFds[i].fd);
 				_pollFds[i] = _pollFds[--_numOfFds]; // Remove the fd from the poll array
+				_pollFds[i].events = POLLIN;
 				i--; // Adjust the index to check the swapped fd
 			}
 		}
