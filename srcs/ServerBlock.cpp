@@ -239,7 +239,6 @@ std::map<std::string, void (ServerBlock::*)(std::vector<std::string>)>
 std::map<std::string, void (ServerBlock::*)(std::vector<std::string>)> ServerBlock::serverParseMap = initServerMap();
 
 // int	main()
-// {
 // 	ServerBlock test;
 // 	std::vector<std::string> maxsize = {"240000"};
 // 	std::vector<std::string> root = {"/newroot/haha"};//, "/another/one"};

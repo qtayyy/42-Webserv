@@ -275,8 +275,8 @@ void	Cluster::run(void)
 			{
 
 				
-				HttpRequest request = mockPostRequest("/upload", "/dir2", "file.txt", "Hello, world!");
-				// request = mockRequest("/dir1", "/dir2");
+				HttpRequest request = mockPostRequest("/upload", "/dir2", "file2.txt", "Hello, world!");
+				//HttpRequest request = mockRequest("/upload.html", "/dir2");
 				HttpResponse response = HttpResponse(request, &_servers[0]);
 				send(_pollFds[i].fd, response.getFinalResponseMsg().c_str(), response.getContentLength(), 0);
 				close(_pollFds[i].fd);
