@@ -213,13 +213,50 @@ int		Cluster::createListenerSocket(std::string IP, std::string Port)
 HttpRequest mockRequest(string path, string path_info) {
     HttpRequest request;
 
-    request.setParam("path", path);
-    request.setParam("path_info", path_info);
-    request.setParam("query_string", "name=John&age=30");
-    request.setParam("method", "GET");
+    request.headerSet("path", path);
+    request.headerSet("path_info", path_info);
+    request.headerSet("query_string", "name=John&age=30");
+    request.headerSet("method", "GET");
 
     return request;
 }
+
+HttpRequest mockPostRequest(string path, string path_info, const string& fileName, const string& fileContent) {
+    HttpRequest request;
+
+	HttpRequestFormBlock formBlock;
+	
+	// test txt file upload
+	formBlock.headerSet("Content-Disposition", "form-data; name=\"file\"; filename=\"" + fileName + "\"");
+	formBlock.headerSet("Content-Type", "application/octet-stream");
+	formBlock.setBody(fileContent);
+
+	request.appendFormBlock(formBlock);
+
+    request.headerSet("path", path);
+    request.headerSet("path_info", path_info);
+    request.headerSet("query_string", "name=John&age=30");
+    request.headerSet("method", "POST");
+
+
+    // Set headers for multipart/form-data
+    string boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW";
+    request.headerSet("Content-Type", "multipart/form-data; boundary=" + boundary);
+
+    // Create the body content for the file upload
+    std::stringstream body;
+    body << "--" << boundary << "\r\n";
+    body << "Content-Disposition: form-data; name=\"file\"; filename=\"" << fileName << "\"\r\n";
+    body << "Content-Type: application/octet-stream\r\n\r\n";
+    body << fileContent << "\r\n";
+    body << "--" << boundary << "--\r\n";
+
+    request.setBody(body.str());
+
+    return request;
+}
+
+
 
 // ============================== RUN ALL SERVERS =============================
 

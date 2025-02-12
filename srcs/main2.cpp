@@ -29,10 +29,10 @@
 HttpRequest mockRequest(string path, string path_info) {
     HttpRequest request;
 
-    request.setParam("path", path);
-    request.setParam("path_info", path_info);
-    request.setParam("query_string", "name=John&age=30");
-    request.setParam("method", "GET");
+    request.headerSet("path", path);
+    request.headerSet("path_info", path_info);
+    request.headerSet("query_string", "name=John&age=30");
+    request.headerSet("method", "GET");
 
     return request;
 }

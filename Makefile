@@ -28,7 +28,9 @@ SRC		= 	Block.cpp \
 			HttpResponse.cpp \
 			Utils.cpp \
 			CGI.cpp \
-			StatusHandler.cpp
+			StatusHandler.cpp \
+			HttpRequestFormBlock.cpp \
+			HttpRequest.cpp \
 
 
 SRCS	= $(addprefix $(SRC_PATH), $(SRC))

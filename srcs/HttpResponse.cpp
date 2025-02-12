@@ -15,10 +15,11 @@ stringDict HttpResponse::createContentTypeMap() {
 const stringDict HttpResponse::contentTypeMap = HttpResponse::createContentTypeMap();
 
 
+
 /* CONSTRUCTORS */
 
 HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
-    string path = request.getParam("path");
+    string path = request.headerGet("path");
     
     
     this->_serverBlockRef = serverBlock;
@@ -78,7 +79,7 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
             if (!cgiToUse.empty())
                 this->initCGIResponse(cgiToUse, path, request);
             else if (isCGI(path))
-                this->initCGIResponse(path, request.getParam("path_info"), request);
+                this->initCGIResponse(path, request.headerGet("path_info"), request);
             else
                 this->initHttpResponseSelf(content, getContentType(reroutedPath), 200);
 
@@ -91,6 +92,7 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
         this->initErrorHttpResponse(e.getStatusCode());
     }
 }
+
 
 
 /* GENERATORS */
@@ -107,7 +109,6 @@ string HttpResponse::createErrorPage(string errorPagePath, int statusCode) const
     return errorFileContents;
 }
 
-
 string HttpResponse::createResponseString(
     const string& fileContent, 
     const string& resourceType, 
@@ -122,7 +123,6 @@ string HttpResponse::createResponseString(
 
     return response.str();
 }
-
 
 string HttpResponse::createAutoIndexHtml(string path) {
     std::stringstream ss;
@@ -152,9 +152,17 @@ string HttpResponse::createAutoIndexHtml(string path) {
 
 string HttpResponse::getFinalResponseMsg() const { return finalResponseMsg; }
 int    HttpResponse::getStatusCode()       const { return httpStatusCode; }
+string HttpResponse::getErrorMsg()         const { return errorMessage; }
+string HttpResponse::getDetails()          const { return details; }
 string HttpResponse::getRequestUrl()       const { return requestUrl; }
 string HttpResponse::getMethod()           const { return method; }
 int    HttpResponse::getContentLength()    const { return contentLength; }
+string HttpResponse::getTimestamp()        const {
+    char buffer[80];
+    std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", std::localtime(&timestamp));
+    return string(buffer);
+}
+
 
 
 /* INITIALIZERS */
@@ -207,9 +215,9 @@ void HttpResponse::initCGIResponse(string cgiPath, string fileToHandle, HttpRequ
 
     CGIHandler cgiHandler = CGIHandler();
 
-    std::cout << GREEN << "Query string: " << request.getParam("query_string") << RESET << std::endl;
+    std::cout << GREEN << "Query string: " << request.headerGet("query_string") << RESET << std::endl;
     cgiHandler.setEnv("REQUEST_METHOD",  request.getMethod());
-    cgiHandler.setEnv("QUERY_STRING",    request.getParam("query_string"));
+    cgiHandler.setEnv("QUERY_STRING",    request.headerGet("query_string"));
     cgiHandler.setEnv("SCRIPT_NAME",     cgiPath);
     cgiHandler.setEnv("SERVER_NAME",     "localhost");
     cgiHandler.setEnv("SERVER_PORT",     "8080");
@@ -217,7 +225,7 @@ void HttpResponse::initCGIResponse(string cgiPath, string fileToHandle, HttpRequ
     cgiHandler.setEnv("PATH_TRANSLATED", absolutePath);
 
     int exit_status = 0;
-    string response_content = cgiHandler.handleCgiRequest(cgiPath, request.getParam("query_string"), absolutePath, exit_status);
+    string response_content = cgiHandler.handleCgiRequest(cgiPath, request.headerGet("query_string"), absolutePath, exit_status);
         // Check if the response contains the content length in its header, if so, remove the header
     if (startsWith(response_content, "Content-Length: ") && response_content.find("\n\n") != string::npos) {
         response_content = response_content.substr(response_content.find("\n\n") + 2);
@@ -227,10 +235,10 @@ void HttpResponse::initCGIResponse(string cgiPath, string fileToHandle, HttpRequ
 }
 
 
-bool HttpResponse::isCGI(const string& resourcePath) {
+
+bool isCGI(const string& resourcePath) {
     return endsWith(resourcePath, ".py");
 }
-
 
 string HttpResponse::decideCGIToUse(string resourcePath) {
     stringDict cgiScripts = this->_locationBlockRef->getCgiScript();
@@ -277,33 +285,37 @@ string HttpResponse::reroutePath(const string &urlPath) {
     return reroutedPath;
 }
 
+HttpResponse::HttpResponse(string content, string contentType, int statusCode) {
+    this->rawContent = content;
+    this->contentLength = contentLength;
+    this->contentType = contentType;
+    this->statusCode = statusCode;
+    this->message = CodeToMessage(statusCode).second;
+    this->finalResponseMsg = createResponseString(content, contentType, to_string(statusCode), message);
+}
 
 string HttpResponse::containsIndexFile(string path) {
-    const std::vector<std::string>& indices = this->_locationBlockRef->getIndex();
+    const std::vector<std::string>& indices = this->_serverBlockRef->getIndex();
     for (std::vector<std::string>::const_iterator it = indices.begin(); it != indices.end(); ++it) {
         if (doesPathExist(path + "/" + *it)) {
             return path + "/" + *it;
         }
     }
 
-
     return "";
 }
-
 
 LocationBlock* HttpResponse::getRelevantLocationBlock(const string& path, ServerBlock* serverBlock) {
     std::vector<LocationBlock> *locations = serverBlock->getLocation();
     LocationBlock* locationBlock = NULL;
     for (std::vector<LocationBlock>::iterator it = locations->begin(); it != locations->end(); ++it) {
-        if (startsWith(path, it->getUri()) // if the path starts with the location block's uri
-            && (locationBlock == NULL || it->getUri().size() > locationBlock->getUri().size())) {
+        if (startsWith(path, it->getUri()) && (locationBlock == NULL || it->getUri().size() > locationBlock->getUri().size())) {
             locationBlock = &(*it);
         }
     }
     
     return locationBlock;
 }
-
 
 string HttpResponse::applyAlias(string& path) {
     std::vector<LocationBlock> *locations = this->_serverBlockRef->getLocation();
@@ -317,7 +329,6 @@ string HttpResponse::applyAlias(string& path) {
     
     return path;
 }
-
 
 std::pair<std::string, std::string> HttpResponse::CodeToMessage(int statusCode) const {
     switch (statusCode) {

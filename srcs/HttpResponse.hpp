@@ -72,6 +72,10 @@ public:
     void initCGIResponse(string cgiPath, string fileToHandle, HttpRequest request);
     void initErrorHttpResponse(int statusCode);
 
+    void handleGet(HttpRequest &request, ServerBlock *serverBlock);
+
+    void handlePost(HttpRequest &request);
+
     HttpResponse(HttpRequest &request, ServerBlock *ServerBlock);
 
     HttpResponse(int code, const string& message, const string& detail, const string& url, const string& reqMethod);

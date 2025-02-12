@@ -1,6 +1,16 @@
 #include "Utils.hpp"
 #include "HttpException.hpp"
 
+void createFileWithContents(const std::string& filePath, const std::string& contents) {
+    std::ofstream outFile(filePath);
+    if (outFile.is_open()) {
+        outFile << contents;
+        outFile.close();
+        std::cout << "File created and contents written successfully." << std::endl;
+    } else {
+        std::cerr << "Error: Unable to open file for writing." << std::endl;
+    }
+}
 
 bool isDirectory(const string& path) {
     struct stat info;
