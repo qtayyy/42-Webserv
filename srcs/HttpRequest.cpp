@@ -1,7 +1,11 @@
 #include "HttpRequest.hpp"
 
-void HttpRequest::appendFormBlock(HttpRequestFormBlock formBlock) {
+void HttpRequest::appendFormBlock(stringDict formBlock) {
     formBlocks.push_back(formBlock);
+}
+
+stringDict *HttpRequest::getFormBlock(int index) {
+    return &formBlocks[index];
 }
 
 void HttpRequest::setBody(string body) {

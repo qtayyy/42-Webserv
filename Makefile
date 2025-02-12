@@ -29,7 +29,6 @@ SRC		= 	Block.cpp \
 			Utils.cpp \
 			CGI.cpp \
 			StatusHandler.cpp \
-			HttpRequestFormBlock.cpp \
 			HttpRequest.cpp \
 
 

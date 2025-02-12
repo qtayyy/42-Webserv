@@ -25,7 +25,7 @@
 class Block
 {
 	public:
-		Block(void) : _autoindex(-1), _clientMaxBodySize(-1) {}; // -1 indicates they haven't been set
+    	Block() : _root(""), _autoindex(-1), _clientMaxBodySize(-1) {} // Initialize _root
 		virtual ~Block(void) {};
 
 		virtual void	printBlock(void) = 0;

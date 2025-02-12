@@ -221,15 +221,13 @@ HttpRequest mockRequest(string path, string path_info) {
     return request;
 }
 
-HttpRequest mockPostRequest(string path, string path_info, const string& fileName, const string& fileContent) {
+HttpRequest mockPostRequest(string path, string path_info, string fileName, string fileContent) {
     HttpRequest request;
 
-	HttpRequestFormBlock formBlock;
-	
-	// test txt file upload
-	formBlock.headerSet("Content-Disposition", "form-data; name=\"file\"; filename=\"" + fileName + "\"");
-	formBlock.headerSet("Content-Type", "application/octet-stream");
-	formBlock.setBody(fileContent);
+	stringDict formBlock;
+	formBlock["Content-Disposition"] = "form-data; name=\"file\"; filename=\"" + fileName + "\"";
+	formBlock["Content-Type"] = "application/octet-stream";
+	formBlock["Body"] = fileContent;
 
 	request.appendFormBlock(formBlock);
 
@@ -237,21 +235,6 @@ HttpRequest mockPostRequest(string path, string path_info, const string& fileNam
     request.headerSet("path_info", path_info);
     request.headerSet("query_string", "name=John&age=30");
     request.headerSet("method", "POST");
-
-
-    // Set headers for multipart/form-data
-    string boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW";
-    request.headerSet("Content-Type", "multipart/form-data; boundary=" + boundary);
-
-    // Create the body content for the file upload
-    std::stringstream body;
-    body << "--" << boundary << "\r\n";
-    body << "Content-Disposition: form-data; name=\"file\"; filename=\"" << fileName << "\"\r\n";
-    body << "Content-Type: application/octet-stream\r\n\r\n";
-    body << fileContent << "\r\n";
-    body << "--" << boundary << "--\r\n";
-
-    request.setBody(body.str());
 
     return request;
 }
@@ -290,7 +273,10 @@ void	Cluster::run(void)
 			}
 			if (_pollFds[i].revents & POLLOUT) // If an fd is ready for writing
 			{
-				HttpRequest request = mockRequest("/dir2", "test.csv");
+
+				
+				HttpRequest request = mockPostRequest("/upload", "/dir2", "file.txt", "Hello, world!");
+				// request = mockRequest("/dir1", "/dir2");
 				HttpResponse response = HttpResponse(request, &_servers[0]);
 				send(_pollFds[i].fd, response.getFinalResponseMsg().c_str(), response.getContentLength(), 0);
 				close(_pollFds[i].fd);

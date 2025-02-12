@@ -1,8 +1,9 @@
 #include "Utils.hpp"
 #include "HttpException.hpp"
 
+
 void createFileWithContents(const std::string& filePath, const std::string& contents) {
-    std::ofstream outFile(filePath);
+    std::ofstream outFile(filePath.c_str());
     if (outFile.is_open()) {
         outFile << contents;
         outFile.close();

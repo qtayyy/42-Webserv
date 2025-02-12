@@ -56,14 +56,17 @@ public:
     string getMessage() const;
     string getContentType() const;
     string getFinalResponseMsg() const;
+    string getErrorMsg() const;
+    string getDetails() const;
     string getRequestUrl() const;
     string getMethod() const;
+    string getTimestamp() const;
 
     bool isCGI(const string &resourcePath);
 
     string decideCGIToUse(string resourcePath);
     static string getContentType(const string& resourcePath);
-    string reroutePath(const string &urlPath);
+    string reroutePath(string urlPath);
     static string createResponseString(const string &fileContent, const string &resourceType, const string &statusCode, const string &statusMessage);
     static string createAutoIndexHtml(string path);
     static HttpResponse createHttpResponse(HttpRequest &request);
@@ -72,9 +75,7 @@ public:
     void initCGIResponse(string cgiPath, string fileToHandle, HttpRequest request);
     void initErrorHttpResponse(int statusCode);
 
-    void handleGet(HttpRequest &request, ServerBlock *serverBlock);
-
-    void handlePost(HttpRequest &request);
+    void handleGetResponse(HttpRequest &request, ServerBlock *serverBlock);
 
     HttpResponse(HttpRequest &request, ServerBlock *ServerBlock);
 

@@ -18,12 +18,11 @@ const stringDict HttpResponse::contentTypeMap = HttpResponse::createContentTypeM
 
 /* CONSTRUCTORS */
 
-HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
+void HttpResponse::handleGetResponse(HttpRequest &request, ServerBlock *serverBlock) {
     string path = request.headerGet("path");
     
     
-    this->_serverBlockRef = serverBlock;
-    this->_locationBlockRef = getRelevantLocationBlock(path, serverBlock);
+    
     
     path = applyAlias(path);
     
@@ -32,8 +31,9 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
 
     try {
         // Check if the request method is allowed
-        if (std::find(limitExcept.begin(), limitExcept.end(), request.getMethod()) == limitExcept.end())
+        if (std::find(limitExcept.begin(), limitExcept.end(), request.headerGet("method")) == limitExcept.end()) {
             throw HttpException(405);
+        }
 
         // Check if a redirect is required
         std::pair<int, std::string> redirectInfo = this->_locationBlockRef->getReturn();
@@ -90,6 +90,46 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
     catch (const HttpException& e) {
         std::cout << RED << "error: " << e.what() << RESET << e.getStatusCode() << std::endl;
         this->initErrorHttpResponse(e.getStatusCode());
+    }
+}
+
+std::vector<std::string> splitString(string str, char delimiter) {
+    std::vector<std::string> tokens;
+    std::string token;
+    std::istringstream tokenStream(str);
+    while (std::getline(tokenStream, token, delimiter)) {
+        tokens.push_back(token);
+    }
+    return tokens;
+}
+
+HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
+    string path = request.headerGet("path");
+    this->_serverBlockRef = serverBlock;
+    this->_locationBlockRef = getRelevantLocationBlock(path, serverBlock);
+    
+    if (request.headerGet("method") == "GET") {
+        handleGetResponse(request, serverBlock);
+    } else if (request.headerGet("method") == "POST") {
+        std::cout << "POST request" << std::endl;
+        
+        string contentDisposition = request.getFormBlock(0)->at("Content-Disposition");
+        stringList contentDispositionTokens = splitString(contentDisposition, ';');
+        string fileName = contentDispositionTokens[2].substr(contentDispositionTokens[1].find("filename=") + 12);
+        fileName = fileName.substr(0, fileName.size() - 1);
+        fileName = request.headerGet("path") + "/" + fileName;
+
+        string fileContents = request.getFormBlock(0)->at("Body");
+
+
+        //create file
+        std::ofstream file(fileName);
+        file << fileContents;
+        file.close();
+
+
+    } else {
+        this->initErrorHttpResponse(400);
     }
 }
 
@@ -152,16 +192,9 @@ string HttpResponse::createAutoIndexHtml(string path) {
 
 string HttpResponse::getFinalResponseMsg() const { return finalResponseMsg; }
 int    HttpResponse::getStatusCode()       const { return httpStatusCode; }
-string HttpResponse::getErrorMsg()         const { return errorMessage; }
-string HttpResponse::getDetails()          const { return details; }
 string HttpResponse::getRequestUrl()       const { return requestUrl; }
 string HttpResponse::getMethod()           const { return method; }
 int    HttpResponse::getContentLength()    const { return contentLength; }
-string HttpResponse::getTimestamp()        const {
-    char buffer[80];
-    std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", std::localtime(&timestamp));
-    return string(buffer);
-}
 
 
 
@@ -236,7 +269,7 @@ void HttpResponse::initCGIResponse(string cgiPath, string fileToHandle, HttpRequ
 
 
 
-bool isCGI(const string& resourcePath) {
+bool HttpResponse::isCGI(const string& resourcePath) {
     return endsWith(resourcePath, ".py");
 }
 
@@ -264,7 +297,7 @@ string HttpResponse::getContentType(const string& resourcePath) {
     return "text/plain";
 }
 
-string HttpResponse::reroutePath(const string &urlPath) {
+string HttpResponse::reroutePath(string urlPath) {
     stringDict pathMap;
 
     pathMap["cgi-bin"] = "";
