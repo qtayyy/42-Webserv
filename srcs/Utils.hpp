@@ -15,5 +15,6 @@ void replaceIfFound(string *haystack, const string& needle, const string& replac
 string readFileContent(const string& filePath);
 string listFiles(const string &path);
 void createFileWithContents(const std::string& filePath, const std::string& contents);
+stringList splitString(string str, char delimiter);
 
 #endif

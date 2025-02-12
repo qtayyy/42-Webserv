@@ -80,6 +80,16 @@ void replaceIfFound(string *haystack, const string& needle, const string& replac
         haystack->replace(pos, needle.size(), replacement);
 }
 
+stringList splitString(string str, char delimiter) {
+    std::vector<std::string> tokens;
+    std::string token;
+    std::istringstream tokenStream(str);
+    while (std::getline(tokenStream, token, delimiter)) {
+        tokens.push_back(token);
+    }
+    return tokens;
+}
+
 string readFileContent(const string& filePath) {
     std::ifstream file(filePath.c_str()); // Open the file
     if (!file.is_open()) {

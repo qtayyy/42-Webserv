@@ -76,6 +76,7 @@ public:
     void initErrorHttpResponse(int statusCode);
 
     void handleGetResponse(HttpRequest &request, ServerBlock *serverBlock);
+    void handlePostRequest(HttpRequest &request, ServerBlock *serverBlock);
 
     HttpResponse(HttpRequest &request, ServerBlock *ServerBlock);
 

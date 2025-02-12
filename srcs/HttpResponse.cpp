@@ -21,20 +21,12 @@ const stringDict HttpResponse::contentTypeMap = HttpResponse::createContentTypeM
 void HttpResponse::handleGetResponse(HttpRequest &request, ServerBlock *serverBlock) {
     string path = request.headerGet("path");
     
-    
-    
-    
     path = applyAlias(path);
     
     stringList limitExcept = this->_locationBlockRef->getLimitExcept();
 
 
     try {
-        // Check if the request method is allowed
-        if (std::find(limitExcept.begin(), limitExcept.end(), request.headerGet("method")) == limitExcept.end()) {
-            throw HttpException(405);
-        }
-
         // Check if a redirect is required
         std::pair<int, std::string> redirectInfo = this->_locationBlockRef->getReturn();
         if (!redirectInfo.second.empty()) {
@@ -93,42 +85,47 @@ void HttpResponse::handleGetResponse(HttpRequest &request, ServerBlock *serverBl
     }
 }
 
-std::vector<std::string> splitString(string str, char delimiter) {
-    std::vector<std::string> tokens;
-    std::string token;
-    std::istringstream tokenStream(str);
-    while (std::getline(tokenStream, token, delimiter)) {
-        tokens.push_back(token);
-    }
-    return tokens;
+void HttpResponse::handlePostRequest(HttpRequest &request, ServerBlock *serverBlock) {
+    std::cout << "POST request" << std::endl;
+        
+    string contentDisposition = request.getFormBlock(0)->at("Content-Disposition");
+    stringList contentDispositionTokens = splitString(contentDisposition, ';');
+    string fileName = contentDispositionTokens[2].substr(contentDispositionTokens[1].find("filename=") + 12);
+    fileName = fileName.substr(0, fileName.size() - 1);
+    fileName = reroutePath(request.headerGet("path") + "/" + fileName);
+    std::cout << "file: " << fileName << std::endl;
+    
+    string fileContents = request.getFormBlock(0)->at("Body");
+    
+    //create file
+    std::ofstream file(fileName.c_str());
+    file << fileContents;
+    file.close();
 }
+
 
 HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
     string path = request.headerGet("path");
     this->_serverBlockRef = serverBlock;
     this->_locationBlockRef = getRelevantLocationBlock(path, serverBlock);
     
+    stringList limitExcept = this->_locationBlockRef->getLimitExcept();
+
+    // Check if the request method is allowed
+    if (std::find(limitExcept.begin(), limitExcept.end(), request.headerGet("method")) == limitExcept.end()) {
+        this->initErrorHttpResponse(405);
+        return;
+    }
+
     if (request.headerGet("method") == "GET") {
-        handleGetResponse(request, serverBlock);
-    } else if (request.headerGet("method") == "POST") {
-        std::cout << "POST request" << std::endl;
-        
-        string contentDisposition = request.getFormBlock(0)->at("Content-Disposition");
-        stringList contentDispositionTokens = splitString(contentDisposition, ';');
-        string fileName = contentDispositionTokens[2].substr(contentDispositionTokens[1].find("filename=") + 12);
-        fileName = fileName.substr(0, fileName.size() - 1);
-        fileName = request.headerGet("path") + "/" + fileName;
-
-        string fileContents = request.getFormBlock(0)->at("Body");
-
-
-        //create file
-        std::ofstream file(fileName);
-        file << fileContents;
-        file.close();
-
-
-    } else {
+        this->handleGetResponse(request, serverBlock);
+    } 
+    
+    else if (request.headerGet("method") == "POST") {
+        this->handlePostRequest(request, serverBlock);
+    }
+    
+    else {
         this->initErrorHttpResponse(400);
     }
 }
@@ -236,7 +233,7 @@ void HttpResponse::initErrorHttpResponse(int statusCode) {
     } 
     
     else {
-        this->initHttpResponseSelf(createErrorPage("public/error.html", 500), CONTENT_TYPE_HTML, statusCode);
+        this->initHttpResponseSelf(createErrorPage("public/error.html", statusCode), CONTENT_TYPE_HTML, statusCode);
     }
 }
 
@@ -307,12 +304,6 @@ string HttpResponse::reroutePath(string urlPath) {
         if (startsWith(urlPath, it->first)) {
             reroutedPath = (it->second + urlPath);
         }
-    }
-
-    std::cout << "rerouted path" << RED << reroutedPath << RESET << std::endl;
-
-    if (!doesPathExist(reroutedPath)) {
-        return "";
     }
 
     return reroutedPath;
