@@ -101,6 +101,12 @@ void HttpResponse::handlePostRequest(HttpRequest &request, ServerBlock *serverBl
     std::ofstream file(fileName.c_str());
     file << fileContents;
     file.close();
+
+    if (doesPathExist(fileName)) {
+        this->initHttpResponseSelf("File uploaded successfully: " + fileName, CONTENT_TYPE_HTML, 200);
+    } else {
+        this->initErrorHttpResponse(500);
+    }
 }
 
 
@@ -358,6 +364,7 @@ std::pair<std::string, std::string> HttpResponse::CodeToMessage(int statusCode) 
     switch (statusCode) {
         case 200: return std::make_pair("OK", "The request has succeeded.");
         case 201: return std::make_pair("Created", "The request has been fulfilled and resulted in a new resource being created.");
+        case 202: return std::make_pair("Accepted", "The request has been accepted for processing, but the processing has not been completed.");
         case 400: return std::make_pair("Bad Request", "The server could not understand the request due to invalid syntax.");
         case 401: return std::make_pair("Unauthorized", "The client must authenticate itself to get the requested response.");
         case 405: return std::make_pair("Method Not Allowed", "The request method is known by the server but has been disabled and cannot be used.");
