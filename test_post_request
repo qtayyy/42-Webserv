@@ -1,0 +1,7 @@
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="ex.txt"
+Content-Type: text/plain
+
+This is an example file content.
+--boundary--

@@ -224,6 +224,10 @@ HttpRequest mockRequest(string path, string path_info) {
 HttpRequest mockPostRequest(string path, string path_info, string fileName, string fileContent) {
     HttpRequest request;
 
+	request.setRawRequest(readFileContent("test_post_request"));
+
+	std::cout << "RAW REQ" << request.getRawRequest() << std::endl;
+
 	stringDict formBlock;
 	formBlock["Content-Disposition"] = "form-data; name=\"file\"; filename=\"" + fileName + "\"";
 	formBlock["Content-Type"] = "application/octet-stream";

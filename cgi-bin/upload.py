@@ -7,29 +7,50 @@ from urllib.parse import unquote
 import cgitb
 cgitb.enable()
 
-content_length = int(os.environ.get("CONTENT_LENGTH", 5))
-file_content = sys.stdin.read(content_length)
-print(file_content)
-print(content_length)
+# Manually set the Content-Type header if not set
+boundary = "boundary"
+os.environ["CONTENT_TYPE"] = f"multipart/form-data; boundary={boundary}"
 
-form = cgi.FieldStorage()
-request_method = os.environ.get("REQUEST_METHOD").upper()
-route = unquote("." + os.environ.get("PATH_TRANSLATED"))
-print(route)
-# exit()
 
-# if request_method == "POST":
-#     if "file" in form and form["file"].filename:
-#         file_item = form["file"]
-#         current_dir = os.path.dirname(os.path.abspath(__file__))
-#         filename = os.path.join(current_dir, file_item.filename)
-#         with open(filename, "wb") as file:
-#             file.write(file_item.file.read())
-#         print("<html><body style='font-family: Arial; sans-serif;margin: 20px;'>")
-#         print("<div>File uploaded successfully.</div>")
-#         print("<div>Uploaded File: {}</div>".format(filename))
-#         print("</body></html>")
-#     else:
-#         print("No file uploaded.")
-# else:
-#     print("Invalid request method.")
+# Read content length and file content
+content_length = int(os.environ.get("CONTENT_LENGTH", 0))
+
+# file_content = sys.stdin.read(content_length)
+# with open("test_post_request", "rb") as f:
+#     file_content = f.read()
+# print(f"Content Length: {content_length}")
+# print(f"File Content: {file_content}")
+
+
+# Initialize FieldStorage
+try:
+    form = cgi.FieldStorage()
+    print("Form initialized successfully.")
+except Exception as e:
+    print(f"Error initializing form: {e}")
+    sys.exit(1)
+
+# Get request method and route
+request_method = os.environ.get("REQUEST_METHOD", "").upper()
+route = unquote("." + os.environ.get("PATH_TRANSLATED", ""))
+print(f"Request Method: {request_method}")
+print(f"Route: {route}")
+
+# Handle POST request
+if request_method == "POST":
+    try:
+        if "file" in form:
+            file_item = form["file"]
+            if file_item.file:
+                file_path = os.path.join(route, file_item.filename)
+                with open(file_path, 'wb') as f:
+                    f.write(file_item.file.read())
+                print(f"File {file_item.filename} uploaded successfully.")
+            else:
+                print("No file content.")
+        else:
+            print("No file uploaded.")
+    except Exception as e:
+        print(f"Error: {e}")
+else:
+    print("Invalid request method.")

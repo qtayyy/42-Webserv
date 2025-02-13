@@ -36,6 +36,14 @@ HttpRequest::~HttpRequest() {
     // Destructor implementation
 }
 
+void HttpRequest::setRawRequest(string rawRequest) {
+    this->rawRequest = rawRequest;
+}
+
+string HttpRequest::getRawRequest() const {
+    return rawRequest;
+}
+
 string HttpRequest::getMethod() const {
     switch (method) {
         case GET:

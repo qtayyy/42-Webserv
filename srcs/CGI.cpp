@@ -75,14 +75,16 @@ string CGIHandler::handleCgiRequest(const string& cgiScriptPath, HttpRequest &re
     this->setEnv("SERVER_PORT",     "8080");
     this->setEnv("PATH_INFO",       request.headerGet("path_info"));
     this->setEnv("PATH_TRANSLATED", request.headerGet("path_info"));
-    this->setEnv("CONTENT_LENGTH",  to_string(request.getFormBlock(0)->at("Body").length()));
-    this->setEnv("CONTENT_TYPE",    request.headerGet("Content-Type"));
-    
+    string data = readFileContent("test_post_request");
+    this->setEnv("CONTENT_LENGTH",  to_string(data.size()));
+    this->setEnv("CONTENT_TYPE",    "multipart/form-data");
+
+    std::cout << "content length: " << data.size() << std::endl;
+
     setEnvironmentVariables(this->envVars);
 
     pid_t pid = fork();
 
-    string data = request.getFormBlock(0)->at("Body");
     string requestedFilepath = request.headerGet("path_info");
 
     std::cout << "DATA: " << data << std::endl;

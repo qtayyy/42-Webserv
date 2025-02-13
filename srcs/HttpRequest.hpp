@@ -20,17 +20,18 @@ private:
     string     body;
     stringDict headerParameters;
     std::vector<stringDict> formBlocks;
+    string rawRequest;
 
 public:
     void appendFormBlock(stringDict formBlock);
     stringDict *getFormBlock(int index);
-
-    
-
     void setBody(string body);
     string getBody();
     void headerSet(string key, string value);
     string headerGet(string key);
+
+    void setRawRequest(string rawRequest);
+    string getRawRequest() const;
 
     HttpRequest(HttpMethod method, string path, string version);
     HttpRequest();
