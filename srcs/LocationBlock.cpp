@@ -35,7 +35,7 @@ void	LocationBlock::initDefaultLocationBlockConfig(void)
 	if (_clientMaxBodySize == -1)
 		_clientMaxBodySize = _parentServerBlock->getClientMaxBodySize();
 	inheritErrorPages(_parentServerBlock->getErrorPage());
-	inheritCgiScripts(_parentServerBlock->getCgiScript());
+	// inheritCgiScripts(_parentServerBlock->getCgiScript());
 }
 
 void	LocationBlock::inheritErrorPages(std::map<int, std::string> parentErrorPages)
@@ -47,14 +47,14 @@ void	LocationBlock::inheritErrorPages(std::map<int, std::string> parentErrorPage
 	}
 }
 
-void	LocationBlock::inheritCgiScripts(std::map<std::string, std::string> parentCgiScripts)
-{
-	for (std::map<std::string, std::string>::iterator it = parentCgiScripts.begin(); it != parentCgiScripts.end(); it++)
-	{
-		if (this->_cgiScript.find(it->first) == this->_cgiScript.end())
-			this->_cgiScript[it->first] = it->second;
-	}
-}
+// void	LocationBlock::inheritCgiPass(std::string parentCgiPass)
+// {
+// 	for (std::map<std::string, std::string>::iterator it = parentCgiScripts.begin(); it != parentCgiScripts.end(); it++)
+// 	{
+// 		if (this->_cgiScript.find(it->first) == this->_cgiScript.end())
+// 			this->_cgiScript[it->first] = it->second;
+// 	}
+// }
 
 /**
  * @brief	Parses directives and arguments in a location block.
@@ -97,7 +97,7 @@ int	LocationBlock::parseLocation(std::vector<std::string> tokens, int i)
 			args.push_back(tokens[i]);
 		else
 		{
-			std::cerr << RED"config error: unknown directive: '" << tokens[i] << "\n" << "'" RESET;
+			std::cerr << RED"config error: unknown directive: '" << tokens[i] << "'" << "\n" RESET;
 			return (-1);
 		}
 	}
@@ -160,6 +160,32 @@ void	LocationBlock::setReturn(std::vector<std::string> args)
 		std::cerr << RED "location error: return: invalid status code\n" RESET; 
 }
 
+/**
+ * @brief	Sets up CGI to handle non-htm/html files.
+ * SYNTAX:	cgi_pass [path_to_binary]
+ */
+void	LocationBlock::setCgiPass(std::vector<std::string> args)
+{
+	if (args.size() != 1)
+	{
+		if (!args.empty())
+			std::cerr << RED "cgi_pass error: invalid num of args.\n" RESET;
+		return ;
+	}
+	this->_cgiPass = args[0];
+}
+
+void	LocationBlock::setUploadPath(std::vector<std::string> args)
+{
+	if (args.size() != 1)
+	{
+		if (!args.empty())
+			std::cerr << RED "upload_path error: invalid num of args. Upload path is set to default.\n" RESET;
+		return ;
+	}
+	this->_uploadPath = args[0];
+}
+
 // ================================= STATIC ==================================
 
 std::map<std::string, void (LocationBlock::*)(std::vector<std::string>)>	LocationBlock::initLocationMap(void)
@@ -169,13 +195,14 @@ std::map<std::string, void (LocationBlock::*)(std::vector<std::string>)>	Locatio
 	// locationMap["location"] = &LocationBlock::setUri; // KIV
 	locationMap["alias"] = &LocationBlock::setAlias;
 	locationMap["autoindex"] = &LocationBlock::setAutoindex;
-	locationMap["cgi_script"] = &LocationBlock::setCgiScript;
+	locationMap["cgi_pass"] = &LocationBlock::setCgiPass;
 	locationMap["client_max_body_size"] = &LocationBlock::setClientMaxBodySize;
 	locationMap["error_page"] = &LocationBlock::setErrorPage;
 	locationMap["index"] =  &LocationBlock::setIndex;
 	locationMap["limit_except"] = &LocationBlock::setLimitExcept;
 	locationMap["return"] = &LocationBlock::setReturn;
 	locationMap["root"] = &LocationBlock::setRoot;
+	locationMap["upload_path"] = &LocationBlock::setUploadPath;
 
 	return (locationMap);
 }
@@ -195,9 +222,8 @@ void	LocationBlock::printBlock()
 	std::vector<std::string> allIndexes = this->getIndex();
 	for (std::vector<std::string>::iterator it = allIndexes.begin(); it != allIndexes.end(); it++)
 		std::cout << "location indexes: "  << *it << std::endl;
-	std::map<std::string, std::string> allCGIs = this->getCgiScript();
-	for (std::map<std::string, std::string>::iterator it = allCGIs.begin(); it != allCGIs.end(); it++)
-		std::cout << "location cgi extension: "  << it->first << "; cgi path: " << it->second << std::endl;
+	std::cout << "location cgi_pass: " << this->getCgiPass() << "\n";
+	std::cout << "location upload_path: " << this->getUploadPath() << "\n";
 	std::cout << "location uri: " << this->getUri() << "\n";
 	std::cout << "location alias: " << this->getAlias() << "\n";
 	if (_return.first != 0)

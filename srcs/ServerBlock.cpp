@@ -200,9 +200,9 @@ void	ServerBlock::printBlock()
 	std::vector<std::string> allIndexes = this->getIndex();
 	for (std::vector<std::string>::iterator it = allIndexes.begin(); it != allIndexes.end(); it++)
 		std::cout << "indexes: "  << *it << std::endl;
-	std::map<std::string, std::string> allCGIs = this->getCgiScript();
-	for (std::map<std::string, std::string>::iterator it = allCGIs.begin(); it != allCGIs.end(); it++)
-		std::cout << "cgi extension: "  << it->first << "; cgi path: " << it->second << std::endl;
+	// std::map<std::string, std::string> allCGIs = this->getCgiScript();
+	// for (std::map<std::string, std::string>::iterator it = allCGIs.begin(); it != allCGIs.end(); it++)
+	// 	std::cout << "cgi extension: "  << it->first << "; cgi path: " << it->second << std::endl;
 	std::vector<std::pair<uint32_t, int> > allListens = this->getListen();
 	for (std::vector<std::pair<uint32_t, int> >::iterator it = allListens.begin(); it != allListens.end(); it++)
 		std::cout << "ip: "  << intToIp(it->first) << "; port: " << it->second << std::endl;
@@ -228,7 +228,7 @@ std::map<std::string, void (ServerBlock::*)(std::vector<std::string>)>
 	serverMap["error_page"] = &ServerBlock::setErrorPage;
 	serverMap["client_max_body_size"] = &ServerBlock::setClientMaxBodySize;
 	serverMap["server_name"] =  &ServerBlock::setServerName;
-	serverMap["cgi_script"] = &ServerBlock::setCgiScript;
+	// serverMap["cgi_script"] = &ServerBlock::setCgiScript;
 	serverMap["limit_except"] = &ServerBlock::setLimitExcept;
 	serverMap["autoindex"] = &ServerBlock::setAutoindex;
 	// serverMap["location"] = &ServerBlock::setLocation;

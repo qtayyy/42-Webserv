@@ -32,11 +32,15 @@ class LocationBlock : public Block
 		void	setUri(std::vector<std::string> args = std::vector<std::string>());
 		void	setAlias(std::vector<std::string> args = std::vector<std::string>());
 		void	setReturn(std::vector<std::string> args = std::vector<std::string>());
+		void	setCgiPass(std::vector<std::string> args = std::vector<std::string>());
+		void	setUploadPath(std::vector<std::string> args = std::vector<std::string>());
 
 		// Getters
 		std::string	getUri(void) { return (_uri); };
 		std::string	getAlias(void) { return (_alias); };
 		std::pair<int, std::string>	getReturn(void) { return (_return); };
+		std::string	getCgiPass(void) { return (_cgiPass); };
+		std::string	getUploadPath(void) { return (_uploadPath); };
 
 		void	printBlock(void);
 
@@ -45,12 +49,14 @@ class LocationBlock : public Block
 		std::string	_uri; // the uri that will "trigger" this location block
 		std::string	_alias; // 3rd requirement for routes (see subject PDF)
 		std::pair<int, std::string>	_return; // redirection
+		std::string	_cgiPass;
+		std::string	_uploadPath;
 
 		static std::map<std::string, void (LocationBlock::*)(std::vector<std::string>)>	locationParseMap;
 		static std::map<std::string, void (LocationBlock::*)(std::vector<std::string>)>	initLocationMap(void);
 	
 		void	inheritErrorPages(std::map<int, std::string> parentErrorPages);
-		void	inheritCgiScripts(std::map<std::string, std::string> parentCgiScripts);
+		void	inheritCgiPass(std::map<std::string, std::string> parentCgiScripts);
 };
 
 #endif

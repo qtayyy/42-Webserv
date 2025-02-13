@@ -86,18 +86,18 @@ void	Block::setClientMaxBodySize(std::vector<std::string> args)
  * @brief	Sets up CGI to handle non-htm/html files.
  * SYNTAX:	cgi_script [extension 1] [extension 2] [...] [path to executable]
  */
-void	Block::setCgiScript(std::vector<std::string> args)
-{
-	if (args.size() < 2)
-	{
-		if (!args.empty())
-			std::cerr << RED "cgi_script error: invalid num of args.\n" RESET;
-		return ;
-	}
-	std::string	cgiPath = args.back();
-	for (size_t i = 0; i < args.size() - 1; i++)
-		this->_cgiScript[args[i]] = cgiPath;
-}
+// void	Block::setCgiScript(std::vector<std::string> args)
+// {
+// 	if (args.size() < 2)
+// 	{
+// 		if (!args.empty())
+// 			std::cerr << RED "cgi_script error: invalid num of args.\n" RESET;
+// 		return ;
+// 	}
+// 	std::string	cgiPath = args.back();
+// 	for (size_t i = 0; i < args.size() - 1; i++)
+// 		this->_cgiScript[args[i]] = cgiPath;
+// }
 
 /**
  * @brief	Sets up the default files that should be served (in order of

@@ -91,7 +91,8 @@ void HttpResponse::handleGetResponse(HttpRequest &request, ServerBlock *serverBl
 void HttpResponse::handlePostRequest(HttpRequest &request, ServerBlock *serverBlock) {
 
     // get first item
-    string cgiPass = this->_locationBlockRef->getCgiScript().begin()->first;
+	(void)serverBlock;
+    string cgiPass = this->_locationBlockRef->getCgiPass();
 
     std::cout << "CGI PASS" << cgiPass << std::endl;
 
@@ -281,15 +282,17 @@ bool HttpResponse::isCGI(const string& resourcePath) {
 }
 
 string HttpResponse::decideCGIToUse(string resourcePath) {
-    stringDict cgiScripts = this->_locationBlockRef->getCgiScript();
+    // stringDict cgiScripts = this->_locationBlockRef->getCgiScript();
 
     // check if cgi handling is required
-    for (stringDict::const_iterator it = cgiScripts.begin(); it != cgiScripts.end(); ++it) {
-        if (endsWith(resourcePath, it->first)) {
-            return (CGI_BIN_PATH + string("/") + it->second);
-        }
-    }
-    return "";
+    // for (stringDict::const_iterator it = cgiScripts.begin(); it != cgiScripts.end(); ++it) {
+    //     if (endsWith(resourcePath, it->first)) {
+    //         return (CGI_BIN_PATH + string("/") + it->second);
+    //     }
+    // }
+    // return "";
+	(void)resourcePath;
+	return (CGI_BIN_PATH + string("/") + this->_locationBlockRef->getCgiPass());
 }
 
 string HttpResponse::getContentType(const string& resourcePath) {

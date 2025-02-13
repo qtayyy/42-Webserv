@@ -34,7 +34,7 @@ class Block
 		void			setRoot(std::vector<std::string> args = std::vector<std::string>());
 		void			setErrorPage(std::vector<std::string> args = std::vector<std::string>());
 		void			setClientMaxBodySize(std::vector<std::string> args = std::vector<std::string>());
-		void			setCgiScript(std::vector<std::string> args = std::vector<std::string>());
+		// void			setCgiScript(std::vector<std::string> args = std::vector<std::string>());
 		void			setAutoindex(std::vector<std::string> args = std::vector<std::string>());
 		void			setIndex(std::vector<std::string> args = std::vector<std::string>());
 		void			setLimitExcept(std::vector<std::string> args = std::vector<std::string>());
@@ -45,7 +45,7 @@ class Block
 		std::map<int, std::string>			getErrorPage(void) { return (this->_errorPage); };
 		std::vector<std::string>			getLimitExcept(void) { return (this->_limitExcept); };
 		int									getAutoindex(void) { return (this->_autoindex); };
-		std::map<std::string, std::string>	getCgiScript(void) {return (this->_cgiScript); };
+		// std::map<std::string, std::string>	getCgiScript(void) {return (this->_cgiScript); };
 		long long							getClientMaxBodySize(void) {return (this->_clientMaxBodySize); };
 
 	protected:
@@ -60,7 +60,7 @@ class Block
 		std::map<int, std::string>			_errorPage; // TBD
 		std::vector<std::string>			_limitExcept;
 		int									_autoindex;
-		std::map<std::string, std::string>	_cgiScript;
+		// std::map<std::string, std::string>	_cgiScript;
 		long long							_clientMaxBodySize;
 
 };
