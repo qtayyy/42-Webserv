@@ -2,8 +2,9 @@
 #define CGI_HPP
 
 #include "../includes/Webserv.hpp"
+#include "HttpRequest.hpp"
 
-
+#include "Utils.hpp"
 
 class CGIHandler {
 private:
@@ -14,8 +15,7 @@ public:
     ~CGIHandler();
     string waitForCGIResponse(int *pipefd, pid_t pid, int &exitStatus);
     void exec(int *pipefd, const string& cgiScriptPath, const string& queryString, const string& requestedFilepath);
-    string handleCgiRequest(const string& cgiScriptPath, const string& queryString, const string requestedFilepath, int &exitStatus);
-    string handleCgiRequest(const string &cgiScriptPath, const string &queryString, const string requestedFilepath, string data, int &exitStatus);
+    string handleCgiRequest(const string &cgiScriptPath, HttpRequest &request, int &exitStatus);
     void setEnv(string key, string value);
     string getEnv(string key);
 };

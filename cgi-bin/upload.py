@@ -8,7 +8,7 @@ import cgitb
 cgitb.enable()
 
 content_length = int(os.environ.get("CONTENT_LENGTH", 5))
-file_content = sys.stdin.read(5)
+file_content = sys.stdin.read(content_length)
 print(file_content)
 print(content_length)
 

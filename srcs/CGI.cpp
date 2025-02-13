@@ -60,16 +60,32 @@ CGIHandler::~CGIHandler() {
 //     exit(1);
 // }
 
-string CGIHandler::handleCgiRequest(const string& cgiScriptPath, const string& queryString, const string requestedFilepath, string data, int &exitStatus) {
+string CGIHandler::handleCgiRequest(const string& cgiScriptPath, HttpRequest &request, int &exitStatus) {
     int inputPipe[2];  // Pipe for sending request body (stdin for CGI)
     int outputPipe[2]; // Pipe for capturing CGI output (stdout from CGI)
 
     if (pipe(inputPipe) == -1 || pipe(outputPipe) == -1) 
         throw std::runtime_error("pipe failed: " + string(strerror(errno)));
 
+    
+    this->setEnv("REQUEST_METHOD",  request.headerGet("method"));
+    this->setEnv("QUERY_STRING",    request.headerGet("query_string"));
+    this->setEnv("SCRIPT_NAME",     cgiScriptPath);
+    this->setEnv("SERVER_NAME",     "localhost");
+    this->setEnv("SERVER_PORT",     "8080");
+    this->setEnv("PATH_INFO",       request.headerGet("path_info"));
+    this->setEnv("PATH_TRANSLATED", request.headerGet("path_info"));
+    this->setEnv("CONTENT_LENGTH",  to_string(request.getFormBlock(0)->at("Body").length()));
+    this->setEnv("CONTENT_TYPE",    request.headerGet("Content-Type"));
+    
     setEnvironmentVariables(this->envVars);
 
     pid_t pid = fork();
+
+    string data = request.getFormBlock(0)->at("Body");
+    string requestedFilepath = request.headerGet("path_info");
+
+    std::cout << "DATA: " << data << std::endl;
 
     if (pid < 0) throw std::runtime_error("fork failed: " + string(strerror(errno)));
 
@@ -97,7 +113,7 @@ string CGIHandler::handleCgiRequest(const string& cgiScriptPath, const string& q
         close(outputPipe[1]); // Close unused write end of output pipe
 
         // **Write request body to CGI stdin**
-        write(inputPipe[1], "hallo", 5);  
+        write(inputPipe[1], data.c_str(), data.length());  
         close(inputPipe[1]);  // Close write end to signal EOF
 
         // **Read CGI response from stdout**

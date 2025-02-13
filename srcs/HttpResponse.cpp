@@ -263,18 +263,8 @@ void HttpResponse::initCGIResponse(string cgiPath, string fileToHandle, HttpRequ
 
     CGIHandler cgiHandler = CGIHandler();
 
-    cgiHandler.setEnv("REQUEST_METHOD",  request.headerGet("method"));
-    cgiHandler.setEnv("QUERY_STRING",    request.headerGet("query_string"));
-    cgiHandler.setEnv("SCRIPT_NAME",     cgiPath);
-    cgiHandler.setEnv("SERVER_NAME",     "localhost");
-    cgiHandler.setEnv("SERVER_PORT",     "8080");
-    cgiHandler.setEnv("PATH_INFO",       fileToHandle);
-    cgiHandler.setEnv("PATH_TRANSLATED", absolutePath);
-    cgiHandler.setEnv("CONTENT_LENGTH",  to_string(request.getBody().size()));
-    cgiHandler.setEnv("CONTENT_TYPE",    request.headerGet("Content-Type"));
-
     int exit_status = 0;
-    string response_content = cgiHandler.handleCgiRequest(cgiPath, request.headerGet("query_string"), absolutePath, request.getBody(), exit_status);
+    string response_content = cgiHandler.handleCgiRequest(cgiPath, request, exit_status);
 
     // Check if the response contains the content length in its header, if so, remove the header
     if (startsWith(response_content, "Content-Length: ") && response_content.find("\n\n") != string::npos) {
