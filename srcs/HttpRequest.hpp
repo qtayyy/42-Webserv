@@ -25,6 +25,8 @@ public:
     void appendFormBlock(stringDict formBlock);
     stringDict *getFormBlock(int index);
 
+    
+
     void setBody(string body);
     string getBody();
     void headerSet(string key, string value);

@@ -89,27 +89,36 @@ void HttpResponse::handleGetResponse(HttpRequest &request, ServerBlock *serverBl
 
 
 void HttpResponse::handlePostRequest(HttpRequest &request, ServerBlock *serverBlock) {
-    std::cout << "POST request" << std::endl;
-        
-    string contentDisposition = request.getFormBlock(0)->at("Content-Disposition");
-    stringList contentDispositionTokens = splitString(contentDisposition, ';');
-    string fileName = contentDispositionTokens[2].substr(contentDispositionTokens[1].find("filename=") + 12);
-    fileName = fileName.substr(0, fileName.size() - 1);
-    fileName = reroutePath(request.headerGet("path") + "/" + fileName);
-    std::cout << "file: " << fileName << std::endl;
-    
-    string fileContents = request.getFormBlock(0)->at("Body");
-    
-    //create file
-    std::ofstream file(fileName.c_str());
-    file << fileContents;
-    file.close();
 
-    if (doesPathExist(fileName)) {
-        this->initHttpResponseSelf("File uploaded successfully: " + fileName, CONTENT_TYPE_HTML, 200);
-    } else {
-        this->initErrorHttpResponse(500);
-    }
+    // get first item
+    string cgiPass = this->_locationBlockRef->getCgiScript().begin()->first;
+
+    std::cout << "CGI PASS" << cgiPass << std::endl;
+
+    this->initCGIResponse("cgi-bin/upload.py", request.headerGet("path_info"), request);
+
+    
+    // exit(0);
+    
+    // string contentDisposition = request.getFormBlock(0)->at("Content-Disposition");
+    // stringList contentDispositionTokens = splitString(contentDisposition, ';');
+    // string fileName = contentDispositionTokens[2].substr(contentDispositionTokens[1].find("filename=") + 12);
+    // fileName = fileName.substr(0, fileName.size() - 1);
+    // fileName = reroutePath(request.headerGet("path") + "/" + fileName);
+    // std::cout << "file: " << fileName << std::endl;
+    
+    // string fileContents = request.getFormBlock(0)->at("Body");
+    
+    // //create file
+    // std::ofstream file(fileName.c_str());
+    // file << fileContents;
+    // file.close();
+
+    // if (doesPathExist(fileName)) {
+    //     this->initHttpResponseSelf("File uploaded successfully: " + fileName, CONTENT_TYPE_HTML, 200);
+    // } else {
+    //     this->initErrorHttpResponse(500);
+    // }
 }
 
 
@@ -254,17 +263,18 @@ void HttpResponse::initCGIResponse(string cgiPath, string fileToHandle, HttpRequ
 
     CGIHandler cgiHandler = CGIHandler();
 
-    std::cout << GREEN << "Query string: " << request.headerGet("query_string") << RESET << std::endl;
-    cgiHandler.setEnv("REQUEST_METHOD",  request.getMethod());
+    cgiHandler.setEnv("REQUEST_METHOD",  request.headerGet("method"));
     cgiHandler.setEnv("QUERY_STRING",    request.headerGet("query_string"));
     cgiHandler.setEnv("SCRIPT_NAME",     cgiPath);
     cgiHandler.setEnv("SERVER_NAME",     "localhost");
     cgiHandler.setEnv("SERVER_PORT",     "8080");
     cgiHandler.setEnv("PATH_INFO",       fileToHandle);
     cgiHandler.setEnv("PATH_TRANSLATED", absolutePath);
+    cgiHandler.setEnv("CONTENT_LENGTH",  to_string(request.getBody().size()));
+    cgiHandler.setEnv("CONTENT_TYPE",    request.headerGet("Content-Type"));
 
     int exit_status = 0;
-    string response_content = cgiHandler.handleCgiRequest(cgiPath, request.headerGet("query_string"), absolutePath, exit_status);
+    string response_content = cgiHandler.handleCgiRequest(cgiPath, request.headerGet("query_string"), absolutePath, request.getBody(), exit_status);
         // Check if the response contains the content length in its header, if so, remove the header
     if (startsWith(response_content, "Content-Length: ") && response_content.find("\n\n") != string::npos) {
         response_content = response_content.substr(response_content.find("\n\n") + 2);

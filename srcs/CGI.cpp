@@ -1,6 +1,20 @@
 #include "CGI.hpp"
 #include "HttpException.hpp"
 
+void setEnvironmentVariables(stringDict envVars) {
+    for (stringDict::const_iterator it = envVars.begin(); it != envVars.end(); ++it) {
+        setenv(it->first.c_str(), it->second.c_str(), 1);
+    }
+}
+
+CGIHandler::CGIHandler() {
+
+}
+
+CGIHandler::~CGIHandler() {
+
+}
+
 string CGIHandler::waitForCGIResponse(int *pipefd, pid_t pid, int &exitStatus) {
     // Parent process
     string response = "";
@@ -29,31 +43,11 @@ string CGIHandler::waitForCGIResponse(int *pipefd, pid_t pid, int &exitStatus) {
     return response;
 }
 
-void setEnvironmentVariables(stringDict envVars) {
-    for (stringDict::const_iterator it = envVars.begin(); it != envVars.end(); ++it) {
-        setenv(it->first.c_str(), it->second.c_str(), 1);
-    }
-}
-
-CGIHandler::CGIHandler() {
-
-}
-
-CGIHandler::~CGIHandler() {
-
-}
-
-void CGIHandler::exec (
+void CGIHandler::exec(
     int *pipefd, 
     const string& cgiScriptPath, 
     const string& queryString, 
     const string& requestedFilepath) {
-    // Child process
-    close(pipefd[0]); 
-    setEnvironmentVariables(this->envVars);
-
-    dup2(pipefd[1], STDOUT_FILENO);
-    close(pipefd[1]);
 
     execl("/usr/bin/python3", "python3", cgiScriptPath.c_str(), requestedFilepath.c_str(), NULL);
     
@@ -61,9 +55,7 @@ void CGIHandler::exec (
     exit(1);
 }
 
-
-
-string CGIHandler::handleCgiRequest(const string& cgiScriptPath, const string& queryString, const string requestedFilepath, int &exitStatus) {
+string CGIHandler::handleCgiRequest(const string& cgiScriptPath, const string& queryString, const string requestedFilepath, string data, int &exitStatus) {
     int pipefd[2];
 
     if (pipe(pipefd) == -1) 
@@ -77,38 +69,19 @@ string CGIHandler::handleCgiRequest(const string& cgiScriptPath, const string& q
         this->exec(pipefd, cgiScriptPath, queryString, requestedFilepath);
     }
     else {
-        // pid_t monitorPid = fork();
+        close(pipefd[0]); 
+        setEnvironmentVariables(this->envVars);
+    
+        dup2(pipefd[1], STDOUT_FILENO); // Redirect stdout to the write end of the pipe
+        write(pipefd[1], "hello", 5); // Write data to the pipe
+        close(pipefd[1]);
 
-        // if (monitorPid < 0) 
-        //     throw std::runtime_error("fork failed: " + string(strerror(errno)));
-
-        // if (monitorPid == 0) {
-        //     // Detach the monitor process
-        //     if (setsid() < 0) {
-        //         throw std::runtime_error("setsid failed: " + string(strerror(errno)));
-        //     }
-
-        //     // Monitor process
-        //     sleep(CGI_TIMOUT);
-        //     std::ofstream logFile("/home/cooper/coreProgram/webserv_correct/webserv_redo/resources/log.txt");
-        //     if (kill(pid, 0) == 0) {
-        //         logFile << "Child process is still running.\n";
-        //         kill(pid, SIGKILL);
-        //         logFile.close();
-        //         exit(504); // Exit with 504 status code
-        //     } else {
-        //         logFile << "Child process has already terminated.\n";
-        //     }
-        //     logFile.close();
-        //     exit(0);
-        // }
-        // Main process continues without waiting for the monitor process
-        return waitForCGIResponse(pipefd, pid, exitStatus);
+        string response = waitForCGIResponse(pipefd, pid, exitStatus);
+        return response;
     }
 
     return "";
 }
-
 void CGIHandler::setEnv(string key, string value) {
     envVars[key] = value;
 }

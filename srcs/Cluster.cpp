@@ -274,8 +274,10 @@ void	Cluster::run(void)
 			if (_pollFds[i].revents & POLLOUT) // If an fd is ready for writing
 			{
 
+				std::string path = readFileContent("input_param");
+				stringList list = splitString(path, '\n');
 				
-				HttpRequest request = mockPostRequest("/upload", "/dir2", "file2.txt", "Hello, world!");
+				HttpRequest request = mockPostRequest(list[0], "/dir2", list[1], "Hello, world!");
 				//HttpRequest request = mockRequest("/upload.html", "/dir2");
 				HttpResponse response = HttpResponse(request, &_servers[0]);
 				send(_pollFds[i].fd, response.getFinalResponseMsg().c_str(), response.getContentLength(), 0);
