@@ -118,7 +118,6 @@ string listFiles(const string &path) {
     string files = "";
     if (dir == NULL) {
         std::cerr << "Error opening directory" << std::endl;
-        exit(1);
     }
     while ((entry = readdir(dir)) != NULL) {
         files += entry->d_name;

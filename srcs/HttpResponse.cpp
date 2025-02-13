@@ -275,7 +275,8 @@ void HttpResponse::initCGIResponse(string cgiPath, string fileToHandle, HttpRequ
 
     int exit_status = 0;
     string response_content = cgiHandler.handleCgiRequest(cgiPath, request.headerGet("query_string"), absolutePath, request.getBody(), exit_status);
-        // Check if the response contains the content length in its header, if so, remove the header
+
+    // Check if the response contains the content length in its header, if so, remove the header
     if (startsWith(response_content, "Content-Length: ") && response_content.find("\n\n") != string::npos) {
         response_content = response_content.substr(response_content.find("\n\n") + 2);
     }

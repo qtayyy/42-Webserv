@@ -78,7 +78,7 @@ public:
     void handleGetResponse(HttpRequest &request, ServerBlock *serverBlock);
     void handlePostRequest(HttpRequest &request, ServerBlock *serverBlock);
 
-void NewFunction(HttpRequest & request);
+    void NewFunction(HttpRequest &request);
 
     HttpResponse(HttpRequest &request, ServerBlock *ServerBlock);
 

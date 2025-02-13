@@ -15,45 +15,50 @@ CGIHandler::~CGIHandler() {
 
 }
 
-string CGIHandler::waitForCGIResponse(int *pipefd, pid_t pid, int &exitStatus) {
-    // Parent process
-    string response = "";
+// string CGIHandler::waitForCGIResponse(int *pipefd, pid_t pid, int &exitStatus) {
+//     // Parent process
+//     string response = "";
 
-    close(pipefd[1]);
-    dup2(pipefd[0], STDIN_FILENO);
+//     close(pipefd[1]);
+//     dup2(pipefd[0], STDIN_FILENO);
 
-    int status;
-    waitpid(pid, &status, 0);
+//     int status;
+//     waitpid(pid, &status, 0);
 
-    if (WIFSIGNALED(status)) {
-        int signal = WTERMSIG(status);
-        std::cout<< RED << "Child process was terminated by signal: " << signal << RESET << std::endl;
-        throw HttpException(500);
-    }
+//     if (WIFSIGNALED(status)) {
+//         int signal = WTERMSIG(status);
+//         std::cout<< RED << "Child process was terminated by signal: " << signal << RESET << std::endl;
+//         throw HttpException(500);
+//     }
 
-    char buffer[1024];
-    ssize_t bytesRead;
-    while ((bytesRead = read(pipefd[0], buffer, sizeof(buffer) - 1)) > 0) {
-        buffer[bytesRead] = '\0';
-        response += buffer;
-    }
-    close(pipefd[0]);
+//     char buffer[1024];
+//     ssize_t bytesRead;
+//     while ((bytesRead = read(pipefd[0], buffer, sizeof(buffer) - 1)) > 0) {
+//         buffer[bytesRead] = '\0';
+//         response += buffer;
+//     }
+//     close(pipefd[0]);
 
-    exitStatus = WEXITSTATUS(status);
-    return response;
-}
+//     exitStatus = WEXITSTATUS(status);
+//     return response;
+// }
 
-void CGIHandler::exec(
-    int *pipefd, 
-    const string& cgiScriptPath, 
-    const string& queryString, 
-    const string& requestedFilepath) {
+// void CGIHandler::exec(
+//     int *pipefd, 
+//     const string& cgiScriptPath, 
+//     const string& queryString, 
+//     const string& requestedFilepath) {
+//     // Child process
+//     close(pipefd[0]); 
 
-    execl("/usr/bin/python3", "python3", cgiScriptPath.c_str(), requestedFilepath.c_str(), NULL);
+//     dup2(pipefd[1], STDIN_FILENO);  // Redirect stdin to the write end of the pipe
+//     write(pipefd[1], "hallo", 5); // Write data to the pipe
+
+//     execl("/usr/bin/python3", "python3", cgiScriptPath.c_str(), requestedFilepath.c_str(), NULL);
     
-    perror(("execl failed: " + cgiScriptPath).c_str());
-    exit(1);
-}
+//     perror(("execl failed: " + cgiScriptPath).c_str());
+//     exit(1);
+// }
 
 string CGIHandler::handleCgiRequest(const string& cgiScriptPath, const string& queryString, const string requestedFilepath, string data, int &exitStatus) {
     int pipefd[2];
@@ -61,23 +66,47 @@ string CGIHandler::handleCgiRequest(const string& cgiScriptPath, const string& q
     if (pipe(pipefd) == -1) 
         throw std::runtime_error("pipe failed: " + string(strerror(errno)));
 
+        setEnvironmentVariables(this->envVars);
+
     pid_t pid = fork();
 
     if (pid < 0) throw std::runtime_error("fork failed: " + string(strerror(errno)));
 
     if (pid == 0) {
-        this->exec(pipefd, cgiScriptPath, queryString, requestedFilepath);
+        close(pipefd[0]); 
+        dup2(pipefd[1], STDIN_FILENO);  // Redirect stdin to the write end of the pipe
+        write(pipefd[1], "hallo", 5); // Write data to the pipe
+        execl("/usr/bin/python3", "python3", cgiScriptPath.c_str(), requestedFilepath.c_str(), NULL);
+        perror(("execl failed: " + cgiScriptPath).c_str());
+        exit(1);
     }
     else {
-        close(pipefd[0]); 
-        setEnvironmentVariables(this->envVars);
+        // Parent process
+        string response = "";
     
-        dup2(pipefd[1], STDOUT_FILENO); // Redirect stdout to the write end of the pipe
-        write(pipefd[1], "hello", 5); // Write data to the pipe
         close(pipefd[1]);
-
-        string response = waitForCGIResponse(pipefd, pid, exitStatus);
+        dup2(pipefd[0], STDIN_FILENO);
+    
+        int status;
+        waitpid(pid, &status, 0);
+    
+        if (WIFSIGNALED(status)) {
+            int signal = WTERMSIG(status);
+            std::cout<< RED << "Child process was terminated by signal: " << signal << RESET << std::endl;
+            throw HttpException(500);
+        }
+    
+        char buffer[1024];
+        ssize_t bytesRead;
+        while ((bytesRead = read(pipefd[0], buffer, sizeof(buffer) - 1)) > 0) {
+            buffer[bytesRead] = '\0';
+            response += buffer;
+        }
+        close(pipefd[0]);
+    
+        exitStatus = WEXITSTATUS(status);
         return response;
+        // return waitForCGIResponse(pipefd, pid, exitStatus);;
     }
 
     return "";
