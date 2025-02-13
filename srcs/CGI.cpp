@@ -61,56 +61,72 @@ CGIHandler::~CGIHandler() {
 // }
 
 string CGIHandler::handleCgiRequest(const string& cgiScriptPath, const string& queryString, const string requestedFilepath, string data, int &exitStatus) {
-    int pipefd[2];
+    int inputPipe[2];  // Pipe for sending request body (stdin for CGI)
+    int outputPipe[2]; // Pipe for capturing CGI output (stdout from CGI)
 
-    if (pipe(pipefd) == -1) 
+    if (pipe(inputPipe) == -1 || pipe(outputPipe) == -1) 
         throw std::runtime_error("pipe failed: " + string(strerror(errno)));
 
-        setEnvironmentVariables(this->envVars);
+    setEnvironmentVariables(this->envVars);
 
     pid_t pid = fork();
 
     if (pid < 0) throw std::runtime_error("fork failed: " + string(strerror(errno)));
 
     if (pid == 0) {
-        close(pipefd[0]); 
-        dup2(pipefd[1], STDIN_FILENO);  // Redirect stdin to the write end of the pipe
-        write(pipefd[1], "hallo", 5); // Write data to the pipe
+        // **CHILD PROCESS** (Executes CGI)
+        close(inputPipe[1]);  // Close unused write end of input pipe
+        close(outputPipe[0]); // Close unused read end of output pipe
+
+        // Redirect CGI stdin to inputPipe[0] (reading request body)
+        dup2(inputPipe[0], STDIN_FILENO);
+        close(inputPipe[0]);  // Close the original read end
+
+        // Redirect CGI stdout to outputPipe[1] (capturing response)
+        dup2(outputPipe[1], STDOUT_FILENO);
+        close(outputPipe[1]); // Close the original write end
+
         execl("/usr/bin/python3", "python3", cgiScriptPath.c_str(), requestedFilepath.c_str(), NULL);
+        
         perror(("execl failed: " + cgiScriptPath).c_str());
         exit(1);
     }
     else {
-        // Parent process
+        // **PARENT PROCESS** (Sends input to CGI)
+        close(inputPipe[0]);  // Close unused read end of input pipe
+        close(outputPipe[1]); // Close unused write end of output pipe
+
+        // **Write request body to CGI stdin**
+        write(inputPipe[1], "hallo", 5);  
+        close(inputPipe[1]);  // Close write end to signal EOF
+
+        // **Read CGI response from stdout**
         string response = "";
-    
-        close(pipefd[1]);
-        dup2(pipefd[0], STDIN_FILENO);
-    
-        int status;
-        waitpid(pid, &status, 0);
-    
-        if (WIFSIGNALED(status)) {
-            int signal = WTERMSIG(status);
-            std::cout<< RED << "Child process was terminated by signal: " << signal << RESET << std::endl;
-            throw HttpException(500);
-        }
-    
         char buffer[1024];
         ssize_t bytesRead;
-        while ((bytesRead = read(pipefd[0], buffer, sizeof(buffer) - 1)) > 0) {
+        while ((bytesRead = read(outputPipe[0], buffer, sizeof(buffer) - 1)) > 0) {
             buffer[bytesRead] = '\0';
             response += buffer;
         }
-        close(pipefd[0]);
-    
-        exitStatus = WEXITSTATUS(status);
-        return response;
-        // return waitForCGIResponse(pipefd, pid, exitStatus);;
-    }
+        close(outputPipe[0]);  // Close read end after reading
 
+        int status;
+        waitpid(pid, &status, 0);
+
+        if (WIFSIGNALED(status)) {
+            int signal = WTERMSIG(status);
+            std::cout << "Child process terminated by signal: " << signal << std::endl;
+            throw HttpException(500);
+        }
+
+        exitStatus = WEXITSTATUS(status);
+        return response;  // Now contains CGI output
+    }
     return "";
 }
+
+
+
 void CGIHandler::setEnv(string key, string value) {
     envVars[key] = value;
 }
