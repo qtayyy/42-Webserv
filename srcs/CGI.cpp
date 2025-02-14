@@ -62,7 +62,7 @@ CGIHandler::~CGIHandler() {
 
 
 
-string CGIHandler::handleCgiRequest(const string& cgiScriptPath, HttpRequest &request, int &exitStatus) {
+string CGIHandler::handleCgiRequest(const string& cgiScriptPath, HttpRequest &request, int &exitStatus, ServerBlock &serverBlock) {
     int inputPipe[2];  // Pipe for sending request body (stdin for CGI)
     int outputPipe[2]; // Pipe for capturing CGI output (stdout from CGI)
 

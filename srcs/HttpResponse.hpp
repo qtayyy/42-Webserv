@@ -72,8 +72,9 @@ public:
     static HttpResponse createHttpResponse(HttpRequest &request);
 
     void initHttpResponseSelf(string content, string resourceType, int statusCode);
-    void initCGIResponse(string cgiPath, string fileToHandle, HttpRequest request);
     void initErrorHttpResponse(int statusCode);
+
+    void initCGIResponse(string cgiPath, HttpRequest request);
 
     void handleGetResponse(HttpRequest &request, ServerBlock *serverBlock);
     void handlePostRequest(HttpRequest &request, ServerBlock *serverBlock);

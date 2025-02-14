@@ -221,7 +221,7 @@ HttpRequest mockRequest(string path, string path_info) {
     return request;
 }
 
-HttpRequest mockPostRequest(string path, string path_info) {
+HttpRequest mockUploadPOSTRequest(string path, string path_info) {
     HttpRequest request;
 
 	request.setRawRequest(readFileContent("test_post_request"));
@@ -236,6 +236,16 @@ HttpRequest mockPostRequest(string path, string path_info) {
     return request;
 }
 
+HttpRequest mockUploadGETRequest() {
+    HttpRequest request;
+
+    request.headerSet("path", "/upload/upload.py");
+    request.headerSet("path_info", "ex.txt");
+    request.headerSet("query_string", "name=John&age=30");
+    request.headerSet("method", "GET");
+
+    return request;
+}
 
 
 
@@ -271,7 +281,8 @@ void	Cluster::run(void)
 			}
 			if (_pollFds[i].revents & POLLOUT) // If an fd is ready for writing
 			{
-				HttpRequest request = mockPostRequest("/upload/", "/dir2");
+				// HttpRequest request = mockUploadPOSTRequest("/upload/", "/dir2");
+				HttpRequest request = mockUploadGETRequest();
 				//HttpRequest request = mockRequest("/upload.html", "/dir2");
 				HttpResponse response = HttpResponse(request, &_servers[0]);
 				send(_pollFds[i].fd, response.getFinalResponseMsg().c_str(), response.getContentLength(), 0);

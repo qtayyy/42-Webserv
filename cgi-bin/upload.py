@@ -90,5 +90,40 @@ if request_method == "POST":
             print("No file uploaded.")
     except Exception as e:
         print(f"Error: {e}")
+elif request_method == "GET":
+    # print argv
+    #print(sys.argv)
+    if os.path.exists(route):
+        root, extension = os.path.splitext(route)
+        file_content = ""
+        with open(route, mode="rb") as file:
+            file_content = file.read()
+        if extension == ".html":
+            print("Content-Type: text/html")
+        elif extension == ".css":
+            print("Content-Type: text/css")
+        elif extension == ".js":
+            print("Content-Type: text/javascript")
+        elif extension == ".jpg" or extension == ".jpeg":
+            print("Content-Type: image/jpeg")
+        elif extension == ".png":
+            print("Content-Type: image/png")
+        elif extension == ".pdf":
+            print("Content-Type: application/pdf")
+        else:
+            print("Content-Type: text/plain")
+        print("\r")
+        print(file_content)
+        print("\r")
+    else:
+        error_message_body = "<html><head><title>404 Not Found(CGI-Python)</title></head><body><center><h1>404 Not Found(CGI-Python)</h1></center></body></html>"
+        print("HTTP/1.1 404 Not Found(CGI-Python)")
+        print("Content-Type: text/html")
+        print("Content-Length: " + str(len(error_message_body)))
+        print("\r")
+        print(error_message_body)
+        print("\r")
 else:
-    print("Invalid request method.")
+    print("Method not allowed.")
+
+# todo post method handled incorrectly, doesnt consider set upload route

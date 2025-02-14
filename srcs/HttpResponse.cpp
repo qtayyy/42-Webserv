@@ -26,6 +26,11 @@ void HttpResponse::handleGetResponse(HttpRequest &request, ServerBlock *serverBl
     stringList limitExcept = this->_locationBlockRef->getLimitExcept();
 
 
+    if (!this->_locationBlockRef->getCgiPass().empty()) {
+        this->initCGIResponse(this->_locationBlockRef->getCgiPass(), request);
+        return;
+    }
+
     try {
         // Check if a redirect is required
         std::pair<int, std::string> redirectInfo = this->_locationBlockRef->getReturn();
@@ -33,6 +38,7 @@ void HttpResponse::handleGetResponse(HttpRequest &request, ServerBlock *serverBl
             this->initRedirectResponse(redirectInfo.second, redirectInfo.first);
             return;
         }
+
 
         string reroutedPath = reroutePath(path);
         string content = readFileContent(reroutedPath);
@@ -69,9 +75,9 @@ void HttpResponse::handleGetResponse(HttpRequest &request, ServerBlock *serverBl
 
             // If CGI handling is required, reroute the path to the CGI script
             if (!cgiToUse.empty())
-                this->initCGIResponse(cgiToUse, path, request);
+                this->initCGIResponse(cgiToUse, request);
             else if (isCGI(path))
-                this->initCGIResponse(path, request.headerGet("path_info"), request);
+                this->initCGIResponse(path, request);
             else
                 this->initHttpResponseSelf(content, getContentType(reroutedPath), 200);
 
@@ -94,9 +100,7 @@ void HttpResponse::handlePostRequest(HttpRequest &request, ServerBlock *serverBl
 	(void)serverBlock;
     string cgiPass = this->_locationBlockRef->getCgiPass();
 
-    
-
-    this->initCGIResponse(cgiPass, request.headerGet("path_info"), request);
+    this->initCGIResponse(cgiPass, request);
 
     
     // exit(0);
@@ -127,7 +131,7 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
     string path = request.headerGet("path");
     this->_serverBlockRef = serverBlock;
     this->_locationBlockRef = getRelevantLocationBlock(path, serverBlock);
-    
+
     stringList limitExcept = this->_locationBlockRef->getLimitExcept();
 
     // Check if the request method is allowed
@@ -256,22 +260,25 @@ void HttpResponse::initErrorHttpResponse(int statusCode) {
     }
 }
 
-void HttpResponse::initCGIResponse(string cgiPath, string fileToHandle, HttpRequest request) {
+void HttpResponse::initCGIResponse(string cgiPath, HttpRequest request) {
 
     cgiPath = getAbsolutePath(cgiPath);
-    if (!doesPathExist(cgiPath)) {
+    if (!doesPathExist(cgiPath) || this->_locationBlockRef->getCgiPass().empty()) {
         std::cout << "path doesn't exist" << cgiPath << std::endl;
         this->initErrorHttpResponse(500);
         return;
     }
 
+    string pathToHandle = request.headerGet("path_info");
+
     CGIHandler cgiHandler = CGIHandler();
-    string absolutePath = getAbsolutePath(this->reroutePath(fileToHandle));
+    string absolutePath = getAbsolutePath(this->_locationBlockRef->getUploadPath() + pathToHandle);
 
-    request.headerSet("path", this->reroutePath(fileToHandle));
+    request.headerSet("path", absolutePath);
 
+    std::cout << "PATH" << absolutePath << std::endl;
     int exit_status = 0;
-    string response_content = cgiHandler.handleCgiRequest(cgiPath, request, exit_status);
+    string response_content = cgiHandler.handleCgiRequest(cgiPath, request, exit_status, *this->_serverBlockRef);
     this->initHttpResponseSelf(response_content, CONTENT_TYPE_HTML, 200);
     std::cout << "response: " << this->getFinalResponseMsg() << std::endl;
 }
