@@ -16,17 +16,62 @@ content_length = int(os.environ.get("CONTENT_LENGTH", 0))
 # Initialize FieldStorage
 try:
     form = cgi.FieldStorage()
-    print("Form initialized successfully.")
 except Exception as e:
-    print(f"Error initializing form: {e}")
     sys.exit(1)
 
 
 # Get request method and route
 request_method = os.environ.get("REQUEST_METHOD", "").upper()
 route = unquote(os.environ.get("PATH_TRANSLATED", ""))
-print(f"Request Method: {request_method}")
-print(f"Route: {route}")
+
+style = '''
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+}
+h2 {
+    color: #4CAF50;
+}
+p {
+    background: #fff;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+'''
+
+raw_success_page = f'''
+<html>
+<head>
+    <style>
+        {style}
+    </style>
+</head>
+<body>
+    <h2>File Upload Successful</h2>
+    <p>File <strong>%filename</strong> uploaded successfully to <strong>%route</strong>.</p>
+</body>
+</html>
+'''
+
+raw_fail_page = f'''
+<html>
+<head>
+    <style>
+        {style}
+        h2 {{
+            color: red;
+        }}
+    </style>
+</head>
+<body>
+    <h2>File Upload Failed</h2>
+    <p>Failed to upload file.</p>
+</body>
+</html>
+'''
 
 
 # Handle POST request
@@ -38,7 +83,7 @@ if request_method == "POST":
                 file_path = os.path.join(route, file_item.filename)
                 with open(file_path, 'wb') as f:
                     f.write(file_item.file.read())
-                print(f"File {file_item.filename} uploaded successfully.")
+                print(raw_success_page.replace("%filename", file_item.filename).replace("%route", route))
             else:
                 print("No file content.")
         else:

@@ -69,9 +69,9 @@ string CGIHandler::handleCgiRequest(const string& cgiScriptPath, HttpRequest &re
     if (pipe(inputPipe) == -1 || pipe(outputPipe) == -1) 
         throw std::runtime_error("pipe failed: " + string(strerror(errno)));
 
-    
     string data = readFileContent("test_post_request");
 
+    // Set environment variables
     this->setEnv("REQUEST_METHOD",  request.headerGet("method"));
     this->setEnv("QUERY_STRING",    request.headerGet("query_string"));
     this->setEnv("SCRIPT_NAME",     cgiScriptPath);
@@ -81,13 +81,10 @@ string CGIHandler::handleCgiRequest(const string& cgiScriptPath, HttpRequest &re
     this->setEnv("PATH_TRANSLATED", request.headerGet("path"));
     this->setEnv("CONTENT_LENGTH",  to_string(data.length()));
     this->setEnv("CONTENT_TYPE",    request.headerGet("content_type"));
-
-    std::cout << "PATH INFO" << data << std::endl;
-
     setEnvironmentVariables(this->envVars);
 
-    pid_t pid = fork();
 
+    pid_t pid = fork();
     string requestedFilepath = request.headerGet("path_info");
 
     if (pid < 0) throw std::runtime_error("fork failed: " + string(strerror(errno)));
@@ -105,7 +102,13 @@ string CGIHandler::handleCgiRequest(const string& cgiScriptPath, HttpRequest &re
         dup2(outputPipe[1], STDOUT_FILENO);
         close(outputPipe[1]); // Close the original write end
 
-        execl("/usr/bin/python3", "python3", cgiScriptPath.c_str(), requestedFilepath.c_str(), NULL);
+        if (endsWith(cgiScriptPath, ".py")) {
+            execl("/usr/bin/python3", "python3", cgiScriptPath.c_str(), requestedFilepath.c_str(), NULL);
+        }
+
+        else {
+            execl(cgiScriptPath.c_str(), cgiScriptPath.c_str(), requestedFilepath.c_str(), NULL);
+        }
         
         perror(("execl failed: " + cgiScriptPath).c_str());
         exit(1);

@@ -94,12 +94,7 @@ void HttpResponse::handlePostRequest(HttpRequest &request, ServerBlock *serverBl
 	(void)serverBlock;
     string cgiPass = this->_locationBlockRef->getCgiPass();
 
-    std::cout << "CGI PASS" << cgiPass << std::endl;
-
-    if (this->_locationBlockRef->getCgiPass().empty()) {
-        this->initErrorHttpResponse(500);
-        return;
-    }
+    
 
     this->initCGIResponse(cgiPass, request.headerGet("path_info"), request);
 
@@ -262,24 +257,30 @@ void HttpResponse::initErrorHttpResponse(int statusCode) {
 }
 
 void HttpResponse::initCGIResponse(string cgiPath, string fileToHandle, HttpRequest request) {
-    CGIHandler cgiHandler = CGIHandler();
-    string absolutePath = getAbsolutePath(this->reroutePath(fileToHandle));
 
     cgiPath = getAbsolutePath(cgiPath);
-    request.printInfo();
+    if (!doesPathExist(cgiPath)) {
+        std::cout << "path doesn't exist" << cgiPath << std::endl;
+        this->initErrorHttpResponse(500);
+        return;
+    }
+
+    CGIHandler cgiHandler = CGIHandler();
+    string absolutePath = getAbsolutePath(this->reroutePath(fileToHandle));
 
     request.headerSet("path", this->reroutePath(fileToHandle));
 
     int exit_status = 0;
     string response_content = cgiHandler.handleCgiRequest(cgiPath, request, exit_status);
     this->initHttpResponseSelf(response_content, CONTENT_TYPE_HTML, 200);
+    std::cout << "response: " << this->getFinalResponseMsg() << std::endl;
 }
-
 
 
 bool HttpResponse::isCGI(const string& resourcePath) {
     return endsWith(resourcePath, ".py");
 }
+
 
 string HttpResponse::decideCGIToUse(string resourcePath) {
     // stringDict cgiScripts = this->_locationBlockRef->getCgiScript();
