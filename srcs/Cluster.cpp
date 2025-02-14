@@ -221,24 +221,17 @@ HttpRequest mockRequest(string path, string path_info) {
     return request;
 }
 
-HttpRequest mockPostRequest(string path, string path_info, string fileName, string fileContent) {
+HttpRequest mockPostRequest(string path, string path_info) {
     HttpRequest request;
 
 	request.setRawRequest(readFileContent("test_post_request"));
-
-	std::cout << "RAW REQ" << request.getRawRequest() << std::endl;
-
-	stringDict formBlock;
-	formBlock["Content-Disposition"] = "form-data; name=\"file\"; filename=\"" + fileName + "\"";
-	formBlock["Content-Type"] = "application/octet-stream";
-	formBlock["Body"] = fileContent;
-
-	request.appendFormBlock(formBlock);
+	request.setBody(readFileContent("test_post_request"));
 
     request.headerSet("path", path);
     request.headerSet("path_info", path_info);
     request.headerSet("query_string", "name=John&age=30");
     request.headerSet("method", "POST");
+    request.headerSet("content_type", "multipart/form-data; boundary=boundary");
 
     return request;
 }
@@ -277,11 +270,7 @@ void	Cluster::run(void)
 			}
 			if (_pollFds[i].revents & POLLOUT) // If an fd is ready for writing
 			{
-
-				std::string path = readFileContent("input_param");
-				stringList list = splitString(path, '\n');
-				
-				HttpRequest request = mockPostRequest(list[0], "/dir2", list[1], "Hello, world!");
+				HttpRequest request = mockPostRequest("/upload.html", "/dir2");
 				//HttpRequest request = mockRequest("/upload.html", "/dir2");
 				HttpResponse response = HttpResponse(request, &_servers[0]);
 				send(_pollFds[i].fd, response.getFinalResponseMsg().c_str(), response.getContentLength(), 0);

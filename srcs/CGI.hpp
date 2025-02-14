@@ -3,6 +3,7 @@
 
 #include "../includes/Webserv.hpp"
 #include "HttpRequest.hpp"
+#include "HttpResponse.hpp"
 
 #include "Utils.hpp"
 
