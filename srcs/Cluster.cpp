@@ -238,6 +238,7 @@ HttpRequest mockPostRequest(string path, string path_info) {
 
 
 
+
 // ============================== RUN ALL SERVERS =============================
 
 /**
@@ -270,7 +271,7 @@ void	Cluster::run(void)
 			}
 			if (_pollFds[i].revents & POLLOUT) // If an fd is ready for writing
 			{
-				HttpRequest request = mockPostRequest("/upload.html", "/dir2");
+				HttpRequest request = mockPostRequest("/upload/", "/dir2");
 				//HttpRequest request = mockRequest("/upload.html", "/dir2");
 				HttpResponse response = HttpResponse(request, &_servers[0]);
 				send(_pollFds[i].fd, response.getFinalResponseMsg().c_str(), response.getContentLength(), 0);

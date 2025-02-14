@@ -27,6 +27,8 @@ bool endsWith(const string& str, const string& suffix) {
 }
 
 bool startsWith(const string& str, const string& prefix) {
+    if (str.size() == 0 || prefix.size() == 0) 
+        return false;
     return str.compare(0, prefix.size(), prefix) == 0;
 }
 

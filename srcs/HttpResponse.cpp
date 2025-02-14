@@ -96,7 +96,12 @@ void HttpResponse::handlePostRequest(HttpRequest &request, ServerBlock *serverBl
 
     std::cout << "CGI PASS" << cgiPass << std::endl;
 
-    this->initCGIResponse("cgi-bin/upload.py", request.headerGet("path_info"), request);
+    if (this->_locationBlockRef->getCgiPass().empty()) {
+        this->initErrorHttpResponse(500);
+        return;
+    }
+
+    this->initCGIResponse(cgiPass, request.headerGet("path_info"), request);
 
     
     // exit(0);
@@ -257,23 +262,16 @@ void HttpResponse::initErrorHttpResponse(int statusCode) {
 }
 
 void HttpResponse::initCGIResponse(string cgiPath, string fileToHandle, HttpRequest request) {
+    CGIHandler cgiHandler = CGIHandler();
     string absolutePath = getAbsolutePath(this->reroutePath(fileToHandle));
 
     cgiPath = getAbsolutePath(cgiPath);
     request.printInfo();
 
-    CGIHandler cgiHandler = CGIHandler();
-
     request.headerSet("path", this->reroutePath(fileToHandle));
 
     int exit_status = 0;
     string response_content = cgiHandler.handleCgiRequest(cgiPath, request, exit_status);
-
-    // Check if the response contains the content length in its header, if so, remove the header
-    // if (startsWith(response_content, "Content-Length: ") && response_content.find("\n\n") != string::npos) {
-    //     response_content = response_content.substr(response_content.find("\n\n") + 2);
-    // }
-
     this->initHttpResponseSelf(response_content, CONTENT_TYPE_HTML, 200);
 }
 
@@ -344,15 +342,24 @@ string HttpResponse::containsIndexFile(string path) {
     return "";
 }
 
+std::string getDirectory(const std::string& fullPath) {
+    size_t pos = fullPath.find_last_of("/\\");
+    if (pos != std::string::npos) {
+        return fullPath.substr(0, pos);
+    }
+    return "";
+}
+
 LocationBlock* HttpResponse::getRelevantLocationBlock(const string& path, ServerBlock* serverBlock) {
     std::vector<LocationBlock> *locations = serverBlock->getLocation();
     LocationBlock* locationBlock = NULL;
+    string directory = getDirectory(path);
+
     for (std::vector<LocationBlock>::iterator it = locations->begin(); it != locations->end(); ++it) {
-        if (startsWith(path, it->getUri()) && (locationBlock == NULL || it->getUri().size() > locationBlock->getUri().size())) {
+        if (startsWith(directory, it->getUri()) && (locationBlock == NULL || it->getUri().size() > locationBlock->getUri().size())) {
             locationBlock = &(*it);
         }
     }
-    
     return locationBlock;
 }
 
