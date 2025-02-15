@@ -240,14 +240,44 @@ HttpRequest mockUploadGETRequest() {
     HttpRequest request;
 
     request.headerSet("path", "/upload/upload.py");
-    request.headerSet("path_info", "ex.txt");
+    request.headerSet("path_info", "webserv.pdf");
     request.headerSet("query_string", "name=John&age=30");
     request.headerSet("method", "GET");
 
     return request;
 }
 
+#include <iostream>
+#include <fstream>
+#include <cstring>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <unistd.h>
 
+std::string constructHttpResponse(std::string pdf_file) {
+	std::ifstream file(pdf_file.c_str(), std::ios::in | std::ios::binary);
+
+    // Read the entire file content into a string
+    std::string file_content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    file.close();
+    
+    // Send HTTP response headers
+    std::string headers = "HTTP/1.1 200 OK\r\n";
+    headers += "Content-Type: application/pdf\r\n";
+    headers += "Connection: close\r\n";
+    headers += "Content-Length: " + to_string(file_content.size()) + "\r\n";
+    headers += "\r\n";
+    
+    // Combine headers and file content
+    std::string response = headers + file_content;
+    
+    // Send the entire response in a single send call
+
+    std::cout << "" << response.c_str() << std::endl;
+
+    return response;
+}
 
 // ============================== RUN ALL SERVERS =============================
 
@@ -255,46 +285,51 @@ HttpRequest mockUploadGETRequest() {
  * @brief	Monitors each socket for incoming connections, request or reponses
  * 			(I/O operations).
  */
-void	Cluster::run(void)
-{
-	int	ready;
-	int	timeout = 500; // 500 ms timeout
+void Cluster::run(void) {
+    int ready;
+    int timeout = 500; // 500 ms timeout
 
-	while (true)
-	{
-		if ((ready = poll(_pollFds, _numOfFds, timeout)) == -1)
-		{
-			perror("poll");
-			throw ClusterException("");
-		}
-		for (int i = 0; i < _numOfFds; i++)
-		{
-			if (_pollFds[i].revents & (POLLIN | POLLHUP)) // If an fd is ready for reading
-			{
-				if (_listenerToServer.find(_pollFds[i].fd) != _listenerToServer.end())
-					handleNewClient(_pollFds[i].fd);
-				else // Note: if client disconnects, have to close its fd and remove from the poll struct
-				{
-					this->_clients[_pollFds[i].fd]->handleRequest(); // Ethan's part
-					_pollFds[i].events = POLLOUT;
-				}
-			}
-			if (_pollFds[i].revents & POLLOUT) // If an fd is ready for writing
-			{
-				// HttpRequest request = mockUploadPOSTRequest("/upload/", "/dir2");
-				HttpRequest request = mockUploadGETRequest();
-				//HttpRequest request = mockRequest("/upload.html", "/dir2");
-				HttpResponse response = HttpResponse(request, &_servers[0]);
-				send(_pollFds[i].fd, response.getFinalResponseMsg().c_str(), response.getContentLength(), 0);
-				close(_pollFds[i].fd);
-				_clients.erase(_pollFds[i].fd);
-				_pollFds[i] = _pollFds[--_numOfFds]; // Remove the fd from the poll array
-				_pollFds[i].events = POLLIN;
-				i--; // Adjust the index to check the swapped fd
-			}
-		}
-	}
+    while (true) {
+        if ((ready = poll(_pollFds, _numOfFds, timeout)) == -1) {
+            perror("poll");
+            throw ClusterException("");
+        }
+        for (int i = 0; i < _numOfFds; i++) {
+            if (_pollFds[i].revents & (POLLIN | POLLHUP)) { // If an fd is ready for reading
+                if (_listenerToServer.find(_pollFds[i].fd) != _listenerToServer.end())
+                    handleNewClient(_pollFds[i].fd);
+                else { // Note: if client disconnects, have to close its fd and remove from the poll struct
+                    this->_clients[_pollFds[i].fd]->handleRequest(); // Ethan's part
+                    _pollFds[i].events = POLLOUT;
+                }
+            }
+            if (_pollFds[i].revents & POLLOUT) { // If an fd is ready for writing
+                string finalMsg = constructHttpResponse("/home/cooper/coreProgram/qi_ter_webserv/public/upload/webserv.pdf");
+                size_t totalSent = 0;
+                ssize_t sentBytes;
+                while (totalSent < finalMsg.size()) {
+                    sentBytes = send(_pollFds[i].fd, finalMsg.c_str() + totalSent, finalMsg.size() - totalSent, 0);
+                    if (sentBytes == -1) {
+                        perror("send");
+                        break;
+                    }
+                    totalSent += sentBytes;
+                }
+				std::cout << "TOTAL SENT: " << totalSent << std::endl;
+                if (totalSent == finalMsg.size()) {
+                    close(_pollFds[i].fd);
+                    _clients.erase(_pollFds[i].fd);
+                    _pollFds[i] = _pollFds[--_numOfFds];
+                    _pollFds[i].events = POLLIN;
+                    i--;
+                }
+            }
+        }
+    }
 }
+// HttpRequest request = mockUploadPOSTRequest("/upload/", "/dir2");
+//HttpRequest request = mockRequest("/upload.html", "/dir2");
+// HttpRequest request = mockUploadGETRequest();
 
 // HELPER FUNCTION FOR CLUSTER::RUN()
 void	Cluster::handleNewClient(int listenerFd)

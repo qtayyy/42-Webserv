@@ -127,6 +127,12 @@ void HttpResponse::handlePostRequest(HttpRequest &request, ServerBlock *serverBl
 }
 
 
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <vector>
+
+
 HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
     string path = request.headerGet("path");
     this->_serverBlockRef = serverBlock;
@@ -142,10 +148,13 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
 
     if (request.headerGet("method") == "GET") {
         this->handleGetResponse(request, serverBlock);
+        // this->finalResponseMsg = constructHttpResponse("/home/cooper/coreProgram/qi_ter_webserv/public/upload/webserv.pdf");
+        // std::cout << "final respnse" << this->finalResponseMsg << std::endl;
     } 
     
     else if (request.headerGet("method") == "POST") {
         this->handlePostRequest(request, serverBlock);
+        // this->finalResponseMsg = constructHttpResponse("/home/cooper/coreProgram/qi_ter_webserv/public/upload/webserv.pdf");
     }
     
     else {
@@ -276,11 +285,11 @@ void HttpResponse::initCGIResponse(string cgiPath, HttpRequest request) {
 
     request.headerSet("path", absolutePath);
 
-    std::cout << "PATH" << absolutePath << std::endl;
     int exit_status = 0;
     string response_content = cgiHandler.handleCgiRequest(cgiPath, request, exit_status, *this->_serverBlockRef);
-    this->initHttpResponseSelf(response_content, CONTENT_TYPE_HTML, 200);
-    std::cout << "response: " << this->getFinalResponseMsg() << std::endl;
+   
+    this->finalResponseMsg = response_content;
+    std::cout << "response: " << response_content << std::endl;
 }
 
 

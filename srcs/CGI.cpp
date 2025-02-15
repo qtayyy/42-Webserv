@@ -83,7 +83,6 @@ string CGIHandler::handleCgiRequest(const string& cgiScriptPath, HttpRequest &re
     this->setEnv("CONTENT_TYPE",    request.headerGet("content_type"));
     setEnvironmentVariables(this->envVars);
 
-
     pid_t pid = fork();
     string requestedFilepath = request.headerGet("path_info");
 
@@ -128,7 +127,7 @@ string CGIHandler::handleCgiRequest(const string& cgiScriptPath, HttpRequest &re
         ssize_t bytesRead;
         while ((bytesRead = read(outputPipe[0], buffer, sizeof(buffer) - 1)) > 0) {
             buffer[bytesRead] = '\0';
-            response += buffer;
+            response.append(buffer);
         }
         close(outputPipe[0]);  // Close read end after reading
 
