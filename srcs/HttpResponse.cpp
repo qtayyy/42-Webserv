@@ -289,7 +289,6 @@ void HttpResponse::initCGIResponse(string cgiPath, HttpRequest request) {
     string response_content = cgiHandler.handleCgiRequest(cgiPath, request, exit_status, *this->_serverBlockRef);
    
     this->finalResponseMsg = response_content;
-    std::cout << "response: " << response_content << std::endl;
 }
 
 

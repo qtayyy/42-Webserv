@@ -101,7 +101,7 @@ import os
 request_method = os.environ.get("REQUEST_METHOD", "")
 
 if request_method == "GET":
-    pdf_path = r"/home/cooper/coreProgram/qi_ter_webserv/public/upload/2.pdf"
+    pdf_path = r"/home/cooper/coreProgram/qi_ter_webserv/public/upload/ok.pdf"
 
 
     if not os.path.exists(route):
@@ -112,6 +112,7 @@ if request_method == "GET":
         print("\r")
         print(error_message_body)
         print("\r")
+        exit()
 
     root, extension = os.path.splitext(route)
     with open(pdf_path, mode="rb") as file:
@@ -132,7 +133,7 @@ if request_method == "GET":
     else:
         print("Content-Type: text/plain")
     print("\r")
-    print(file_content)  # Decode the bytes object to a string
+    print(file_content)
     print("\r")
 
 else:

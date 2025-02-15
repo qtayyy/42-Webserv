@@ -279,6 +279,49 @@ std::string constructHttpResponse(std::string pdf_file) {
     return response;
 }
 
+#define BUFF_SIZE 30000
+
+void sendHttpResponse(int client_sock, const std::string &pdf_file) {
+	std::ifstream file(pdf_file.c_str(), std::ios::binary | std::ios::ate);
+	if (!file) {
+		std::string not_found = "HTTP/1.1 404 Not Found\r\n"
+								"Content-Type: text/plain\r\n"
+								"Content-Length: 13\r\n"
+								"Connection: close\r\n\r\n"
+								"404 Not Found";
+		send(client_sock, not_found.c_str(), not_found.size(), 0);
+		return;
+	}
+
+	std::ifstream::pos_type file_size = file.tellg();
+	file.seekg(0, std::ios::beg);
+
+	// Read the entire file content into a string
+	std::string file_content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+	file.close();
+
+	// Send HTTP response headers
+	std::string headers = "HTTP/1.1 200 OK\r\n"
+						  "Content-Type: application/pdf\r\n"
+						  "Content-Length: " + to_string(file_content.size()) + "\r\n"
+						  "\r\n\r\n";
+
+	// Combine headers and file content
+	std::string response = headers + file_content;
+
+	// Send the entire response in a single send call
+	int bytes = send(client_sock, response.c_str(), response.size(), 0);
+	std::cout << "response:: " << response << std::endl;
+	std::cout << "bytes:: " << bytes << std::endl;
+	std::ofstream outFile("output.log");
+	if (outFile.is_open()) {
+		outFile << response;
+		outFile.close();
+	} 
+	else
+		std::cerr << "Unable to open file for writing" << std::endl;
+}
+
 // ============================== RUN ALL SERVERS =============================
 
 /**
@@ -304,25 +347,36 @@ void Cluster::run(void) {
                 }
             }
             if (_pollFds[i].revents & POLLOUT) { // If an fd is ready for writing
-                string finalMsg = constructHttpResponse("/home/cooper/coreProgram/qi_ter_webserv/public/upload/webserv.pdf");
-                size_t totalSent = 0;
-                ssize_t sentBytes;
-                while (totalSent < finalMsg.size()) {
-                    sentBytes = send(_pollFds[i].fd, finalMsg.c_str() + totalSent, finalMsg.size() - totalSent, 0);
-                    if (sentBytes == -1) {
-                        perror("send");
-                        break;
-                    }
-                    totalSent += sentBytes;
-                }
-				std::cout << "TOTAL SENT: " << totalSent << std::endl;
-                if (totalSent == finalMsg.size()) {
-                    close(_pollFds[i].fd);
-                    _clients.erase(_pollFds[i].fd);
-                    _pollFds[i] = _pollFds[--_numOfFds];
-                    _pollFds[i].events = POLLIN;
-                    i--;
-                }
+				//sendHttpResponse(_pollFds[i].fd, "/home/cooper/coreProgram/qi_ter_webserv/public/upload/webserv.pdf");
+				
+
+				
+				
+				HttpRequest request = mockUploadGETRequest();
+				HttpResponse response = HttpResponse(request, &_servers[0]);
+				
+				string finalMsg = response.getFinalResponseMsg();
+				
+				// finalMsg = readFileContent("output2.log");
+
+
+				int bytes = send(_pollFds[i].fd, finalMsg.c_str(), finalMsg.size(), 0);
+
+				// close(_pollFds[i].fd);
+				_clients.erase(_pollFds[i].fd);
+				_pollFds[i] = _pollFds[--_numOfFds];
+				_pollFds[i].events = POLLIN;
+				i--;
+
+				
+				
+				//sendHttpResponse(_pollFds[i].fd, "/home/cooper/coreProgram/qi_ter_webserv/public/upload/webserv.pdf");
+
+				// close(_pollFds[i].fd);
+				// _clients.erase(_pollFds[i].fd);
+				// _pollFds[i] = _pollFds[--_numOfFds];
+				// _pollFds[i].events = POLLIN;
+				// i--;
             }
         }
     }

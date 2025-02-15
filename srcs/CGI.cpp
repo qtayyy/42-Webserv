@@ -62,7 +62,7 @@ CGIHandler::~CGIHandler() {
 
 
 
-string CGIHandler::handleCgiRequest(const string& cgiScriptPath, HttpRequest &request, int &exitStatus, ServerBlock &serverBlock) {
+string CGIHandler:: handleCgiRequest(const string& cgiScriptPath, HttpRequest &request, int &exitStatus, ServerBlock &serverBlock) {
     int inputPipe[2];  // Pipe for sending request body (stdin for CGI)
     int outputPipe[2]; // Pipe for capturing CGI output (stdout from CGI)
 
@@ -122,13 +122,19 @@ string CGIHandler::handleCgiRequest(const string& cgiScriptPath, HttpRequest &re
         close(inputPipe[1]);  // Close write end to signal EOF
 
         // **Read CGI response from stdout**
-        string response = "";
+        std::vector<char> responseBuffer;
+
         char buffer[1024];
         ssize_t bytesRead;
-        while ((bytesRead = read(outputPipe[0], buffer, sizeof(buffer) - 1)) > 0) {
-            buffer[bytesRead] = '\0';
-            response.append(buffer);
+        ssize_t totalBytes = 0;
+        while ((bytesRead = read(outputPipe[0], buffer, sizeof(buffer))) > 0) {
+            responseBuffer.insert(responseBuffer.end(), buffer, buffer + bytesRead);
+            totalBytes += bytesRead;
         }
+
+        std::cout << "TOTAL BYTES" << totalBytes << std::endl;
+        std::cout << "LENGTH RESPONSE" << responseBuffer.size() << std::endl;
+        
         close(outputPipe[0]);  // Close read end after reading
 
         int status;
@@ -141,7 +147,7 @@ string CGIHandler::handleCgiRequest(const string& cgiScriptPath, HttpRequest &re
         }
 
         exitStatus = WEXITSTATUS(status);
-        return response;  // Now contains CGI output
+        return std::string(responseBuffer.begin(), responseBuffer.end());  // Now contains CGI output
     }
     return "";
 }
