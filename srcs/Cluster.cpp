@@ -240,7 +240,7 @@ HttpRequest mockUploadGETRequest() {
     HttpRequest request;
 
     request.headerSet("path", "/upload/upload.py");
-    request.headerSet("path_info", "webserv.pdf");
+    request.headerSet("path_info", "test.html");
     request.headerSet("query_string", "name=John&age=30");
     request.headerSet("method", "GET");
 

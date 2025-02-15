@@ -5,14 +5,19 @@ import os
 import sys
 from urllib.parse import unquote
 import cgitb
+from textwrap import dedent
+
+CONTENT_TYPES = {
+        ".html": "text/html",
+        ".css": "text/css",
+        ".js": "text/javascript",
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".png": "image/png",
+        ".pdf": "application/pdf",
+    }
+
 cgitb.enable()
-
-
-# Manually set the Content-Type header if not set
-boundary = "boundary"
-
-# Read content length and file content
-content_length = int(os.environ.get("CONTENT_LENGTH", 0))
 
 # Initialize FieldStorage
 try:
@@ -57,23 +62,40 @@ raw_success_page = f'''
 </html>
 '''
 
-raw_fail_page = f'''
-<html>
-<head>
-    <style>
-        {style}
-        h2 {{
-            color: red;
-        }}
-    </style>
-</head>
-<body>
-    <h2>File Upload Failed</h2>
-    <p>Failed to upload file.</p>
-</body>
-</html>
-'''
 
+def generate_error_page(title, message):
+    raw_fail_page = dedent(f'''
+    <html>
+    <head>
+        <style>
+            {style}
+            h2 {{
+                color: red;
+            }}
+        </style>
+    </head>
+    <body>
+        <h2>{title}</h2>
+        <p>{message}</p>
+    </body>
+    </html>
+    ''')
+    return raw_fail_page
+
+def generate_response_string(
+            content:str,
+            status_code:int = 404,
+            status_message:str = "Not Found",
+            content_length:int = None,
+            content_type:str = "text/html"): 
+        
+        return dedent(f"""
+        HTTP/1.1 {status_code} {status_message}
+        Content-Type: {content_type}
+        Content-Length: {len(content) if content_length is None else content_length}
+        
+        {content}
+        """)
 
 # Handle POST request
 if request_method == "POST":
@@ -92,49 +114,35 @@ if request_method == "POST":
     except Exception as e:
         print(f"Error: {e}")
 
-#!/usr/bin/env python3
+# Handle GET request
+elif request_method == "GET":
+    pdf_path = route
 
-import sys
-import os
+    extension = os.path.splitext(pdf_path)[1]
+    content_type = CONTENT_TYPES.get(extension, "Content-Type: text/plain")
 
-# Get the request method from environment variables
-request_method = os.environ.get("REQUEST_METHOD", "")
+    error_page = generate_error_page("404 Not Found", "The requested file was not found.")
 
-if request_method == "GET":
-    pdf_path = r"/home/cooper/coreProgram/qi_ter_webserv/public/upload/ok.pdf"
+    if not os.path.exists(pdf_path):
+        not_found = generate_response_string(error_page)
+        sys.stdout.buffer.write(not_found.encode())
+        sys.stdout.buffer.flush()
+        sys.exit()
 
-
-    if not os.path.exists(route):
-        error_message_body = "<html><head><title>404 Not Found(CGI-Python)</title></head><body><center><h1>404 Not Found(CGI-Python)</h1></center></body></html>"
-        print("HTTP/1.1 404 Not Found(CGI-Python)")
-        print("Content-Type: text/html")
-        print("Content-Length: " + str(len(error_message_body)))
-        print("\r")
-        print(error_message_body)
-        print("\r")
-        exit()
-
-    root, extension = os.path.splitext(route)
-    with open(pdf_path, mode="rb") as file:
+    with open(pdf_path, 'rb') as file:
         file_content = file.read()
-    print("HTTP/1.1 200 OK")
-    if extension == ".html":
-        print("Content-Type: text/html")
-    elif extension == ".css":
-        print("Content-Type: text/css")
-    elif extension == ".js":
-        print("Content-Type: text/javascript")
-    elif extension == ".jpg" or extension == ".jpeg":
-        print("Content-Type: image/jpeg")
-    elif extension == ".png":
-        print("Content-Type: image/png")
-    elif extension == ".pdf":
-        print("Content-Type: application/pdf")
-    else:
-        print("Content-Type: text/plain")
-    print("\r")
-    print(file_content)
-    print("\r")
+
+    headers = (
+        "HTTP/1.1 200 OK\r\n"
+        "Content-Type: {}\r\n"
+        "Content-Length: {}\r\n"
+        "Connection: close\r\n"
+        "\r\n"
+    ).format(content_type, len(file_content)).encode()
+
+    sys.stdout.buffer.write(headers)
+    sys.stdout.buffer.write(file_content)
+    sys.stdout.buffer.flush()
 
 else:
     print("HTTP/1.1 405 Method Not Allowed")

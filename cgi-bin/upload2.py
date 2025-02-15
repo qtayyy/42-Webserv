@@ -1,9 +1,9 @@
 import os
 import sys
-# sys.stdout = open('output2.log', 'w')
-pdf_path = "/home/cooper/coreProgram/qi_ter_webserv/public/upload/webserv.pdf"
 
-if not os.path.exists(pdf_path):
+png_path = "/home/cooper/coreProgram/qi_ter_webserv/public/upload/screenshot.png"
+
+if not os.path.exists(png_path):
     not_found = b"HTTP/1.1 404 Not Found\r\n" \
                 b"Content-Type: text/plain\r\n" \
                 b"Content-Length: 13\r\n" \
@@ -13,13 +13,17 @@ if not os.path.exists(pdf_path):
     sys.stdout.buffer.flush()
     sys.exit()
 
-with open(pdf_path, 'rb') as file:
+with open(png_path, 'rb') as file:
     file_content = file.read()
 
-headers = b"HTTP/1.1 200 OK\r\n" \
-          b"Content-Type: application/pdf\r\n" \
-          b"Content-Length: " + str(len(file_content)).encode() + b"\r\n" \
-          b"\r\n\r\n"
+headers = (
+    "HTTP/1.1 200 OK\r\n"
+    "Content-Type: image/png\r\n"
+    "Content-Length: {}\r\n"
+    "Connection: close\r\n"
+    "\r\n"
+).format(len(file_content)).encode()
 
-sys.stdout.buffer.write(headers + file_content)
-sys.stdout.buffer.flush()   
+sys.stdout.buffer.write(headers)
+sys.stdout.buffer.write(file_content)
+sys.stdout.buffer.flush()
