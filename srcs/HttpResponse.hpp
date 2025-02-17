@@ -76,8 +76,8 @@ public:
 
     void initCGIResponse(string cgiPath, HttpRequest request);
 
-    void handleGetResponse(HttpRequest &request, ServerBlock *serverBlock);
-    void handlePostRequest(HttpRequest &request, ServerBlock *serverBlock);
+    void handleGet(HttpRequest &request, ServerBlock *serverBlock);
+    void handPost(HttpRequest &request, ServerBlock *serverBlock);
 
     void NewFunction(HttpRequest &request);
 

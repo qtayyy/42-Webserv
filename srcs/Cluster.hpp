@@ -8,6 +8,14 @@
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
 
+#include <iostream>
+#include <fstream>
+#include <cstring>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <unistd.h>
+
 class Cluster
 {
 	public:

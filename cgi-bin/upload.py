@@ -106,11 +106,12 @@ if request_method == "POST":
                 file_path = os.path.join(route, file_item.filename)
                 with open(file_path, 'wb') as f:
                     f.write(file_item.file.read())
-                print(raw_success_page.replace("%filename", file_item.filename).replace("%route", route))
+                string = generate_response_string(raw_success_page.replace("%filename", file_item.filename).replace("%route", route), status_code=200, status_message="OK")
+                print(string)
             else:
                 print("No file content.")
         else:
-            print("No file uploaded.")
+            print(generate_error_page("400 Bad Request", "No file was uploaded."))
     except Exception as e:
         print(f"Error: {e}")
 

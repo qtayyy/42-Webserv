@@ -221,14 +221,14 @@ HttpRequest mockRequest(string path, string path_info) {
     return request;
 }
 
-HttpRequest mockUploadPOSTRequest(string path, string path_info) {
+HttpRequest mockUploadPOSTRequest() {
     HttpRequest request;
 
 	request.setRawRequest(readFileContent("test_post_request"));
 	request.setBody(readFileContent("test_post_request"));
 
-    request.headerSet("path", path);
-    request.headerSet("path_info", path_info);
+    request.headerSet("path", "/upload/upload.py");
+    request.headerSet("path_info", "");
     request.headerSet("query_string", "name=John&age=30");
     request.headerSet("method", "POST");
     request.headerSet("content_type", "multipart/form-data; boundary=boundary");
@@ -240,87 +240,13 @@ HttpRequest mockUploadGETRequest() {
     HttpRequest request;
 
     request.headerSet("path", "/upload/upload.py");
-    request.headerSet("path_info", "test.html");
+    request.headerSet("path_info", "webserv.pdf");
     request.headerSet("query_string", "name=John&age=30");
     request.headerSet("method", "GET");
 
     return request;
 }
 
-#include <iostream>
-#include <fstream>
-#include <cstring>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <unistd.h>
-
-std::string constructHttpResponse(std::string pdf_file) {
-	std::ifstream file(pdf_file.c_str(), std::ios::in | std::ios::binary);
-
-    // Read the entire file content into a string
-    std::string file_content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-    file.close();
-    
-    // Send HTTP response headers
-    std::string headers = "HTTP/1.1 200 OK\r\n";
-    headers += "Content-Type: application/pdf\r\n";
-    headers += "Connection: close\r\n";
-    headers += "Content-Length: " + to_string(file_content.size()) + "\r\n";
-    headers += "\r\n";
-    
-    // Combine headers and file content
-    std::string response = headers + file_content;
-    
-    // Send the entire response in a single send call
-
-    std::cout << "" << response.c_str() << std::endl;
-
-    return response;
-}
-
-#define BUFF_SIZE 30000
-
-void sendHttpResponse(int client_sock, const std::string &pdf_file) {
-	std::ifstream file(pdf_file.c_str(), std::ios::binary | std::ios::ate);
-	if (!file) {
-		std::string not_found = "HTTP/1.1 404 Not Found\r\n"
-								"Content-Type: text/plain\r\n"
-								"Content-Length: 13\r\n"
-								"Connection: close\r\n\r\n"
-								"404 Not Found";
-		send(client_sock, not_found.c_str(), not_found.size(), 0);
-		return;
-	}
-
-	std::ifstream::pos_type file_size = file.tellg();
-	file.seekg(0, std::ios::beg);
-
-	// Read the entire file content into a string
-	std::string file_content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-	file.close();
-
-	// Send HTTP response headers
-	std::string headers = "HTTP/1.1 200 OK\r\n"
-						  "Content-Type: application/pdf\r\n"
-						  "Content-Length: " + to_string(file_content.size()) + "\r\n"
-						  "\r\n\r\n";
-
-	// Combine headers and file content
-	std::string response = headers + file_content;
-
-	// Send the entire response in a single send call
-	int bytes = send(client_sock, response.c_str(), response.size(), 0);
-	std::cout << "response:: " << response << std::endl;
-	std::cout << "bytes:: " << bytes << std::endl;
-	std::ofstream outFile("output.log");
-	if (outFile.is_open()) {
-		outFile << response;
-		outFile.close();
-	} 
-	else
-		std::cerr << "Unable to open file for writing" << std::endl;
-}
 
 // ============================== RUN ALL SERVERS =============================
 
@@ -347,43 +273,120 @@ void Cluster::run(void) {
                 }
             }
             if (_pollFds[i].revents & POLLOUT) { // If an fd is ready for writing
-				//sendHttpResponse(_pollFds[i].fd, "/home/cooper/coreProgram/qi_ter_webserv/public/upload/webserv.pdf");
-				
-
-				
-				
 				HttpRequest request = mockUploadGETRequest();
 				HttpResponse response = HttpResponse(request, &_servers[0]);
 				
 				string finalMsg = response.getFinalResponseMsg();
 				
-				// finalMsg = readFileContent("output2.log");
-
-
-				int bytes = send(_pollFds[i].fd, finalMsg.c_str(), finalMsg.size(), 0);
-
-				// close(_pollFds[i].fd);
-				_clients.erase(_pollFds[i].fd);
-				_pollFds[i] = _pollFds[--_numOfFds];
-				_pollFds[i].events = POLLIN;
-				i--;
-
-				
-				
-				//sendHttpResponse(_pollFds[i].fd, "/home/cooper/coreProgram/qi_ter_webserv/public/upload/webserv.pdf");
-
-				// close(_pollFds[i].fd);
-				// _clients.erase(_pollFds[i].fd);
-				// _pollFds[i] = _pollFds[--_numOfFds];
-				// _pollFds[i].events = POLLIN;
-				// i--;
-            }
+				ssize_t bytesSent = 0;
+				ssize_t totalBytes = finalMsg.size();
+				while (bytesSent < totalBytes) {
+					ssize_t bytes = send(_pollFds[i].fd, finalMsg.c_str() + bytesSent, totalBytes - bytesSent, 0);
+					if (bytes < 0) {
+						if (errno == EAGAIN || errno == EWOULDBLOCK) {
+							// Wait for the socket to be ready for writing again
+							struct pollfd pfd = { _pollFds[i].fd, POLLOUT, 0 };
+							poll(&pfd, 1, -1); // Wait indefinitely
+							continue;
+						} else {
+							perror("send");
+							break;
+						}
+					}
+					bytesSent += bytes;
+				}
+			
+				// Ensure all data has been sent before closing the file descriptor
+				if (bytesSent == totalBytes) {
+					char buffer[4096] = {0};
+					read(_pollFds[i].fd, buffer, 4095);
+					close(_pollFds[i].fd);
+					_clients.erase(_pollFds[i].fd);
+					_pollFds[i] = _pollFds[--_numOfFds];
+					i--;
+					
+					std::cout << std::endl << "Response :" << std::endl;
+					std::cout << "[" << GREEN << std::string(buffer) << RESET << "]" << std::endl << std::endl;
+				} else {
+					// Handle the case where not all data was sent
+					std::cerr << "Error: Not all data was sent" << std::endl;
+				}
+			}
         }
     }
 }
-// HttpRequest request = mockUploadPOSTRequest("/upload/", "/dir2");
-//HttpRequest request = mockRequest("/upload.html", "/dir2");
-// HttpRequest request = mockUploadGETRequest();
+
+
+
+// std::string constructHttpResponse(std::string pdf_file) {
+// 	std::ifstream file(pdf_file.c_str(), std::ios::in | std::ios::binary);
+
+//     // Read the entire file content into a string
+//     std::string file_content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+//     file.close();
+    
+//     // Send HTTP response headers
+//     std::string headers = "HTTP/1.1 200 OK\r\n";
+//     headers += "Content-Type: application/pdf\r\n";
+//     headers += "Connection: close\r\n";
+//     headers += "Content-Length: " + to_string(file_content.size()) + "\r\n";
+//     headers += "\r\n";
+    
+//     // Combine headers and file content
+//     std::string response = headers + file_content;
+    
+//     // Send the entire response in a single send call
+
+//     std::cout << "" << response.c_str() << std::endl;
+
+//     return response;
+// }
+
+// #define BUFF_SIZE 30000
+
+// void sendHttpResponse(int client_sock, const std::string &pdf_file) {
+// 	std::ifstream file(pdf_file.c_str(), std::ios::binary | std::ios::ate);
+// 	if (!file) {
+// 		std::string not_found = "HTTP/1.1 404 Not Found\r\n"
+// 								"Content-Type: text/plain\r\n"
+// 								"Content-Length: 13\r\n"
+// 								"Connection: close\r\n\r\n"
+// 								"404 Not Found";
+// 		send(client_sock, not_found.c_str(), not_found.size(), 0);
+// 		return;
+// 	}
+
+// 	std::ifstream::pos_type file_size = file.tellg();
+// 	file.seekg(0, std::ios::beg);
+
+// 	// Read the entire file content into a string
+// 	std::string file_content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+// 	file.close();
+
+// 	// Send HTTP response headers
+// 	std::string headers = "HTTP/1.1 200 OK\r\n"
+// 						  "Content-Type: application/pdf\r\n"
+// 						  "Content-Length: " + to_string(file_content.size()) + "\r\n"
+// 						  "\r\n\r\n";
+
+// 	// Combine headers and file content
+// 	std::string response = headers + file_content;
+
+// 	// Send the entire response in a single send call
+// 	int bytes = send(client_sock, response.c_str(), response.size(), 0);
+// 	std::cout << "response:: " << response << std::endl;
+// 	std::cout << "bytes:: " << bytes << std::endl;
+// 	std::ofstream outFile("output.log");
+// 	if (outFile.is_open()) {
+// 		outFile << response;
+// 		outFile.close();
+// 	} 
+// 	else
+// 		std::cerr << "Unable to open file for writing" << std::endl;
+// }
+
+
+
 
 // HELPER FUNCTION FOR CLUSTER::RUN()
 void	Cluster::handleNewClient(int listenerFd)

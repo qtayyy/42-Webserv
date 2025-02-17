@@ -18,7 +18,7 @@ const stringDict HttpResponse::contentTypeMap = HttpResponse::createContentTypeM
 
 /* CONSTRUCTORS */
 
-void HttpResponse::handleGetResponse(HttpRequest &request, ServerBlock *serverBlock) {
+void HttpResponse::handleGet(HttpRequest &request, ServerBlock *serverBlock) {
     string path = request.headerGet("path");
     
     path = applyAlias(path);
@@ -94,7 +94,7 @@ void HttpResponse::handleGetResponse(HttpRequest &request, ServerBlock *serverBl
 
 
 
-void HttpResponse::handlePostRequest(HttpRequest &request, ServerBlock *serverBlock) {
+void HttpResponse::handPost(HttpRequest &request, ServerBlock *serverBlock) {
 
     // get first item
 	(void)serverBlock;
@@ -147,14 +147,22 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
     }
 
     if (request.headerGet("method") == "GET") {
-        this->handleGetResponse(request, serverBlock);
+        this->handleGet(request, serverBlock);
         // this->finalResponseMsg = constructHttpResponse("/home/cooper/coreProgram/qi_ter_webserv/public/upload/webserv.pdf");
         // std::cout << "final respnse" << this->finalResponseMsg << std::endl;
     } 
     
     else if (request.headerGet("method") == "POST") {
-        this->handlePostRequest(request, serverBlock);
+        this->handPost(request, serverBlock);
         // this->finalResponseMsg = constructHttpResponse("/home/cooper/coreProgram/qi_ter_webserv/public/upload/webserv.pdf");
+    }
+
+    else if (request.headerGet("method") == "DELETE") {
+        if (remove(path.c_str()) == 0) {
+            this->initHttpResponseSelf("File deleted successfully", CONTENT_TYPE_HTML, 200);
+        } else {
+            this->initErrorHttpResponse(500);
+        }
     }
     
     else {
