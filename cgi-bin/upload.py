@@ -7,6 +7,7 @@ from urllib.parse import unquote
 import cgitb
 from textwrap import dedent
 
+
 CONTENT_TYPES = {
         ".html": "text/html",
         ".css": "text/css",

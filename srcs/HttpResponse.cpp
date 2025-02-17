@@ -23,22 +23,20 @@ void HttpResponse::handleGet(HttpRequest &request, ServerBlock *serverBlock) {
     
     path = applyAlias(path);
     
-    stringList limitExcept = this->_locationBlockRef->getLimitExcept();
+    // Check if a redirect is required
+    std::pair<int, std::string> redirectInfo = this->getBlock()->getReturn();
+    if (!redirectInfo.second.empty()) {
+        std::cout << "redirecting to :" << redirectInfo.second << std::endl;
+        this->initRedirectResponse(redirectInfo.second, redirectInfo.first);
+        return;
+    }
 
-
-    if (!this->_locationBlockRef->getCgiPass().empty()) {
-        this->initCGIResponse(this->_locationBlockRef->getCgiPass(), request);
+    if (!this->getBlock()->getCgiPass().empty()) {
+        this->initCGIResponse(this->getBlock()->getCgiPass(), request);
         return;
     }
 
     try {
-        // Check if a redirect is required
-        std::pair<int, std::string> redirectInfo = this->_locationBlockRef->getReturn();
-        if (!redirectInfo.second.empty()) {
-            this->initRedirectResponse(redirectInfo.second, redirectInfo.first);
-            return;
-        }
-
 
         string reroutedPath = reroutePath(path);
         string content = readFileContent(reroutedPath);
@@ -92,52 +90,58 @@ void HttpResponse::handleGet(HttpRequest &request, ServerBlock *serverBlock) {
 }
 
 
-
-
-void HttpResponse::handPost(HttpRequest &request, ServerBlock *serverBlock) {
-
-    // get first item
-	(void)serverBlock;
-    string cgiPass = this->_locationBlockRef->getCgiPass();
-
-    this->initCGIResponse(cgiPass, request);
-
-    
-    // exit(0);
-    
-    // string contentDisposition = request.getFormBlock(0)->at("Content-Disposition");
-    // stringList contentDispositionTokens = splitString(contentDisposition, ';');
-    // string fileName = contentDispositionTokens[2].substr(contentDispositionTokens[1].find("filename=") + 12);
-    // fileName = fileName.substr(0, fileName.size() - 1);
-    // fileName = reroutePath(request.headerGet("path") + "/" + fileName);
-    // std::cout << "file: " << fileName << std::endl;
-    
-    // string fileContents = request.getFormBlock(0)->at("Body");
-    
-    // //create file
-    // std::ofstream file(fileName.c_str());
-    // file << fileContents;
-    // file.close();
-
-    // if (doesPathExist(fileName)) {
-    //     this->initHttpResponseSelf("File uploaded successfully: " + fileName, CONTENT_TYPE_HTML, 200);
-    // } else {
-    //     this->initErrorHttpResponse(500);
-    // }
+LocationBlock *HttpResponse::getBlock() {
+    if (this->_locationBlockRef) {
+        return dynamic_cast<LocationBlock*>(this->_locationBlockRef);
+    } else {
+        return this->emptyBlock;
+    }
 }
 
 
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <vector>
+void HttpResponse::handlePost(HttpRequest &request, ServerBlock *serverBlock) {
+    string cgiPass = this->getBlock()->getCgiPass();
+
+    this->initCGIResponse(cgiPass, request);
+}
+
+
+void HttpResponse::handleDelete(string path) {
+    path = reroutePath(path);
+    if (!doesPathExist(path)) {
+        this->initErrorHttpResponse(404);
+        std::cout << "FILE DOESN'T EXIST: " << path << std::endl;
+        return; 
+    } 
+
+    int status = remove(path.c_str());
+
+    if (status == 0) {
+        this->initHttpResponseSelf("File deleted successfully", CONTENT_TYPE_HTML, 200);
+    } 
+    
+    else {
+        std::cout << path << " could not be deleted. Status: " << status << std::endl;
+        this->initErrorHttpResponse(500);
+    }
+}
 
 
 HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
+    this->emptyBlock = new LocationBlock();
     string path = request.headerGet("path");
     this->_serverBlockRef = serverBlock;
     this->_locationBlockRef = getRelevantLocationBlock(path, serverBlock);
 
+    if (this->_locationBlockRef == NULL) {
+        this->_locationBlockRef = serverBlock;
+        this->isLocation = false;
+        std::cout << YELLOW << path << " Does not match any location. Defaulting..." << RESET << std::endl;
+    }
+    else {
+        std::cout << "Location matches location block: " << this->getBlock()->getUri() << std::endl;
+    }
+    
     stringList limitExcept = this->_locationBlockRef->getLimitExcept();
 
     // Check if the request method is allowed
@@ -146,21 +150,19 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
         return;
     }
 
-    
-    if (request.headerGet("method") == "GET") {
+
+    string method = request.headerGet("method");
+
+    if (method == "GET") {
         this->handleGet(request, serverBlock);
     } 
     
-    else if (request.headerGet("method") == "POST") {
-        this->handPost(request, serverBlock);
+    else if (method == "POST") {
+        this->handlePost(request, serverBlock);
     }
 
-    else if (request.headerGet("method") == "DELETE") {
-        if (remove(path.c_str()) == 0) {
-            this->initHttpResponseSelf("File deleted successfully", CONTENT_TYPE_HTML, 200);
-        } else {
-            this->initErrorHttpResponse(500);
-        }
+    else if (method == "DELETE") {
+        this->handleDelete(path);
     }
     
     else {
@@ -172,7 +174,7 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
 
 /* GENERATORS */
 
-string HttpResponse::createErrorPage(string errorPagePath, int statusCode) const {
+string HttpResponse::createStatusPageStr(string errorPagePath, int statusCode) const {
     string errorFileContents = readFileContent(errorPagePath);
         
     std::pair<std::string, std::string> details = CodeToMessage(statusCode);
@@ -266,19 +268,19 @@ void HttpResponse::initErrorHttpResponse(int statusCode) {
         try {
             this->initHttpResponseSelf(readFileContent(errorPage), CONTENT_TYPE_HTML, statusCode);
         } catch (const HttpException& e) {
-            this->initHttpResponseSelf(createErrorPage("public/error.html", 500), CONTENT_TYPE_HTML, 500);
+            this->initHttpResponseSelf(createStatusPageStr("public/error.html", 500), CONTENT_TYPE_HTML, 500);
         }
     } 
     
     else {
-        this->initHttpResponseSelf(createErrorPage("public/error.html", statusCode), CONTENT_TYPE_HTML, statusCode);
+        this->initHttpResponseSelf(createStatusPageStr("public/error.html", statusCode), CONTENT_TYPE_HTML, statusCode);
     }
 }
 
 void HttpResponse::initCGIResponse(string cgiPath, HttpRequest request) {
 
     cgiPath = getAbsolutePath(cgiPath);
-    if (!doesPathExist(cgiPath) || this->_locationBlockRef->getCgiPass().empty()) {
+    if (!doesPathExist(cgiPath) || this->getBlock()->getCgiPass().empty()) {
         std::cout << "path doesn't exist" << cgiPath << std::endl;
         this->initErrorHttpResponse(500);
         return;
@@ -287,9 +289,9 @@ void HttpResponse::initCGIResponse(string cgiPath, HttpRequest request) {
     string pathToHandle = request.headerGet("path_info");
 
     CGIHandler cgiHandler = CGIHandler();
-    string absolutePath = getAbsolutePath(this->_locationBlockRef->getUploadPath() + pathToHandle);
+    string absolutePath = getAbsolutePath(this->getBlock()->getUploadPath() + pathToHandle);
 
-    request.headerSet("path", absolutePath);
+    request.headerSet("absolute_path", absolutePath);
 
     int exit_status = 0;
     string response_content = cgiHandler.handleCgiRequest(cgiPath, request, exit_status, *this->_serverBlockRef);
@@ -314,7 +316,7 @@ string HttpResponse::decideCGIToUse(string resourcePath) {
     // }
     // return "";
 	(void)resourcePath;
-	return (CGI_BIN_PATH + string("/") + this->_locationBlockRef->getCgiPass());
+	return (CGI_BIN_PATH + string("/") + this->getBlock()->getCgiPass());
 }
 
 string HttpResponse::getContentType(const string& resourcePath) {
@@ -376,7 +378,8 @@ LocationBlock* HttpResponse::getRelevantLocationBlock(const string& path, Server
     std::vector<LocationBlock> *locations = serverBlock->getLocation();
     LocationBlock* locationBlock = NULL;
     string directory = getDirectory(path);
-
+    
+    
     for (std::vector<LocationBlock>::iterator it = locations->begin(); it != locations->end(); ++it) {
         if (startsWith(directory, it->getUri()) && (locationBlock == NULL || it->getUri().size() > locationBlock->getUri().size())) {
             locationBlock = &(*it);

@@ -2,8 +2,11 @@
 #include "HttpException.hpp"
 
 void setEnvironmentVariables(stringDict envVars) {
+
+    std::cout << YELLOW << "Setting env.." << YELLOW << std::endl;
     for (stringDict::const_iterator it = envVars.begin(); it != envVars.end(); ++it) {
         setenv(it->first.c_str(), it->second.c_str(), 1);
+        std::cout << std::left << YELLOW << std::setw(20) << "\t" + it->first << RESET << it->second << std::endl;
     }
 }
 
@@ -61,15 +64,25 @@ CGIHandler::~CGIHandler() {
 // }
 
 
+void CGIHandler:: runCGIExecutable(string &cgiScriptPath, string &requestedFilepath) {
+    if (endsWith(cgiScriptPath, ".py")) {
+        execl("/usr/bin/python3", "python3", cgiScriptPath.c_str(), requestedFilepath.c_str(), NULL);
+    }
 
-string CGIHandler:: handleCgiRequest(const string& cgiScriptPath, HttpRequest &request, int &exitStatus, ServerBlock &serverBlock) {
+    else {
+        execl(cgiScriptPath.c_str(), cgiScriptPath.c_str(), requestedFilepath.c_str(), NULL);
+    }
+}
+
+string CGIHandler:: handleCgiRequest(string& cgiScriptPath, HttpRequest &request, int &exitStatus, ServerBlock &serverBlock) {
     int inputPipe[2];  // Pipe for sending request body (stdin for CGI)
     int outputPipe[2]; // Pipe for capturing CGI output (stdout from CGI)
 
     if (pipe(inputPipe) == -1 || pipe(outputPipe) == -1) 
         throw std::runtime_error("pipe failed: " + string(strerror(errno)));
 
-    string data = readFileContent("test_post_request");
+    string data              = request.getBody();
+    string requestedFilepath = request.headerGet("path_info");
 
     // Set environment variables
     this->setEnv("REQUEST_METHOD",  request.headerGet("method"));
@@ -77,14 +90,15 @@ string CGIHandler:: handleCgiRequest(const string& cgiScriptPath, HttpRequest &r
     this->setEnv("SCRIPT_NAME",     cgiScriptPath);
     this->setEnv("SERVER_NAME",     "localhost");
     this->setEnv("SERVER_PORT",     "8080");
-    this->setEnv("PATH_INFO",       request.headerGet("path_info"));
-    this->setEnv("PATH_TRANSLATED", request.headerGet("path"));
+    this->setEnv("PATH_INFO",       requestedFilepath);
+    this->setEnv("PATH_TRANSLATED", request.headerGet("absolute_path"));
     this->setEnv("CONTENT_LENGTH",  to_string(data.length()));
     this->setEnv("CONTENT_TYPE",    request.headerGet("content_type"));
     setEnvironmentVariables(this->envVars);
 
+    std::cout << YELLOW << "Running CGI..." << RESET << std::endl;
+
     pid_t pid = fork();
-    string requestedFilepath = request.headerGet("path_info");
 
     if (pid < 0) throw std::runtime_error("fork failed: " + string(strerror(errno)));
 
@@ -101,13 +115,7 @@ string CGIHandler:: handleCgiRequest(const string& cgiScriptPath, HttpRequest &r
         dup2(outputPipe[1], STDOUT_FILENO);
         close(outputPipe[1]); // Close the original write end
 
-        if (endsWith(cgiScriptPath, ".py")) {
-            execl("/usr/bin/python3", "python3", cgiScriptPath.c_str(), requestedFilepath.c_str(), NULL);
-        }
-
-        else {
-            execl(cgiScriptPath.c_str(), cgiScriptPath.c_str(), requestedFilepath.c_str(), NULL);
-        }
+        runCGIExecutable(cgiScriptPath, requestedFilepath);
         
         perror(("execl failed: " + cgiScriptPath).c_str());
         exit(1);
@@ -131,9 +139,7 @@ string CGIHandler:: handleCgiRequest(const string& cgiScriptPath, HttpRequest &r
             responseBuffer.insert(responseBuffer.end(), buffer, buffer + bytesRead);
             totalBytes += bytesRead;
         }
-
-        std::cout << "TOTAL BYTES" << totalBytes << std::endl;
-        std::cout << "LENGTH RESPONSE" << responseBuffer.size() << std::endl;
+        std::cout << GREEN << "CGI completed. " << totalBytes << " bytes received from " << basename(cgiScriptPath.c_str()) << RESET << std::endl;
         
         close(outputPipe[0]);  // Close read end after reading
 

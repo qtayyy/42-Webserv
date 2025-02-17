@@ -240,7 +240,7 @@ HttpRequest mockUploadGETRequest() {
     HttpRequest request;
 
     request.headerSet("path", "/upload/upload.py");
-    request.headerSet("path_info", "webserv.pdf");
+    request.headerSet("path_info", "");
     request.headerSet("query_string", "name=John&age=30");
     request.headerSet("method", "GET");
 
@@ -250,10 +250,10 @@ HttpRequest mockUploadGETRequest() {
 HttpRequest mockDeleteRequest() {
     HttpRequest request;
 
-    request.headerSet("path", "/upload/upload.py");
+    request.headerSet("path", "/upload/ok.pdf");
     request.headerSet("path_info", "webserv.pdf");
     request.headerSet("query_string", "name=John&age=30");
-    request.headerSet("method", "GET");
+    request.headerSet("method", "DELETE");
 
     return request;
 }
@@ -284,7 +284,7 @@ void Cluster::run(void) {
                 }
             }
             if (_pollFds[i].revents & POLLOUT) { // If an fd is ready for writing
-				HttpRequest request = mockUploadGETRequest();
+				HttpRequest request = mockUploadPOSTRequest();
 				HttpResponse response = HttpResponse(request, &_servers[0]);
 				
 				string finalMsg = response.getFinalResponseMsg();

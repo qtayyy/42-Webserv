@@ -23,8 +23,11 @@ private:
     string  contentType;
     string  finalResponseMsg;
 
+    bool isLocation;
+    LocationBlock *emptyBlock;
+
     ServerBlock *_serverBlockRef;
-    LocationBlock *_locationBlockRef;
+    Block *_locationBlockRef;
     string containsIndexFile(string path);
 
     LocationBlock *getRelevantLocationBlock(const string &path, ServerBlock *serverBlock);
@@ -43,7 +46,7 @@ private:
     std::time_t timestamp;    // Error occurrence time
 
     std::pair<std::string, std::string> CodeToMessage(int code) const;
-    string createErrorPage(string errorPagePath, int statusCode) const;
+    string createStatusPageStr(string errorPagePath, int statusCode) const;
     void displayError() const;
 
 public:
@@ -77,9 +80,12 @@ public:
     void initCGIResponse(string cgiPath, HttpRequest request);
 
     void handleGet(HttpRequest &request, ServerBlock *serverBlock);
-    void handPost(HttpRequest &request, ServerBlock *serverBlock);
+    LocationBlock *getBlock();
+    void handlePost(HttpRequest &request, ServerBlock *serverBlock);
 
     void NewFunction(HttpRequest &request);
+
+    void handleDelete(string path);
 
     HttpResponse(HttpRequest &request, ServerBlock *ServerBlock);
 
