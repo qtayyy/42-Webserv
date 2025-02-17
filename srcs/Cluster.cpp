@@ -247,6 +247,17 @@ HttpRequest mockUploadGETRequest() {
     return request;
 }
 
+HttpRequest mockDeleteRequest() {
+    HttpRequest request;
+
+    request.headerSet("path", "/upload/upload.py");
+    request.headerSet("path_info", "webserv.pdf");
+    request.headerSet("query_string", "name=John&age=30");
+    request.headerSet("method", "GET");
+
+    return request;
+}
+
 
 // ============================== RUN ALL SERVERS =============================
 

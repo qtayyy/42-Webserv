@@ -146,15 +146,13 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
         return;
     }
 
+    
     if (request.headerGet("method") == "GET") {
         this->handleGet(request, serverBlock);
-        // this->finalResponseMsg = constructHttpResponse("/home/cooper/coreProgram/qi_ter_webserv/public/upload/webserv.pdf");
-        // std::cout << "final respnse" << this->finalResponseMsg << std::endl;
     } 
     
     else if (request.headerGet("method") == "POST") {
         this->handPost(request, serverBlock);
-        // this->finalResponseMsg = constructHttpResponse("/home/cooper/coreProgram/qi_ter_webserv/public/upload/webserv.pdf");
     }
 
     else if (request.headerGet("method") == "DELETE") {
