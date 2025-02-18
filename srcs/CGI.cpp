@@ -149,7 +149,6 @@ string CGIHandler:: handleCgiRequest(string& cgiScriptPath, HttpRequest &request
         if (WIFSIGNALED(status)) {
             int signal = WTERMSIG(status);
             std::cout << "Child process terminated by signal: " << signal << std::endl;
-            throw HttpException(500);
         }
 
         exitStatus = WEXITSTATUS(status);
