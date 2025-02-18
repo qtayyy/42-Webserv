@@ -213,23 +213,23 @@ std::map<std::string, void (LocationBlock::*)(std::vector<std::string>)>	Locatio
 
 void	LocationBlock::printBlock()
 {
-	std::cout << "location root: " << this->getRoot() << "\n";
-	std::cout << "location autoindex: " << this->getAutoindex() << "\n";
-	std::cout << "location client max body size: " << this->getClientMaxBodySize() << "\n";
-	std::vector<std::string> allowedMethods = this->getLimitExcept();
-	for (std::vector<std::string>::iterator it = allowedMethods.begin(); it != allowedMethods.end(); it++)
-		std::cout << "location allowed methods: "  << *it << std::endl;
+	std::cout << std::left << std::setw(25) << "location root:" << this->getRoot() << "\n";
+	std::cout << std::left << std::setw(25) << "location autoindex:" << this->getAutoindex() << "\n";
+	std::cout << std::left << std::setw(25) << "location client max body size:" << this->getClientMaxBodySize() << "\n";
+	stringList allowedMethods = this->getLimitExcept();
+	for (stringList::iterator it = allowedMethods.begin(); it != allowedMethods.end(); it++)
+		std::cout << std::left << std::setw(25) << "location allowed methods:" << *it << std::endl;
 	std::vector<std::string> allIndexes = this->getIndex();
 	for (std::vector<std::string>::iterator it = allIndexes.begin(); it != allIndexes.end(); it++)
-		std::cout << "location indexes: "  << *it << std::endl;
-	std::cout << "location cgi_pass: " << this->getCgiPass() << "\n";
-	std::cout << "location upload_path: " << this->getUploadPath() << "\n";
-	std::cout << "location uri: " << this->getUri() << "\n";
-	std::cout << "location alias: " << this->getAlias() << "\n";
+		std::cout << std::left << std::setw(25) << "location indexes:" << *it << std::endl;
+	std::cout << std::left << std::setw(25) << "location cgi_pass:" << this->getCgiPass() << "\n";
+	std::cout << std::left << std::setw(25) << "location upload_path:" << this->getUploadPath() << "\n";
+	std::cout << std::left << std::setw(25) << "location uri:" << this->getUri() << "\n";
+	std::cout << std::left << std::setw(25) << "location alias:" << this->getAlias() << "\n";
 	if (_return.first != 0)
-		std::cout << "location return: " << this->getReturn().first << " " << this->getReturn().second << "\n";
+		std::cout << std::left << std::setw(25) << "location return:" << this->getReturn().first << " " << this->getReturn().second << "\n";
 	std::map<int, std::string> errorpages = this->getErrorPage();
 	for (std::map<int, std::string>::iterator it = errorpages.begin(); it != errorpages.end(); it++)
-		std::cout << "location error code: " << it->first << " " << it->second << std::endl;
+		std::cout << std::left << std::setw(25) << "location error code:" << it->first << " " << it->second << std::endl;
 	std::cout << "\n";
 }

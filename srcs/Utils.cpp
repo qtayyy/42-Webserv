@@ -114,16 +114,17 @@ string readFileContent(const string& filePath) {
     return content;
 }
 
-string listFiles(const string &path) {
+std::vector<string> listFiles(const string &path) {
     struct dirent *entry;
     DIR *dir = opendir(path.c_str());
-    string files = "";
+    std::vector<string> files;
     if (dir == NULL) {
         std::cerr << "Error opening directory" << std::endl;
+        return files;
     }
     while ((entry = readdir(dir)) != NULL) {
-        files += entry->d_name;
-        files += "\n";
+        files.push_back(entry->d_name);
     }
+    closedir(dir);
     return files;
 }

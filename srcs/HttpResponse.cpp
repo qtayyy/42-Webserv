@@ -137,6 +137,7 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
     this->_serverBlockRef = serverBlock;
     this->_locationBlockRef = getRelevantLocationBlock(path, serverBlock);
 
+
     if (this->_locationBlockRef == NULL) {
         this->_locationBlockRef = serverBlock;
         this->isLocation = false;
@@ -146,10 +147,12 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
         std::cout << "\tLocation matches location block: " << this->getBlock()->getUri() << std::endl;
     }
     
+    this->getBlock()->printBlock();
+
     stringList limitExcept = this->_locationBlockRef->getLimitExcept();
 
     // Check if the request method is allowed
-    if (std::find(limitExcept.begin(), limitExcept.end(), request.headerGet("method")) == limitExcept.end()) {
+    if (std::find(limitExcept.begin(), limitExcept.end(), request.getMethod()) == limitExcept.end()) {
         this->initErrorHttpResponse(405);
         return;
     }
@@ -207,33 +210,77 @@ string HttpResponse::createResponseString(
     return response.str();
 }
 
-// response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
-// response.headers["Pragma"] = "no-cache";
-// response.headers["Expires"] = "0";
+string Css() {
+    return 
+"       body {"
+"           font-family: Arial, sans-serif;"
+"           background-color: #f4f4f4;"
+"           margin: 0;"
+"           padding: 20px;"
+"       }"
+"       h1 {"
+"           color: #4CAF50;"
+"       }"
+"       table {"
+"           width: 100%;"
+"           border-collapse: collapse;"
+"           border-radius: 10px;"
+"           overflow: hidden;"
+"           padding: 10px;"
+"       }"
+"       th, td {"
+"           text-align: left;"
+"           background: #fff;"
+"           padding: 10px;"
+"       }"
+"       a {"
+"           color: #1E90FF;"
+"       }"
+"       .folder {"
+"           color:rgb(0, 255, 251);"
+"       }"
+"       .error {"
+"           color: red;"
+"           font-weight: bold;"
+"       }";
+}
+
+int getFileSize(const std::string& filePath) {
+    struct stat stat_buf;
+    int rc = stat(filePath.c_str(), &stat_buf);
+    return rc == 0 ? stat_buf.st_size : -1;
+}
 
 string HttpResponse::createAutoIndexHtml(string path) {
     std::stringstream ss;
-    ss << "<html><head><title>Index of " << path << "</title></head><body>";
-    ss << "<h1>Index of " << path << "</h1><ul>";
+    ss << "<html><head><title>Index of " << path << "</title>";
+    ss << "<style>" << Css() << "</style></head><body>";
+    ss << "<h1>Index of " << path << "</h1><table>";
+    ss << "<tr><th>Name</th><th>Size</th></tr>"; // Table header
 
-    DIR* dir = opendir(path.c_str());
-    if (dir) {
-        struct dirent* entry;
-        while ((entry = readdir(dir)) != NULL) {
-            string name = entry->d_name;
-            if (name != "." && name != "..") {
-                ss << "<li><a href=\"" << name << "\">" << name << "</a></li>";
-            }
+    std::vector<string> files = listFiles(path);
+    if (!files.empty()) {
+        for (std::vector<string>::iterator it = files.begin(); it != files.end(); ++it) {
+            if (*it == "." || *it == "..")
+                continue;
+            
+            std::string fullPath = path + "/" + *it;
+            std::string fileSize = isDirectory(fullPath) ? "-" : to_string(getFileSize(fullPath));
+
+            if (isDirectory(fullPath))
+                ss << "<tr><td><a class=\"folder\" href=\"" << *it << "\">" << *it << "</a></td><td>" << fileSize << "</td></tr>";
+            else
+                ss << "<tr><td><a href=\"" << *it << "\">" << *it << "</a></td><td>" << fileSize << "</td></tr>";
         }
-        closedir(dir);
-    } else {
-        ss << "<li>Unable to open directory</li>";
+    } 
+    
+    else {
+        ss << "<tr><td>Unable to open directory</td></tr>";
     }
 
-    ss << "</ul></body></html>";
+    ss << "</table></body></html>";
     return ss.str();
 }
-
 
 
 /* GETTERS */
@@ -274,18 +321,28 @@ void HttpResponse::initRedirectResponse(string & redirectUrl, int statusCode) {
 void HttpResponse::initErrorHttpResponse(int statusCode) {
     if (!this->_locationBlockRef->getErrorPage().empty() && 
         this->_locationBlockRef->getErrorPage().find(statusCode) != this->_locationBlockRef->getErrorPage().end()) {
-        string errorPage = reroutePath(this->_locationBlockRef->getErrorPage()[statusCode]);
-
         try {
+            string errorPage = this->_locationBlockRef->getErrorPage()[statusCode];
+            std::cout << "error page: " << errorPage << "'" << std::endl;
+            std::cout << "exist?: " << doesPathExist(errorPage) << std::endl;
             this->initHttpResponseSelf(readFileContent(errorPage), CONTENT_TYPE_HTML, statusCode);
-        } catch (const HttpException& e) {
-            this->initHttpResponseSelf(createStatusPageStr("public/error.html", 500), CONTENT_TYPE_HTML, 500);
+            return ;
         }
-    } 
-    
-    else {
-        this->initHttpResponseSelf(createStatusPageStr("public/error.html", statusCode), CONTENT_TYPE_HTML, statusCode);
+        catch (const HttpException& e) {
+            statusCode = 500;
+            std::cout << "exception" << e.getStatusCode() << std::endl;
+        }
     }
+
+    std::pair<std::string, std::string> details = CodeToMessage(statusCode);
+    std::stringstream ss;
+    ss << "<html><head><title>" << details.first << "</title>";
+    ss << "<style>" << Css() << "</style></head><body>";
+    ss << "<h1 class=\"error\">" << details.first << "</h1>";
+    ss << "<p>" << details.second << "</p>";
+    ss << "</body></html>";
+
+    this->initHttpResponseSelf(ss.str(), CONTENT_TYPE_HTML, statusCode);
 }
 
 void HttpResponse::initCGIResponse(string cgiPath, HttpRequest request) {
@@ -305,7 +362,7 @@ void HttpResponse::initCGIResponse(string cgiPath, HttpRequest request) {
     request.headerSet("absolute_path", absolutePath);
 
     int exit_status = 0;
-    string response_content = cgiHandler.handleCgiRequest(cgiPath, request, exit_status, *this->_serverBlockRef);
+    string response_content = cgiHandler.handleCgi(cgiPath, request, exit_status, *this->_serverBlockRef);
    
     this->finalResponseMsg = response_content;
 }

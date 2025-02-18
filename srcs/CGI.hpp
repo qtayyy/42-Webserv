@@ -18,7 +18,7 @@ public:
     string waitForCGIResponse(int *pipefd, pid_t pid, int &exitStatus);
     void exec(int *pipefd, const string& cgiScriptPath, const string& queryString, const string& requestedFilepath);
     void runCGIExecutable(string &path, string &requestedFilepath);
-    string handleCgiRequest(string &cgiScriptPath, HttpRequest &request, int &exitStatus, ServerBlock &serverBlock);
+    string handleCgi(string &cgiScriptPath, HttpRequest &request, int &exitStatus, ServerBlock &serverBlock);
     void setEnv(string key, string value);
     string getEnv(string key);
 };

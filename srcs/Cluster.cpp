@@ -239,7 +239,7 @@ HttpRequest mockUploadGETRequest() {
     HttpRequest request;
 
     request.headerSet("path", "/upload/upload.py");
-    request.headerSet("path_info", "2.pdf");
+    request.headerSet("path_info", "/volatile/large.pdf");
     request.headerSet("query_string", "name=John&age=30");
     request.headerSet("method", "GET");
 
@@ -249,7 +249,7 @@ HttpRequest mockUploadGETRequest() {
 HttpRequest mockDeleteRequest() {
     HttpRequest request;
 
-    request.headerSet("path", "/upload/ok.pdf");
+    request.headerSet("path", "/volatile/large.jpeg");
     request.headerSet("path_info", "webserv.pdf");
     request.headerSet("query_string", "name=John&age=30");
     request.headerSet("method", "DELETE");
@@ -285,14 +285,15 @@ void Cluster::run(void) {
                 }
             }
             if (_pollFds[i].revents & POLLOUT) { // If an fd is ready for writing
+                // HttpRequest request = mockUploadGETRequest();
                 HttpRequest request = mockRequest("/volatile/large.pdf");
                 HttpResponse response = HttpResponse(request, &_servers[0]);
                 
                 string finalMsg = response.getFinalResponseMsg();
                 
                 ssize_t totalBytes = finalMsg.size();
-                ssize_t bytesSent = 0;
-                ssize_t bytesLeft = totalBytes;
+                ssize_t bytesSent  = 0;
+                ssize_t bytesLeft  = totalBytes;
                 const char* msgPtr = finalMsg.c_str();
                 
                 std::cout << YELLOW << "Sending " << totalBytes << " Bytes to client [" << _pollFds[i].fd << "]...\n" << RESET << std::endl;
@@ -300,19 +301,29 @@ void Cluster::run(void) {
                 while (bytesLeft > 0) {
 					ssize_t sent = send(_pollFds[i].fd, msgPtr + bytesSent, bytesLeft, 0);
 					if (sent == -1) {
-						if (errno == EPIPE) {
-							std::cerr << "Client disconnected, closing fd: " << _pollFds[i].fd << std::endl;
-							close(_pollFds[i].fd);
-							_clients.erase(_pollFds[i].fd);
-							_pollFds[i] = _pollFds[--_numOfFds];
-							i--;
-							break;
-						} else if (errno == EAGAIN || errno == EWOULDBLOCK) {
-							// Resource temporarily unavailable, retry after a short delay
-							usleep(1000); // Sleep for 1 millisecond
-							continue;
+						int error = 0;
+						socklen_t len = sizeof(error);
+						if (getsockopt(_pollFds[i].fd, SOL_SOCKET, SO_ERROR, &error, &len) == 0) {
+							if (error == EPIPE) {
+								std::cerr << "Client disconnected, closing fd: " << _pollFds[i].fd << std::endl;
+								close(_pollFds[i].fd);
+								_clients.erase(_pollFds[i].fd);
+								_pollFds[i] = _pollFds[--_numOfFds];
+								i--;
+								break;
+							} else if (error == EAGAIN || error == EWOULDBLOCK) {
+								usleep(1000); // Sleep for 1 millisecond
+								continue;
+							} else {
+								std::cerr << "send error: " << strerror(error) << std::endl;
+								close(_pollFds[i].fd);
+								_clients.erase(_pollFds[i].fd);
+								_pollFds[i] = _pollFds[--_numOfFds];
+								i--;
+								break;
+							}
 						} else {
-							perror("send");
+							perror("getsockopt");
 							close(_pollFds[i].fd);
 							_clients.erase(_pollFds[i].fd);
 							_pollFds[i] = _pollFds[--_numOfFds];
@@ -348,7 +359,7 @@ void Cluster::run(void) {
 //     std::string file_content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 //     file.close();
     
-//     // Send HTTP response headers
+//     // Send HTTP response headersupl
 //     std::string headers = "HTTP/1.1 200 OK\r\n";
 //     headers += "Content-Type: application/pdf\r\n";
 //     headers += "Connection: close\r\n";

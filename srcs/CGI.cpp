@@ -18,51 +18,6 @@ CGIHandler::~CGIHandler() {
 
 }
 
-// string CGIHandler::waitForCGIResponse(int *pipefd, pid_t pid, int &exitStatus) {
-//     // Parent process
-//     string response = "";
-
-//     close(pipefd[1]);
-//     dup2(pipefd[0], STDIN_FILENO);
-
-//     int status;
-//     waitpid(pid, &status, 0);
-
-//     if (WIFSIGNALED(status)) {
-//         int signal = WTERMSIG(status);
-//         std::cout<< RED << "Child process was terminated by signal: " << signal << RESET << std::endl;
-//         throw HttpException(500);
-//     }
-
-//     char buffer[1024];
-//     ssize_t bytesRead;
-//     while ((bytesRead = read(pipefd[0], buffer, sizeof(buffer) - 1)) > 0) {
-//         buffer[bytesRead] = '\0';
-//         response += buffer;
-//     }
-//     close(pipefd[0]);
-
-//     exitStatus = WEXITSTATUS(status);
-//     return response;
-// }
-
-// void CGIHandler::exec(
-//     int *pipefd, 
-//     const string& cgiScriptPath, 
-//     const string& queryString, 
-//     const string& requestedFilepath) {
-//     // Child process
-//     close(pipefd[0]); 
-
-//     dup2(pipefd[1], STDIN_FILENO);  // Redirect stdin to the write end of the pipe
-//     write(pipefd[1], "hallo", 5); // Write data to the pipe
-
-//     execl("/usr/bin/python3", "python3", cgiScriptPath.c_str(), requestedFilepath.c_str(), NULL);
-    
-//     perror(("execl failed: " + cgiScriptPath).c_str());
-//     exit(1);
-// }
-
 
 void CGIHandler:: runCGIExecutable(string &cgiScriptPath, string &requestedFilepath) {
     if (endsWith(cgiScriptPath, ".py")) {
@@ -74,7 +29,7 @@ void CGIHandler:: runCGIExecutable(string &cgiScriptPath, string &requestedFilep
     }
 }
 
-string CGIHandler:: handleCgiRequest(string& cgiScriptPath, HttpRequest &request, int &exitStatus, ServerBlock &serverBlock) {
+string CGIHandler:: handleCgi(string& cgiScriptPath, HttpRequest &request, int &exitStatus, ServerBlock &serverBlock) {
     int inputPipe[2];  // Pipe for sending request body (stdin for CGI)
     int outputPipe[2]; // Pipe for capturing CGI output (stdout from CGI)
 
