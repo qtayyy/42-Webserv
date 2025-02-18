@@ -293,21 +293,7 @@ void Cluster::run(void) {
 				ssize_t bytesSent = 0;
 				ssize_t totalBytes = finalMsg.size();
 				std::cout << YELLOW << "Sending " << totalBytes << " Bytes to client [" << _pollFds[i].fd << "]...\n" << RESET << std::endl;
-				while (bytesSent < totalBytes) {
-					ssize_t bytes = send(_pollFds[i].fd, finalMsg.c_str() + bytesSent, totalBytes - bytesSent, 0);
-					if (bytes < 0) {
-						if (errno == EAGAIN || errno == EWOULDBLOCK) {
-							// Wait for the socket to be ready for writing again
-							struct pollfd pfd = { _pollFds[i].fd, POLLOUT, 0 };
-							poll(&pfd, 1, -1); // Wait indefinitely
-							continue;
-						} else {
-							perror("send");
-							break;
-						}
-					}
-					bytesSent += bytes;
-				}
+				bytesSent = send(_pollFds[i].fd, finalMsg.c_str(), finalMsg.size(), 0);
 			
 				// Ensure all data has been sent before closing the file descriptor
 				if (bytesSent == totalBytes) {
@@ -321,8 +307,6 @@ void Cluster::run(void) {
 					std::cout << std::endl << "Response from browser :" << std::endl;
 					std::cout << GREEN << std::string(buffer) << RESET << std::endl << std::endl;
 				} else {
-					// Handle the case where not all data was sent
-					std::cerr << "Error: Not all data was sent" << std::endl;
 				}
 			}
         }
