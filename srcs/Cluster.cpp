@@ -298,32 +298,32 @@ void Cluster::run(void) {
                 std::cout << YELLOW << "Sending " << totalBytes << " Bytes to client [" << _pollFds[i].fd << "]...\n" << RESET << std::endl;
                 
                 while (bytesLeft > 0) {
-    ssize_t sent = send(_pollFds[i].fd, msgPtr + bytesSent, bytesLeft, 0);
-    if (sent == -1) {
-        if (errno == EPIPE) {
-            std::cerr << "Client disconnected, closing fd: " << _pollFds[i].fd << std::endl;
-            close(_pollFds[i].fd);
-            _clients.erase(_pollFds[i].fd);
-            _pollFds[i] = _pollFds[--_numOfFds];
-            i--;
-            break;
-        } else if (errno == EAGAIN || errno == EWOULDBLOCK) {
-            // Resource temporarily unavailable, retry after a short delay
-            usleep(1000); // Sleep for 1 millisecond
-            continue;
-        } else {
-            perror("send");
-            close(_pollFds[i].fd);
-            _clients.erase(_pollFds[i].fd);
-            _pollFds[i] = _pollFds[--_numOfFds];
-            i--;
-            break;
-        }
-    }
-    bytesSent += sent;
-    bytesLeft -= sent;
-}
-                
+					ssize_t sent = send(_pollFds[i].fd, msgPtr + bytesSent, bytesLeft, 0);
+					if (sent == -1) {
+						if (errno == EPIPE) {
+							std::cerr << "Client disconnected, closing fd: " << _pollFds[i].fd << std::endl;
+							close(_pollFds[i].fd);
+							_clients.erase(_pollFds[i].fd);
+							_pollFds[i] = _pollFds[--_numOfFds];
+							i--;
+							break;
+						} else if (errno == EAGAIN || errno == EWOULDBLOCK) {
+							// Resource temporarily unavailable, retry after a short delay
+							usleep(1000); // Sleep for 1 millisecond
+							continue;
+						} else {
+							perror("send");
+							close(_pollFds[i].fd);
+							_clients.erase(_pollFds[i].fd);
+							_pollFds[i] = _pollFds[--_numOfFds];
+							i--;
+							break;
+						}
+					}
+					bytesSent += sent;
+					bytesLeft -= sent;
+				}
+								
                 // Ensure all data has been sent before closing the file descriptor
                 if (bytesLeft == 0) {
                     char buffer[4096] = {0};
