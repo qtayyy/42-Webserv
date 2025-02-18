@@ -285,7 +285,7 @@ void Cluster::run(void) {
             if (_pollFds[i].revents & POLLOUT) { // If an fd is ready for writing
 				// HttpRequest request   = mockUploadPOSTRequest();
 				// HttpRequest request   = mockUploadGETRequest();
-				HttpRequest request   = mockRequest("/dir2/economics.pdf");
+				HttpRequest request   = mockRequest("/volatile/large.jpeg");
 				HttpResponse response = HttpResponse(request, &_servers[0]);
 				
 				string finalMsg = response.getFinalResponseMsg();
@@ -412,7 +412,7 @@ void	Cluster::handleNewClient(int listenerFd)
 		perror("fcntl");
 	else
 	{
-		this->_clients[newClient] = new Client(); // Ethan's part (prob need to pass info about config - ServerBlock)
+		this->_clients[newClient] = new Client(); // Ethan's `rt (prob need to pass info about config - ServerBlock)
 		_pollFds[_numOfFds].fd = newClient;
 		std::cout << GREEN "New client connection received: [" << _pollFds[_numOfFds].fd << "]\n" RESET; 
 		_pollFds[_numOfFds++].events = POLLIN;
