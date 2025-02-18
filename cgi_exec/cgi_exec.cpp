@@ -82,6 +82,9 @@ bool isDirectory(const std::string& path) {
 
 
 int main(int ac, char **av) {
+    (void)ac;
+    (void)av;
+
     const char* request_method = getenv("REQUEST_METHOD");
     const char* path_translated = getenv("PATH_TRANSLATED");
 

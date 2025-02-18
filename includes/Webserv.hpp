@@ -49,13 +49,13 @@ std::string	intToIp(uint32_t ip);
 #include <fstream>
 #include <unistd.h>
 #include <dirent.h>
+#include <sys/stat.h>
+#include <cstring>
 
 #define METHOD_GET "GET"
 #define METHOD_POST "POST"
 #define METHOD_PUT "PUT"
 #define METHOD_DELETE "DELETE"
-#include <sys/stat.h>
-#include <cstring>
 
 
 #define CONTENT_TYPE_HTML "text/html"
@@ -64,7 +64,7 @@ std::string	intToIp(uint32_t ip);
 #define CONTENT_TYPE_PNG "image/png"
 #define CONTENT_TYPE_JPG "image/jpeg"
 #define CONTENT_TYPE_GIF "image/gif"
-
+#define CONTENT_TYPE_PDF "application/pdf"
 
 
 #define ROOT_RESOURCE_PATH "public"

@@ -210,11 +210,10 @@ int		Cluster::createListenerSocket(std::string IP, std::string Port)
 	return (listener);
 }
 
-HttpRequest mockRequest(string path, string path_info) {
+HttpRequest mockRequest(string path) {
     HttpRequest request;
 
     request.headerSet("path", path);
-    request.headerSet("path_info", path_info);
     request.headerSet("query_string", "name=John&age=30");
     request.headerSet("method", "GET");
 
@@ -240,7 +239,7 @@ HttpRequest mockUploadGETRequest() {
     HttpRequest request;
 
     request.headerSet("path", "/upload/upload.py");
-    request.headerSet("path_info", "");
+    request.headerSet("path_info", "2.pdf");
     request.headerSet("query_string", "name=John&age=30");
     request.headerSet("method", "GET");
 
@@ -285,13 +284,15 @@ void Cluster::run(void) {
             }
             if (_pollFds[i].revents & POLLOUT) { // If an fd is ready for writing
 				// HttpRequest request   = mockUploadPOSTRequest();
-				HttpRequest request   = mockUploadGETRequest();
+				// HttpRequest request   = mockUploadGETRequest();
+				HttpRequest request   = mockRequest("/dir2/economics.pdf");
 				HttpResponse response = HttpResponse(request, &_servers[0]);
 				
 				string finalMsg = response.getFinalResponseMsg();
 				
 				ssize_t bytesSent = 0;
 				ssize_t totalBytes = finalMsg.size();
+				std::cout << YELLOW << "Sending " << totalBytes << " Bytes to client [" << _pollFds[i].fd << "]...\n" << RESET << std::endl;
 				while (bytesSent < totalBytes) {
 					ssize_t bytes = send(_pollFds[i].fd, finalMsg.c_str() + bytesSent, totalBytes - bytesSent, 0);
 					if (bytes < 0) {
@@ -317,8 +318,8 @@ void Cluster::run(void) {
 					_pollFds[i] = _pollFds[--_numOfFds];
 					i--;
 					
-					std::cout << std::endl << "Response :" << std::endl;
-					std::cout << "[" << GREEN << std::string(buffer) << RESET << "]" << std::endl << std::endl;
+					std::cout << std::endl << "Response from browser :" << std::endl;
+					std::cout << GREEN << std::string(buffer) << RESET << std::endl << std::endl;
 				} else {
 					// Handle the case where not all data was sent
 					std::cerr << "Error: Not all data was sent" << std::endl;
@@ -413,8 +414,8 @@ void	Cluster::handleNewClient(int listenerFd)
 	{
 		this->_clients[newClient] = new Client(); // Ethan's part (prob need to pass info about config - ServerBlock)
 		_pollFds[_numOfFds].fd = newClient;
+		std::cout << GREEN "New client connection received: [" << _pollFds[_numOfFds].fd << "]\n" RESET; 
 		_pollFds[_numOfFds++].events = POLLIN;
-		std::cout << GREEN "New client connection received\n" RESET; 
 	}	
 }
 

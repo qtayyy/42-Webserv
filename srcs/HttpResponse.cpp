@@ -9,6 +9,7 @@ stringDict HttpResponse::createContentTypeMap() {
     map[".png"] = CONTENT_TYPE_PNG;
     map[".jpg"] = CONTENT_TYPE_JPG;
     map[".gif"] = CONTENT_TYPE_GIF;
+    map[".pdf"] = CONTENT_TYPE_PDF;
     return map;
 }
 
@@ -18,7 +19,18 @@ const stringDict HttpResponse::contentTypeMap = HttpResponse::createContentTypeM
 
 /* CONSTRUCTORS */
 
-void HttpResponse::handleGet(HttpRequest &request, ServerBlock *serverBlock) {
+LocationBlock *HttpResponse::getBlock() {
+    if (this->_locationBlockRef) {
+        return dynamic_cast<LocationBlock*>(this->_locationBlockRef);
+    } else {
+        return this->emptyBlock;
+    }
+}
+
+
+/* REQUEST HANDLERS */
+
+void HttpResponse::handleGET(HttpRequest &request, ServerBlock *serverBlock) {
     string path = request.headerGet("path");
     
     path = applyAlias(path);
@@ -72,14 +84,14 @@ void HttpResponse::handleGet(HttpRequest &request, ServerBlock *serverBlock) {
             string cgiToUse = decideCGIToUse(path);
 
             // If CGI handling is required, reroute the path to the CGI script
-            if (!cgiToUse.empty())
-                this->initCGIResponse(cgiToUse, request);
-            else if (isCGI(path))
-                this->initCGIResponse(path, request);
-            else
-                this->initHttpResponseSelf(content, getContentType(reroutedPath), 200);
+            // if (!cgiToUse.empty())
+            //     this->initCGIResponse(cgiToUse, request);
+            // else if (isCGI(path))
+            //     this->initCGIResponse(path, request);
+            // else
+            this->initHttpResponseSelf(content, getContentType(reroutedPath), 200);
 
-            std::cout << this->getFinalResponseMsg() << std::endl;
+            // std::cout << this->getFinalResponseMsg().substr(100) << std::endl;
         }
     } 
 
@@ -90,23 +102,14 @@ void HttpResponse::handleGet(HttpRequest &request, ServerBlock *serverBlock) {
 }
 
 
-LocationBlock *HttpResponse::getBlock() {
-    if (this->_locationBlockRef) {
-        return dynamic_cast<LocationBlock*>(this->_locationBlockRef);
-    } else {
-        return this->emptyBlock;
-    }
-}
-
-
-void HttpResponse::handlePost(HttpRequest &request, ServerBlock *serverBlock) {
+void HttpResponse::handlePOST(HttpRequest &request, ServerBlock *serverBlock) {
     string cgiPass = this->getBlock()->getCgiPass();
 
     this->initCGIResponse(cgiPass, request);
 }
 
 
-void HttpResponse::handleDelete(string path) {
+void HttpResponse::handleDELETE(string path) {
     path = reroutePath(path);
     if (!doesPathExist(path)) {
         this->initErrorHttpResponse(404);
@@ -128,6 +131,7 @@ void HttpResponse::handleDelete(string path) {
 
 
 HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
+    std::cout << YELLOW << "\nConstructing response..." << std::endl;
     this->emptyBlock = new LocationBlock();
     string path = request.headerGet("path");
     this->_serverBlockRef = serverBlock;
@@ -136,10 +140,10 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
     if (this->_locationBlockRef == NULL) {
         this->_locationBlockRef = serverBlock;
         this->isLocation = false;
-        std::cout << YELLOW << path << " Does not match any location. Defaulting..." << RESET << std::endl;
+        std::cout << YELLOW << "\t" << path << " Does not match any location. Defaulting..." << RESET << std::endl;
     }
     else {
-        std::cout << "Location matches location block: " << this->getBlock()->getUri() << std::endl;
+        std::cout << "\tLocation matches location block: " << this->getBlock()->getUri() << std::endl;
     }
     
     stringList limitExcept = this->_locationBlockRef->getLimitExcept();
@@ -150,24 +154,22 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
         return;
     }
 
-
     string method = request.headerGet("method");
 
+    std::cout << YELLOW << "\tHandling method: " << method << RESET << std::endl;
     if (method == "GET") {
-        this->handleGet(request, serverBlock);
+        this->handleGET(request, serverBlock);
     } 
-    
     else if (method == "POST") {
-        this->handlePost(request, serverBlock);
+        this->handlePOST(request, serverBlock);
     }
-
     else if (method == "DELETE") {
-        this->handleDelete(path);
+        this->handleDELETE(path);
     }
-    
     else {
         this->initErrorHttpResponse(400);
     }
+    std::cout << std::endl;
 }
 
 
@@ -193,13 +195,21 @@ string HttpResponse::createResponseString(
     const string& statusMessage) {
 
     std::stringstream response;
-    response << PROTOCOL << " " << statusCode << " " << statusMessage << "\r\n";
-    response << "Content-Length: " << fileContent.size() << "\r\n";
-    response << "Content-Type: " << resourceType << "\r\n\r\n";
+    response << PROTOCOL << " " << statusCode << " " << statusMessage << "\n";
+    response << "Content-Length: " << fileContent.size() << "\n";
+    response << "Connection: " << "close" << "\n";
+    // response << "Cache-Control: " << "no-cache, no-store, must-revalidate" << "\n";
+    // response << "Pragma: " << "no-cache" << "\n";
+    // response << "Expires: " << "0" << "\n";
+    response << "Content-Type: " << resourceType << "\n\n";
     response << fileContent;
 
     return response.str();
 }
+
+// response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+// response.headers["Pragma"] = "no-cache";
+// response.headers["Expires"] = "0";
 
 string HttpResponse::createAutoIndexHtml(string path) {
     std::stringstream ss;
@@ -223,6 +233,7 @@ string HttpResponse::createAutoIndexHtml(string path) {
     ss << "</ul></body></html>";
     return ss.str();
 }
+
 
 
 /* GETTERS */

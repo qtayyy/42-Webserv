@@ -34,7 +34,7 @@ bool startsWith(const string& str, const string& prefix) {
 
 bool doesPathExist(const string& resourcePath) {
     struct stat buffer;
-    return (stat(resourcePath.c_str(), &buffer) == 0);
+    return (stat(resourcePath.c_str(), &buffer) == 0) && !isDirectory(resourcePath);
 }
 
 string getAbsolutePath(string filepath) {

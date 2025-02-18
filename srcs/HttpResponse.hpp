@@ -79,13 +79,13 @@ public:
 
     void initCGIResponse(string cgiPath, HttpRequest request);
 
-    void handleGet(HttpRequest &request, ServerBlock *serverBlock);
+    void handleGET(HttpRequest &request, ServerBlock *serverBlock);
     LocationBlock *getBlock();
-    void handlePost(HttpRequest &request, ServerBlock *serverBlock);
+    void handlePOST(HttpRequest &request, ServerBlock *serverBlock);
 
     void NewFunction(HttpRequest &request);
 
-    void handleDelete(string path);
+    void handleDELETE(string path);
 
     HttpResponse(HttpRequest &request, ServerBlock *ServerBlock);
 
