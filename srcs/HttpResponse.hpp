@@ -50,7 +50,7 @@ private:
     void displayError() const;
 
 public:
-    HttpResponse(string content, string contentType, int statusCode);
+    //HttpResponse(string content, string contentType, int statusCode);
     HttpResponse(HttpRequest &request, ServerBlock &ServerBlock);
 
     string getRawContent() const;

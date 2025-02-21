@@ -313,10 +313,14 @@ void Cluster::run(void) {
 								_pollFds[i] = _pollFds[--_numOfFds];
 								i--;
 								break;
-							} else if (error == EAGAIN || error == EWOULDBLOCK) {
+							} 
+							
+							else if (error == EAGAIN || error == EWOULDBLOCK) {
 								usleep(1000); // Sleep for 1 millisecond
 								continue;
-							} else {
+							} 
+							
+							else {
 								std::cerr << "send error: " << strerror(error) << std::endl;
 								close(_pollFds[i].fd);
 								_clients.erase(_pollFds[i].fd);
@@ -324,7 +328,9 @@ void Cluster::run(void) {
 								i--;
 								break;
 							}
-						} else {
+						} 
+						
+						else {
 							perror("getsockopt");
 							close(_pollFds[i].fd);
 							_clients.erase(_pollFds[i].fd);
