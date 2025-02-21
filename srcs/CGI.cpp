@@ -37,10 +37,10 @@ string CGIHandler:: handleCgi(string& cgiScriptPath, HttpRequest &request, int &
         throw std::runtime_error("pipe failed: " + string(strerror(errno)));
 
     string data              = request.getBody();
-    string requestedFilepath = request.headerGet("path_info");
+    string requestedFilepath = request.headerGet("absolute_path");
 
     // Set environment variables
-    this->setEnv("REQUEST_METHOD",  request.headerGet("method"));
+    this->setEnv("REQUEST_METHOD",  request.getMethod());
     this->setEnv("QUERY_STRING",    request.headerGet("query_string"));
     this->setEnv("SCRIPT_NAME",     cgiScriptPath);
     this->setEnv("SERVER_NAME",     "localhost");

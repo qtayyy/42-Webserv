@@ -81,12 +81,25 @@ bool isDirectory(const std::string& path) {
 }
 
 
+
+void createFile(const std::string& path, const std::string& content) {
+    std::ofstream file(path.c_str());
+    if (file.is_open()) {
+        file << content;
+        file.close();
+        std::cout << "File created successfully at " << path << std::endl;
+    } else {
+        std::cerr << "Error: Could not create file at " << path << std::endl;
+    }
+}
+
 int main(int ac, char **av) {
     (void)ac;
     (void)av;
 
     const char* request_method = getenv("REQUEST_METHOD");
     const char* path_translated = getenv("PATH_TRANSLATED");
+    const char* path = av[1];
 
     if (!request_method || !path_translated) {
         std::cerr << "Error: Required environment variables are not set." << std::endl;
@@ -96,17 +109,22 @@ int main(int ac, char **av) {
     if (std::string(request_method) == "GET") {
         std::string path = std::string(path_translated);
 
-        if (!doesPathExist(path)) {
-            std::cout << constructResponseWithHeader("File not found: " + path, "text/plain", "404", "Not Found");
-            return 0;
-        }
+        // if (!doesPathExist(path)) {
+        //     std::cout << constructResponseWithHeader("File not found: " + path, "text/plain", "404", "Not Found");
+        //     return 0;
+        // }
 
-        if (isDirectory(path)) {
-            std::cout << constructResponseWithHeader("Path is a directory: " + path, "text/plain", "400", "Bad Request");
-            return 0;
-        }
+        // if (isDirectory(path)) {
+        //     std::cout << constructResponseWithHeader("Path is a directory: " + path, "text/plain", "400", "Bad Request");
+        //     return 0;
+        // }
 
-        std::cout << constructHttpResponseFromFile(urlDecode(path)) << std::endl;
+
+
+        std::cout << constructResponseWithHeader(path, "text/plain", "200", "OK");
+        // std::cout << constructHttpResponseFromFile(urlDecode(path)) << std::endl;
+
+        // std::cout << constructHttpResponseFromFile(urlDecode(path)) << std::endl;
     } 
     
     else {

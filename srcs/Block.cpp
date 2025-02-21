@@ -14,6 +14,7 @@
 
 // ================================= SETTERS =================================
 
+
 /**
  * @brief	Sets up default or custom error pages.
  * SYNTAX:	error_page [error code 1] [error code 2] ... [path to error page]

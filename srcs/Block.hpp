@@ -28,6 +28,7 @@ class Block
     	Block() : _root(""), _autoindex(-1), _clientMaxBodySize(-1) {} // Initialize _root
 		virtual ~Block(void) {};
 
+
 		virtual void	printBlock(void) = 0;
 
 		// Setters (pass in as reference?)

@@ -25,38 +25,39 @@ class LocationBlock : public Block
 		LocationBlock(ServerBlock *parent) : _parentServerBlock(parent) {}
 		~LocationBlock(void) {};
 
-		int		parseLocation(std::vector<std::string> args, int i);
+		int		parseLocation(stringList args, int i);
 		void	initDefaultLocationBlockConfig(void);
+		static LocationBlock *emptyBlock;
 
 		// Setters
-		void	setUri(std::vector<std::string> args = std::vector<std::string>());
-		void	setAlias(std::vector<std::string> args = std::vector<std::string>());
-		void	setReturn(std::vector<std::string> args = std::vector<std::string>());
-		void	setCgiPass(std::vector<std::string> args = std::vector<std::string>());
-		void	setUploadPath(std::vector<std::string> args = std::vector<std::string>());
+		void	setUri(stringList args = stringList());
+		void	setAlias(stringList args = stringList());
+		void	setReturn(stringList args = stringList());
+		void	setCgiPass(stringList args = stringList());
+		void	setUploadPath(stringList args = stringList());
 
 		// Getters
-		std::string	getUri(void) { return (_uri); };
-		std::string	getAlias(void) { return (_alias); };
-		std::pair<int, std::string>	getReturn(void) { return (_return); };
-		std::string	getCgiPass(void) { return (_cgiPass); };
-		std::string	getUploadPath(void) { return (_uploadPath); };
+		string	getUri(void) { return (_uri); };
+		string	getAlias(void) { return (_alias); };
+		std::pair<int, string>	getReturn(void) { return (_return); };
+		string	getCgiPass(void) { return (_cgiPass); };
+		string	getUploadPath(void) { return (_uploadPath); };
 
 		void	printBlock(void);
 
 	private:
 		ServerBlock	*_parentServerBlock;
-		std::string	_uri; // the uri that will "trigger" this location block
-		std::string	_alias; // 3rd requirement for routes (see subject PDF)
-		std::pair<int, std::string>	_return; // redirection
-		std::string	_cgiPass;
-		std::string	_uploadPath;
+		string	_uri; // the uri that will "trigger" this location block
+		string	_alias; // 3rd requirement for routes (see subject PDF)
+		std::pair<int, string>	_return; // redirection
+		string	_cgiPass;
+		string	_uploadPath;
 
-		static std::map<std::string, void (LocationBlock::*)(std::vector<std::string>)>	locationParseMap;
-		static std::map<std::string, void (LocationBlock::*)(std::vector<std::string>)>	initLocationMap(void);
+		static std::map<string, void (LocationBlock::*)(stringList)> locationParseMap;
+		static std::map<string, void (LocationBlock::*)(stringList)> initLocationMap(void);
 	
-		void	inheritErrorPages(std::map<int, std::string> parentErrorPages);
-		void	inheritCgiPass(std::map<std::string, std::string> parentCgiScripts);
+		void	inheritErrorPages(std::map<int, string> parentErrorPages);
+		void	inheritCgiPass(std::map<string, string> parentCgiScripts);
 };
 
 #endif

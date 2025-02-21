@@ -7,7 +7,8 @@
 
 class HttpException : public std::runtime_error {
 public:
-    HttpException(int statusCode) : std::runtime_error("test"), statusCode_(statusCode) {}
+    HttpException(int statusCode) : std::runtime_error(""), statusCode_(statusCode) {}
+    HttpException(int statusCode, string str) : std::runtime_error(str), statusCode_(statusCode) {}
 
     int getStatusCode() const {
         return statusCode_;

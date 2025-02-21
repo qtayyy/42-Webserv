@@ -16,7 +16,7 @@ enum HttpMethod
 
 class HttpRequest {
 private:
-    HttpMethod method;
+    string method;
     string     body;
     stringDict headerParameters;
     std::vector<stringDict> formBlocks;
@@ -27,8 +27,13 @@ public:
     stringDict *getFormBlock(int index);
     void        setBody(string body);
     string      getBody();
+
+
+    void setMethod(string method);
+    string getMethod();
+
     void        headerSet(string key, string value);
-    string      headerGet(string key);
+    string headerGet(string key);
 
     void   setRawRequest(string rawRequest);
     string getRawRequest() const;

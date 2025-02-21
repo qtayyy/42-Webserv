@@ -20,6 +20,14 @@ void HttpRequest::headerSet(string key, string value) {
     headerParameters[key] = value;
 }
 
+void HttpRequest::setMethod(string method) {
+    this->method = method;
+}
+
+string HttpRequest::getMethod() {
+    return method;
+}
+
 string HttpRequest::headerGet(string key) {
     return headerParameters[key];
 }
@@ -44,27 +52,11 @@ string HttpRequest::getRawRequest() const {
     return rawRequest;
 }
 
-string HttpRequest::getMethod() const {
-    switch (method) {
-        case GET:
-            return "GET";
-        case POST:
-            return "POST";
-        case PUT:
-            return "PUT";
-        case DELETE:
-            return "DELETE";
-        case HEAD:
-            return "HEAD";
-        default:
-            return "NONE";
-    }
-}
 
 void HttpRequest::printInfo() { 
     std::cout << "\n-- request --" << std::endl;
     std::cout << GREEN << "\tpath: " << RESET         << this->headerGet("path") << std::endl;
     std::cout << GREEN << "\tpath_info: " << RESET    << this->headerGet("path_info") << std::endl;
     std::cout << GREEN << "\tquery_string: " << RESET << this->headerGet("query_string") << std::endl;
-    std::cout << GREEN << "\tmethod: " << RESET       << this->headerGet("method") << std::endl;
+    std::cout << GREEN << "\tmethod: " << RESET       << this->getMethod() << std::endl;
 }

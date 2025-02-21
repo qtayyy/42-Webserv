@@ -215,7 +215,8 @@ HttpRequest mockRequest(string path) {
 
     request.headerSet("path", path);
     request.headerSet("query_string", "name=John&age=30");
-    request.headerSet("method", "GET");
+    request.headerSet("path_info", "test");
+	request.setMethod("GET");
 
     return request;
 }
@@ -229,7 +230,7 @@ HttpRequest mockUploadPOSTRequest() {
     request.headerSet("path", "/upload/upload.py");
     request.headerSet("path_info", "");
     request.headerSet("query_string", "name=John&age=30");
-    request.headerSet("method", "POST");
+	request.setMethod("POST");
     request.headerSet("content_type", "multipart/form-data; boundary=boundary");
 
     return request;
@@ -241,7 +242,7 @@ HttpRequest mockUploadGETRequest() {
     request.headerSet("path", "/upload/upload.py");
     request.headerSet("path_info", "/volatile/large.pdf");
     request.headerSet("query_string", "name=John&age=30");
-    request.headerSet("method", "GET");
+	request.setMethod("GET");
 
     return request;
 }
@@ -252,7 +253,7 @@ HttpRequest mockDeleteRequest() {
     request.headerSet("path", "/volatile/large.jpeg");
     request.headerSet("path_info", "webserv.pdf");
     request.headerSet("query_string", "name=John&age=30");
-    request.headerSet("method", "DELETE");
+	request.setMethod("DELETE");
 
     return request;
 }
@@ -286,20 +287,21 @@ void Cluster::run(void) {
             }
             if (_pollFds[i].revents & POLLOUT) { // If an fd is ready for writing
                 // HttpRequest request = mockUploadGETRequest();
-                HttpRequest request = mockRequest("/volatile/large.pdf");
+                HttpRequest	request = mockRequest("/logs/");
                 HttpResponse response = HttpResponse(request, &_servers[0]);
                 
-                string finalMsg = response.getFinalResponseMsg();
+                string		finalMsg = response.getFinalResponseMsg();
                 
-                ssize_t totalBytes = finalMsg.size();
-                ssize_t bytesSent  = 0;
-                ssize_t bytesLeft  = totalBytes;
-                const char* msgPtr = finalMsg.c_str();
+                ssize_t		totalBytes = finalMsg.size();
+                ssize_t		bytesSent  = 0;
+                ssize_t		bytesLeft  = totalBytes;
+                const char* msgPtr 	   = finalMsg.c_str();
                 
-                std::cout << YELLOW << "Sending " << totalBytes << " Bytes to client [" << _pollFds[i].fd << "]...\n" << RESET << std::endl;
+                std::cout << YELLOW << "Sending " << totalBytes << " Bytes to client [" << _pollFds[i].fd << "]..." << RESET << std::endl;
                 
                 while (bytesLeft > 0) {
 					ssize_t sent = send(_pollFds[i].fd, msgPtr + bytesSent, bytesLeft, 0);
+					std::cout << GREEN << "Sent " << sent << " bytes" << RESET << std::endl;
 					if (sent == -1) {
 						int error = 0;
 						socklen_t len = sizeof(error);

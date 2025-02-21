@@ -191,36 +191,41 @@ void	ServerBlock::setServerName(std::vector<std::string> args)
  */
 void	ServerBlock::printBlock()
 {
-	std::cout << "root: " << this->getRoot() << "\n";
-	std::cout << "autoindex: " << this->getAutoindex() << "\n";
-	std::cout << "client max body size: " << this->getClientMaxBodySize() << "\n";
-	std::vector<std::string> allowedMethods = this->getLimitExcept();
-	for (std::vector<std::string>::iterator it = allowedMethods.begin(); it != allowedMethods.end(); it++)
-		std::cout << "allowed methods: "  << *it << std::endl;
-	std::vector<std::string> allIndexes = this->getIndex();
-	for (std::vector<std::string>::iterator it = allIndexes.begin(); it != allIndexes.end(); it++)
-		std::cout << "indexes: "  << *it << std::endl;
-	// std::map<std::string, std::string> allCGIs = this->getCgiScript();
-	// for (std::map<std::string, std::string>::iterator it = allCGIs.begin(); it != allCGIs.end(); it++)
-	// 	std::cout << "cgi extension: "  << it->first << "; cgi path: " << it->second << std::endl;
+	std::cout << BLUE << std::endl;
+	std::cout << " -- Server Block --------------------" << "\n";
+	std::cout << std::left << std::setw(17) << "root:"            << this->getRoot() << "\n";
+	std::cout << std::left << std::setw(17) << "autoindex:"       << this->getAutoindex() << "\n";
+	std::cout << std::left << std::setw(17) << "client max body:" << this->getClientMaxBodySize() << "\n";
+
+	stringList allowedMethods = this->getLimitExcept();
+	for (stringList::iterator it = allowedMethods.begin(); it != allowedMethods.end(); it++)
+		std::cout << std::left << std::setw(17) << "allowed methods:" << *it << std::endl;
+
+	stringList allIndexes = this->getIndex();
+	for (stringList::iterator it = allIndexes.begin(); it != allIndexes.end(); it++)
+		std::cout << std::left << std::setw(17) << "indexes:" << *it << std::endl;
+
 	std::vector<std::pair<uint32_t, int> > allListens = this->getListen();
 	for (std::vector<std::pair<uint32_t, int> >::iterator it = allListens.begin(); it != allListens.end(); it++)
-		std::cout << "ip: "  << intToIp(it->first) << "; port: " << it->second << std::endl;
-	std::vector<std::string> servernames = this->getServerName();
-	for (std::vector<std::string>::iterator it = servernames.begin(); it != servernames.end(); it++)
-		std::cout << "server names: "  << *it << std::endl;
+		std::cout << std::left << std::setw(17) << "ip:port:" << intToIp(it->first) << ":" << it->second << std::endl;
+
+	stringList servernames = this->getServerName();
+	for (stringList::iterator it = servernames.begin(); it != servernames.end(); it++)
+		std::cout << std::left << std::setw(17) << "server names:" << *it << std::endl;
+
 	std::map<int, std::string> errorpages = this->getErrorPage();
 	for (std::map<int, std::string>::iterator it = errorpages.begin(); it != errorpages.end(); it++)
-		std::cout << "error code: " << it->first << " " << it->second << std::endl;
-	std::cout << "\n";
+		std::cout << std::left << std::setw(17) << "error code:" << it->first << " " << it->second << std::endl;
+
+	std::cout << "\n" << BLUE;
 }
 
 // ================================= STATIC =================================
 
-std::map<std::string, void (ServerBlock::*)(std::vector<std::string>)>
+std::map<std::string, void (ServerBlock::*)(stringList)>
 	ServerBlock::initServerMap(void)
 {
-	std::map<std::string, void (ServerBlock::*)(std::vector<std::string>)>	serverMap;
+	std::map<std::string, void (ServerBlock::*)(stringList)>	serverMap;
 
 	serverMap["listen"] = &ServerBlock::setListen;
 	serverMap["root"] = &ServerBlock::setRoot;
@@ -236,7 +241,7 @@ std::map<std::string, void (ServerBlock::*)(std::vector<std::string>)>
 	return (serverMap);
 }
 
-std::map<std::string, void (ServerBlock::*)(std::vector<std::string>)> ServerBlock::serverParseMap = initServerMap();
+std::map<std::string, void (ServerBlock::*)(stringList)> ServerBlock::serverParseMap = initServerMap();
 
 // int	main()
 // 	ServerBlock test;

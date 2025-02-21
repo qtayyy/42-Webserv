@@ -34,7 +34,7 @@ bool startsWith(const string& str, const string& prefix) {
 
 bool doesPathExist(const string& resourcePath) {
     struct stat buffer;
-    return (stat(resourcePath.c_str(), &buffer) == 0) && !isDirectory(resourcePath);
+    return (stat(resourcePath.c_str(), &buffer) == 0);
 }
 
 string getAbsolutePath(string filepath) {
@@ -92,11 +92,42 @@ stringList splitString(string str, char delimiter) {
     return tokens;
 }
 
+int getFileSize(const std::string& filePath) {
+    struct stat stat_buf;
+    int rc = stat(filePath.c_str(), &stat_buf);
+    return rc == 0 ? stat_buf.st_size : -1;
+}
+
+std::string getDirectory(const std::string& fullPath) {
+    size_t pos = fullPath.find_last_of("/\\");
+    if (pos != std::string::npos) {
+        return fullPath.substr(0, pos);
+    }
+    return "";
+}
+
+string appendPaths(const std::string& path1, const std::string& path2) {
+    if (path1.empty()) return path2;
+    if (path2.empty()) return path1;
+
+    string result = path1;
+    if (result[result.size() - 1] == '/' || result[result.size() - 1] == '\\') {
+        result.erase(result.size() - 1);
+    }
+
+    if (path2[0] == '/' || path2[0] == '\\')
+        result += path2;
+    else
+        result += '/' + path2;
+
+    return result;
+}
+
 string readFileContent(const string& filePath) {
     std::ifstream file(filePath.c_str()); // Open the file
     if (!file.is_open()) {
         if (!doesPathExist(filePath)) {
-            throw HttpException(404); // Assuming file not found
+            throw HttpException(404, "error reading from " + filePath); // Assuming file not found
         } else if (file.fail()) {
             throw HttpException(403); // Assuming permission denied
         } else {

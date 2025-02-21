@@ -4,12 +4,12 @@
 stringDict HttpResponse::createContentTypeMap() {
     stringDict map;
     map[".html"] = CONTENT_TYPE_HTML;
-    map[".css"] = CONTENT_TYPE_CSS;
-    map[".js"] = CONTENT_TYPE_JS;
-    map[".png"] = CONTENT_TYPE_PNG;
-    map[".jpg"] = CONTENT_TYPE_JPG;
-    map[".gif"] = CONTENT_TYPE_GIF;
-    map[".pdf"] = CONTENT_TYPE_PDF;
+    map[".css"]  = CONTENT_TYPE_CSS;
+    map[".js"]   = CONTENT_TYPE_JS;
+    map[".png"]  = CONTENT_TYPE_PNG;
+    map[".jpg"]  = CONTENT_TYPE_JPG;
+    map[".gif"]  = CONTENT_TYPE_GIF;
+    map[".pdf"]  = CONTENT_TYPE_PDF;
     return map;
 }
 
@@ -20,10 +20,11 @@ const stringDict HttpResponse::contentTypeMap = HttpResponse::createContentTypeM
 /* CONSTRUCTORS */
 
 LocationBlock *HttpResponse::getBlock() {
-    if (this->_locationBlockRef) {
+    if (this->isLocation) {
         return dynamic_cast<LocationBlock*>(this->_locationBlockRef);
     } else {
-        return this->emptyBlock;
+        return LocationBlock::emptyBlock;
+        // return this->emptyBlock;
     }
 }
 
@@ -49,12 +50,15 @@ void HttpResponse::handleGET(HttpRequest &request, ServerBlock *serverBlock) {
     }
 
     try {
-
         string reroutedPath = reroutePath(path);
-        string content = readFileContent(reroutedPath);
+
+        if (!doesPathExist(reroutedPath)) {
+            throw HttpException(404, reroutedPath);
+        }
 
         // if the path is a directory
         if (isDirectory(reroutedPath)) {
+            std::cout << "Directory detected" << std::endl;
             string indexFile = containsIndexFile(reroutedPath);
             
             // if index file is found, serve it
@@ -68,6 +72,7 @@ void HttpResponse::handleGET(HttpRequest &request, ServerBlock *serverBlock) {
             
             // if autoindex is enabled, serve the autoindex page
             else if (serverBlock->getAutoindex()) {
+                std::cout << "Generating auto index... " << std::endl;
                 string autoIndex = createAutoIndexHtml(reroutedPath);
                 this->initHttpResponseSelf(autoIndex, CONTENT_TYPE_HTML, 200);
             } 
@@ -80,18 +85,8 @@ void HttpResponse::handleGET(HttpRequest &request, ServerBlock *serverBlock) {
         
         // if the path is a file
         else {
-            // Check if CGI handling is required for the resource
-            string cgiToUse = decideCGIToUse(path);
-
-            // If CGI handling is required, reroute the path to the CGI script
-            // if (!cgiToUse.empty())
-            //     this->initCGIResponse(cgiToUse, request);
-            // else if (isCGI(path))
-            //     this->initCGIResponse(path, request);
-            // else
+            string content = readFileContent(reroutedPath);
             this->initHttpResponseSelf(content, getContentType(reroutedPath), 200);
-
-            // std::cout << this->getFinalResponseMsg().substr(100) << std::endl;
         }
     } 
 
@@ -130,24 +125,31 @@ void HttpResponse::handleDELETE(string path) {
 }
 
 
+
+/* CONSTRUCTOR */
+
 HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
     std::cout << YELLOW << "\nConstructing response..." << std::endl;
-    this->emptyBlock = new LocationBlock();
-    string path = request.headerGet("path");
-    this->_serverBlockRef = serverBlock;
+    
+    
+    this->emptyBlock        = new LocationBlock();
+    string path             = request.headerGet("path");
+    this->_serverBlockRef   = serverBlock;
     this->_locationBlockRef = getRelevantLocationBlock(path, serverBlock);
 
 
     if (this->_locationBlockRef == NULL) {
+        std::cout << YELLOW << "\t" << path << " Does not match any location. Defaulting..." << RESET << std::endl;
         this->_locationBlockRef = serverBlock;
         this->isLocation = false;
-        std::cout << YELLOW << "\t" << path << " Does not match any location. Defaulting..." << RESET << std::endl;
+        this->_locationBlockRef->printBlock();
     }
     else {
+        this->isLocation = true;
         std::cout << "\tLocation matches location block: " << this->getBlock()->getUri() << std::endl;
+        this->getBlock()->printBlock();
     }
     
-    this->getBlock()->printBlock();
 
     stringList limitExcept = this->_locationBlockRef->getLimitExcept();
 
@@ -157,9 +159,8 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
         return;
     }
 
-    string method = request.headerGet("method");
+    string method = request.getMethod();
 
-    std::cout << YELLOW << "\tHandling method: " << method << RESET << std::endl;
     if (method == "GET") {
         this->handleGET(request, serverBlock);
     } 
@@ -201,9 +202,6 @@ string HttpResponse::createResponseString(
     response << PROTOCOL << " " << statusCode << " " << statusMessage << "\n";
     response << "Content-Length: " << fileContent.size() << "\n";
     response << "Connection: " << "close" << "\n";
-    // response << "Cache-Control: " << "no-cache, no-store, must-revalidate" << "\n";
-    // response << "Pragma: " << "no-cache" << "\n";
-    // response << "Expires: " << "0" << "\n";
     response << "Content-Type: " << resourceType << "\n\n";
     response << fileContent;
 
@@ -245,10 +243,15 @@ string Css() {
 "       }";
 }
 
-int getFileSize(const std::string& filePath) {
-    struct stat stat_buf;
-    int rc = stat(filePath.c_str(), &stat_buf);
-    return rc == 0 ? stat_buf.st_size : -1;
+
+
+string HttpResponse::reroutePath(string urlPath) {
+    string reroutedPath = appendPaths(this->_serverBlockRef->getRoot(), urlPath);
+
+    if (this->isLocation)
+        reroutedPath = appendPaths(this->getBlock()->getRoot(), urlPath);
+
+    return reroutedPath;
 }
 
 string HttpResponse::createAutoIndexHtml(string path) {
@@ -258,17 +261,17 @@ string HttpResponse::createAutoIndexHtml(string path) {
     ss << "<h1>Index of " << path << "</h1><table>";
     ss << "<tr><th>Name</th><th>Size</th></tr>"; // Table header
 
-    std::vector<string> files = listFiles(path);
+    stringList files = listFiles(path);
     if (!files.empty()) {
-        for (std::vector<string>::iterator it = files.begin(); it != files.end(); ++it) {
+        for (stringList::iterator it = files.begin(); it != files.end(); ++it) {
             if (*it == "." || *it == "..")
                 continue;
             
-            std::string fullPath = path + "/" + *it;
-            std::string fileSize = isDirectory(fullPath) ? "-" : to_string(getFileSize(fullPath));
+            string fullPath = appendPaths(path, *it);
+            string fileSize = isDirectory(fullPath) ? "-" : to_string(getFileSize(fullPath));
 
             if (isDirectory(fullPath))
-                ss << "<tr><td><a class=\"folder\" href=\"" << *it << "\">" << *it << "</a></td><td>" << fileSize << "</td></tr>";
+                ss << "<tr><td><a class=\"folder\" href=\"" << *it << "\">" << *it << "</a></td><td>" << fileSize << "bytes</td></tr>";
             else
                 ss << "<tr><td><a href=\"" << *it << "\">" << *it << "</a></td><td>" << fileSize << "</td></tr>";
         }
@@ -281,6 +284,7 @@ string HttpResponse::createAutoIndexHtml(string path) {
     ss << "</table></body></html>";
     return ss.str();
 }
+
 
 
 /* GETTERS */
@@ -347,9 +351,11 @@ void HttpResponse::initErrorHttpResponse(int statusCode) {
 
 void HttpResponse::initCGIResponse(string cgiPath, HttpRequest request) {
 
+    std::cout << YELLOW << "Initializing CGI: " << cgiPath << RESET << std::endl;
+
     cgiPath = getAbsolutePath(cgiPath);
-    if (!doesPathExist(cgiPath) || this->getBlock()->getCgiPass().empty()) {
-        std::cout << "path doesn't exist" << cgiPath << std::endl;
+    if (!doesPathExist(cgiPath)) {
+        std::cout << "path doesn't exist: " << cgiPath << std::endl;
         this->initErrorHttpResponse(500);
         return;
     }
@@ -357,7 +363,7 @@ void HttpResponse::initCGIResponse(string cgiPath, HttpRequest request) {
     string pathToHandle = request.headerGet("path_info");
 
     CGIHandler cgiHandler = CGIHandler();
-    string absolutePath = getAbsolutePath(this->getBlock()->getUploadPath() + pathToHandle);
+    string absolutePath = getAbsolutePath(pathToHandle);
 
     request.headerSet("absolute_path", absolutePath);
 
@@ -368,24 +374,8 @@ void HttpResponse::initCGIResponse(string cgiPath, HttpRequest request) {
 }
 
 
-bool HttpResponse::isCGI(const string& resourcePath) {
-    return endsWith(resourcePath, ".py");
-}
 
-
-string HttpResponse::decideCGIToUse(string resourcePath) {
-    // stringDict cgiScripts = this->_locationBlockRef->getCgiScript();
-
-    // check if cgi handling is required
-    // for (stringDict::const_iterator it = cgiScripts.begin(); it != cgiScripts.end(); ++it) {
-    //     if (endsWith(resourcePath, it->first)) {
-    //         return (CGI_BIN_PATH + string("/") + it->second);
-    //     }
-    // }
-    // return "";
-	(void)resourcePath;
-	return (CGI_BIN_PATH + string("/") + this->getBlock()->getCgiPass());
-}
+/* OTHERS */
 
 string HttpResponse::getContentType(const string& resourcePath) {
     
@@ -395,32 +385,8 @@ string HttpResponse::getContentType(const string& resourcePath) {
         if (endsWith(resourcePath, it->first))
             return it->second;
     }
-
+    
     return "text/plain";
-}
-
-string HttpResponse::reroutePath(string urlPath) {
-    stringDict pathMap;
-
-    pathMap["cgi-bin"] = "";
-
-    string reroutedPath = this->_locationBlockRef->getRoot() + "/" + urlPath;
-    for (stringDict::const_iterator it = pathMap.begin(); it != pathMap.end(); ++it) {
-        if (startsWith(urlPath, it->first)) {
-            reroutedPath = (it->second + urlPath);
-        }
-    }
-
-    return reroutedPath;
-}
-
-HttpResponse::HttpResponse(string content, string contentType, int statusCode) {
-    this->rawContent = content;
-    this->contentLength = contentLength;
-    this->contentType = contentType;
-    this->statusCode = statusCode;
-    this->message = CodeToMessage(statusCode).second;
-    this->finalResponseMsg = createResponseString(content, contentType, to_string(statusCode), message);
 }
 
 string HttpResponse::containsIndexFile(string path) {
@@ -431,14 +397,6 @@ string HttpResponse::containsIndexFile(string path) {
         }
     }
 
-    return "";
-}
-
-std::string getDirectory(const std::string& fullPath) {
-    size_t pos = fullPath.find_last_of("/\\");
-    if (pos != std::string::npos) {
-        return fullPath.substr(0, pos);
-    }
     return "";
 }
 

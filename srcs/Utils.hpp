@@ -16,5 +16,9 @@ string readFileContent(const string& filePath);
 std::vector<string> listFiles(const string &path);
 void createFileWithContents(const std::string& filePath, const std::string& contents);
 stringList splitString(string str, char delimiter);
+int getFileSize(const std::string& filePath);
+std::string getDirectory(const std::string& fullPath);    
+string appendPaths(const std::string& path1, const std::string& path2);
+    
 
 #endif
