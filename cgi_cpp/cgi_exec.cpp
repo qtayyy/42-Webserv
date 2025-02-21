@@ -65,6 +65,16 @@ std::string constructHttpResponseFromFile(const std::string& path) {
     return constructResponseWithHeader(file_content, content_type, "200", "OK");
 }
 
+void appendLineToFile(const std::string& path, const std::string& line) {
+    std::ofstream file(path.c_str(), std::ios::app);
+    if (file.is_open()) {
+        file << line << std::endl;
+        file.close();
+    } else {
+        std::cerr << "Error: Could not open file at " << path << std::endl;
+    }
+}
+
 
 bool doesPathExist(const std::string& path) {
     struct stat buffer;
@@ -93,9 +103,30 @@ void createFile(const std::string& path, const std::string& content) {
     }
 }
 
+
+#include <sstream>
+#include <vector>
+
+std::vector<std::string> extractAndProcessFirstLine(const std::string& request) {
+    std::istringstream request_stream(request);
+    std::string line;
+    std::getline(request_stream, line);
+
+    std::istringstream line_stream(line);
+    std::vector<std::string> result;
+    std::string word;
+    while (line_stream >> word) {
+        result.push_back(word);
+    }
+
+    return result;
+}
+
 int main(int ac, char **av) {
     (void)ac;
     (void)av;
+
+    chdir("cgi_cpp");
 
     const char* request_method = getenv("REQUEST_METHOD");
     const char* path_translated = getenv("PATH_TRANSLATED");
@@ -109,23 +140,18 @@ int main(int ac, char **av) {
     if (std::string(request_method) == "GET") {
         std::string path = std::string(path_translated);
 
-        // if (!doesPathExist(path)) {
-        //     std::cout << constructResponseWithHeader("File not found: " + path, "text/plain", "404", "Not Found");
-        //     return 0;
-        // }
+        std::ifstream log_file("log.txt");
+        std::string log_content((std::istreambuf_iterator<char>(log_file)), std::istreambuf_iterator<char>());
+        log_file.close();
 
-        // if (isDirectory(path)) {
-        //     std::cout << constructResponseWithHeader("Path is a directory: " + path, "text/plain", "400", "Bad Request");
-        //     return 0;
-        // }
-
-
-
-        std::cout << constructResponseWithHeader(path, "text/plain", "200", "OK");
-        // std::cout << constructHttpResponseFromFile(urlDecode(path)) << std::endl;
-
-        // std::cout << constructHttpResponseFromFile(urlDecode(path)) << std::endl;
+        std::cout << constructResponseWithHeader(log_content, "text/plain", "200", "OK");
     } 
+    
+    if (std::string(request_method) == "POST") {
+        appendLineToFile("log.txt", path);
+        std::cout << constructResponseWithHeader("ok", "text/plain", "200", "OK");
+
+    }
     
     else {
         std::cout << constructResponseWithHeader("Method not supported: " + std::string(request_method), "text/plain", "405", "Method Not Allowed");

@@ -35,14 +35,6 @@ void HttpResponse::handleGET(HttpRequest &request, ServerBlock *serverBlock) {
     string path = request.headerGet("path");
     
     path = applyAlias(path);
-    
-    // Check if a redirect is required
-    std::pair<int, std::string> redirectInfo = this->getBlock()->getReturn();
-    if (!redirectInfo.second.empty()) {
-        std::cout << "redirecting to :" << redirectInfo.second << std::endl;
-        this->initRedirectResponse(redirectInfo.second, redirectInfo.first);
-        return;
-    }
 
     if (!this->getBlock()->getCgiPass().empty()) {
         this->initCGIResponse(this->getBlock()->getCgiPass(), request);
@@ -139,14 +131,14 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
 
 
     if (this->_locationBlockRef == NULL) {
-        std::cout << YELLOW << "\t" << path << " Does not match any location. Defaulting..." << RESET << std::endl;
+        std::cout << YELLOW << path << " Does not match any location. Defaulting..." << RESET << std::endl;
         this->_locationBlockRef = serverBlock;
         this->isLocation = false;
         this->_locationBlockRef->printBlock();
     }
     else {
         this->isLocation = true;
-        std::cout << "\tLocation matches location block: " << this->getBlock()->getUri() << std::endl;
+        std::cout << "Location matches location block: " << this->getBlock()->getUri() << std::endl;
         this->getBlock()->printBlock();
     }
     
@@ -160,6 +152,16 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
     }
 
     string method = request.getMethod();
+
+    // Check if a redirect is required
+    std::pair<int, std::string> redirectInfo = this->getBlock()->getReturn();
+    if (!redirectInfo.second.empty()) {
+        std::cout << "redirecting to :" << redirectInfo.second << std::endl;
+        this->initRedirectResponse(redirectInfo.second, redirectInfo.first);
+        return;
+    }
+
+
 
     if (method == "GET") {
         this->handleGET(request, serverBlock);
