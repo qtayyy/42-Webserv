@@ -227,7 +227,7 @@ HttpRequest mockUploadPOSTRequest() {
 	request.setRawRequest(readFileContent("test_post_request"));
 	request.setBody(readFileContent("test_post_request"));
 
-    request.headerSet("path", "/upload/upload.py");
+    request.headerSet("path", "/logs/");
     request.headerSet("path_info", "");
     request.headerSet("query_string", "name=John&age=30");
 	request.setMethod("POST");

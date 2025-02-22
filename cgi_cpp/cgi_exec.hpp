@@ -9,5 +9,9 @@
 # include <iomanip>
 # include <sstream>
 #include <sys/stat.h>
+#include <sstream>
+#include <vector>
+#define RED "\033[31m"
+#define RESET "\033[0m"
 
 #endif

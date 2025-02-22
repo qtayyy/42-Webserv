@@ -123,7 +123,6 @@ void HttpResponse::handleDELETE(string path) {
 HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
     std::cout << YELLOW << "\nConstructing response..." << std::endl;
     
-    
     this->emptyBlock        = new LocationBlock();
     string path             = request.headerGet("path");
     this->_serverBlockRef   = serverBlock;
