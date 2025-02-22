@@ -177,17 +177,6 @@ void	LocationBlock::setCgiPass(std::vector<std::string> args)
 	this->_cgiPass = args[0];
 }
 
-void	LocationBlock::setUploadPath(std::vector<std::string> args)
-{
-	if (args.size() != 1)
-	{
-		if (!args.empty())
-			std::cerr << RED "upload_path error: invalid num of args. Upload path is set to default.\n" RESET;
-		return ;
-	}
-	this->_uploadPath = args[0];
-}
-
 // ================================= STATIC ==================================
 
 std::map<std::string, void (LocationBlock::*)(std::vector<std::string>)>	LocationBlock::initLocationMap(void)
@@ -204,7 +193,6 @@ std::map<std::string, void (LocationBlock::*)(std::vector<std::string>)>	Locatio
 	locationMap["limit_except"] = &LocationBlock::setLimitExcept;
 	locationMap["return"] = &LocationBlock::setReturn;
 	locationMap["root"] = &LocationBlock::setRoot;
-	locationMap["upload_path"] = &LocationBlock::setUploadPath;
 
 	return (locationMap);
 }
@@ -231,7 +219,6 @@ void	LocationBlock::printBlock()
 		std::cout << std::left << std::setw(17) << "indexes:" 		  << *it << std::endl;
 	
 	std::cout << std::left << std::setw(17) 	<< "cgi_pass:" 		  << this->getCgiPass() << "\n";
-	std::cout << std::left << std::setw(17) 	<< "upload_path:" 	  << this->getUploadPath() << "\n";
 	std::cout << std::left << std::setw(17) 	<< "uri:" 			  << this->getUri() << "\n";
 	std::cout << std::left << std::setw(17) 	<< "alias:" 		  << this->getAlias() << "\n";
 	if (_return.first != 0)

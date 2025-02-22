@@ -34,14 +34,12 @@ class LocationBlock : public Block
 		void	setAlias(stringList args = stringList());
 		void	setReturn(stringList args = stringList());
 		void	setCgiPass(stringList args = stringList());
-		void	setUploadPath(stringList args = stringList());
 
 		// Getters
 		string	getUri(void) { return (_uri); };
 		string	getAlias(void) { return (_alias); };
 		std::pair<int, string>	getReturn(void) { return (_return); };
 		string	getCgiPass(void) { return (_cgiPass); };
-		string	getUploadPath(void) { return (_uploadPath); };
 
 		void	printBlock(void);
 
@@ -51,7 +49,6 @@ class LocationBlock : public Block
 		string	_alias; // 3rd requirement for routes (see subject PDF)
 		std::pair<int, string>	_return; // redirection
 		string	_cgiPass;
-		string	_uploadPath;
 
 		static std::map<string, void (LocationBlock::*)(stringList)> locationParseMap;
 		static std::map<string, void (LocationBlock::*)(stringList)> initLocationMap(void);
