@@ -287,7 +287,7 @@ void Cluster::run(void) {
             }
             if (_pollFds[i].revents & POLLOUT) { // If an fd is ready for writing
                 // HttpRequest request = mockUploadGETRequest();
-                HttpRequest	request = mockRequest("/logs/");
+                HttpRequest	request = mockUploadPOSTRequest();
                 HttpResponse response = HttpResponse(request, &_servers[0]);
                 
                 string		finalMsg = response.getFinalResponseMsg();

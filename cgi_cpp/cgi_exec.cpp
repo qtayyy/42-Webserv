@@ -150,7 +150,6 @@ int main(int ac, char **av) {
     if (std::string(request_method) == "POST") {
         appendLineToFile("log.txt", path);
         std::cout << constructResponseWithHeader("ok", "text/plain", "200", "OK");
-
     }
     
     else {
