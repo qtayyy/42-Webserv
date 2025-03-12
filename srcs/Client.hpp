@@ -1,18 +1,29 @@
 #ifndef CLIENT_HPP
 # define CLIENT_HPP
 
+#include "HttpRequest.hpp"
+
+#include <string>
+#include <iostream>
+#include <unistd.h>
+#include <sys/socket.h>
+
+
 class Client
 {
 	public:
-		Client(void) {};
-		~Client(void) {};
+		Client(int fd);
+		~Client();
 
-		void	handleRequest(void) {
-			
-		};
-		void	handleResponse(void) {};
-
+		void		receiveRequest();
+		void		parseRequest();
+		void		handleRequest();
+		HttpRequest &getRequest();
 	private:
+		int			socket_fd;
+		std::string		request_buf;
+		HttpRequest request;
+
 		
 };
 
