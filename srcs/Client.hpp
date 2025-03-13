@@ -13,6 +13,7 @@ class Client
 {
 	public:
 		Client(int fd);
+		Client();
 		~Client();
 
 		void		receiveRequest();

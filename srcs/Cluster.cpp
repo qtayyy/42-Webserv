@@ -281,7 +281,9 @@ void Cluster::run(void) {
                 if (_listenerToServer.find(_pollFds[i].fd) != _listenerToServer.end())
                     handleNewClient(_pollFds[i].fd);
                 else { // Note: if client disconnects, have to close its fd and remove from the poll struct
-                    this->_clients[_pollFds[i].fd]->handleRequest(); // Ethan's part
+                    std::cout << "REQUEST PARSED" << "" << std::endl;
+					std::cout << "" << &(this->_clients) << std::endl;
+					this->_clients[_pollFds[i].fd]->handleRequest(); // Ethan's part
                     _pollFds[i].events = POLLOUT;
                 }
             }
@@ -441,7 +443,7 @@ void	Cluster::handleNewClient(int listenerFd)
 		perror("fcntl");
 	else
 	{
-		this->_clients[newClient] = new Client(); // Ethan's `rt (prob need to pass info about config - ServerBlock)
+		this->_clients[newClient] = new Client(newClient); // Ethan's `rt (prob need to pass info about config - ServerBlock)
 		_pollFds[_numOfFds].fd = newClient;
 		std::cout << GREEN "New client connection received: [" << _pollFds[_numOfFds].fd << "]\n" RESET; 
 		_pollFds[_numOfFds++].events = POLLIN;

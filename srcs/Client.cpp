@@ -15,6 +15,9 @@
 Client::Client(int fd) : socket_fd(fd), request_buf("") {
 }
 
+Client::Client() : socket_fd(-1), request_buf() {
+}
+
 Client::~Client() {
 }
 
@@ -25,8 +28,13 @@ void Client::receiveRequest() {
     //Reads specified number of bytes from the socket
     read_buf = recv(socket_fd, buffer, BUFFER_SIZE - 1, 0);
     if (read_buf <= 0) {
-        std::cerr << "Couldn't read from socket" << std::endl;
-        return;
+        if (read_buf == 0)
+            std::cout << "hang" << read_buf << std::endl;
+        
+        else {
+            std::cerr << "Error receiving data on socket fd " << socket_fd << ": " << strerror(errno) << std::endl;
+            perror("recv");
+        }
     }
     
     buffer[read_buf] = '\0';
@@ -67,13 +75,17 @@ void Client::parseRequestLine(const std::string& requestLine) {
     request.headerSet("path", path);
     request.headerSet("queryString", queryString);
     request.headerSet("absolute_path", path);
+    std::cout << "PATH" << path << std::endl;
+    std::cout << "Query string" << queryString << std::endl;
+    std::cout << "abs path" << path << std::endl;
 }
 
 void Client::parseHeaders(const std::string& headers) {
+    std::string headersCopy = headers; 
     size_t pos = 0;
-    while ((pos = headers.find("\r\n")) != std::string::npos) {
-        std::string headerLine = headers.substr(0, pos);
-        headers = headers.substr(pos + 2);
+    while ((pos = headersCopy.find("\r\n")) != std::string::npos) {
+        std::string headerLine = headersCopy.substr(0, pos);
+        headersCopy = headersCopy.substr(pos + 2);
 
         size_t colonPos = headerLine.find(": ");
         if (colonPos != std::string::npos) {
@@ -120,6 +132,7 @@ void Client::parseRequest() {
 void Client::handleRequest() {
     receiveRequest();
     parseRequest();
+    request.printInfo();
 }
 
 HttpRequest& Client::getRequest() {
