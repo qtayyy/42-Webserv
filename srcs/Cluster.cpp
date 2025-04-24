@@ -280,13 +280,29 @@ void Cluster::run(void) {
             if (_pollFds[i].revents & (POLLIN | POLLHUP)) { // If an fd is ready for reading
                 if (_listenerToServer.find(_pollFds[i].fd) != _listenerToServer.end())
                     handleNewClient(_pollFds[i].fd);
-                else { // Note: if client disconnects, have to close its fd and remove from the poll struct
-                    std::cout << "REQUEST PARSED" << "" << std::endl;
-					std::cout << "" << &(this->_clients) << std::endl;
-					this->_clients[_pollFds[i].fd]->handleRequest(); // Ethan's part
-                    _pollFds[i].events = POLLOUT;
-                }
-            }
+                else {
+					char buffer[BUFFER_SIZE];
+					ssize_t byteRecv;
+					byteRecv = recv(_pollFds[i].fd, buffer, BUFFER_SIZE - 1, 0);
+					//check for disconnection or error
+					if (byteRecv <= 0){
+						if(byteRecv == 0){
+							std::cout << "Client disconnected" << std::endl;
+						}
+						else{
+							std::cerr << "Recv error" << strerror(errno) << std::endl;
+						}
+						close(_pollFds[i].fd);
+						_clients.erase(_pollFds[i].fd);
+						_pollFds[i] = _pollFds[--_numOfFds];
+						i--;
+						continue;
+					}
+					buffer[byteRecv] = '\0';
+					this->_clients[_pollFds[i].fd]->handleRequest();
+					_pollFds[i].events = POLLOUT;
+            	}
+			}
             if (_pollFds[i].revents & POLLOUT) { // If an fd is ready for writing
                 // HttpRequest request = mockUploadGETRequest();
                 HttpRequest	request = mockUploadPOSTRequest();

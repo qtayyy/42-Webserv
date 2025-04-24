@@ -15,9 +15,6 @@
 Client::Client(int fd) : socket_fd(fd), request_buf("") {
 }
 
-Client::Client() : socket_fd(-1), request_buf() {
-}
-
 Client::~Client() {
 }
 
@@ -86,7 +83,6 @@ void Client::parseHeaders(const std::string& headers) {
     while ((pos = headersCopy.find("\r\n")) != std::string::npos) {
         std::string headerLine = headersCopy.substr(0, pos);
         headersCopy = headersCopy.substr(pos + 2);
-
         size_t colonPos = headerLine.find(": ");
         if (colonPos != std::string::npos) {
             std::string key = headerLine.substr(0, colonPos);
@@ -94,6 +90,71 @@ void Client::parseHeaders(const std::string& headers) {
             request.headerSet(key, value);
         }
     }
+}
+
+//parses the chunked body
+void Client::parseChunkedBody() {
+    size_t headerEnd;
+    std::string fullBody;
+    headerEnd = request_buf.find("\r\n\r\n");
+    if (headerEnd == std::string::npos) {
+        std::cerr << "Invalid chunked request format" << std::endl;
+        return;
+    }
+    size_t pos;
+	size_t chunkSize;
+    pos = headerEnd + 4;
+    chunkSize = 1;
+
+    size_t lineEnd;
+    while (chunkSize != 0) {
+        lineEnd = request_buf.find("\r\n", pos);
+        if (lineEnd == std::string::npos) {
+            std::cerr << "Invalid chunk format" << std::endl;
+            return;
+        }
+		std::string hexSize;
+        hexSize = request_buf.substr(pos, lineEnd - pos);
+        chunkSize = parseChunkSize(hexSize);
+        pos = lineEnd + 2;
+        if (pos + chunkSize > request_buf.length()) {
+            std::cerr << "Incomplete chunk data" << std::endl;
+            return;
+        }
+        if (chunkSize > 0) {
+            fullBody += request_buf.substr(pos, chunkSize);
+            pos += chunkSize + 2;
+        }
+    }
+    request.setBody(fullBody);
+}
+
+size_t Client::parseChunkSize(const std::string& hexChunk) {
+    // Remove any chunk extensions
+    size_t semicolonPos = hexChunk.find(';');
+    std::string cleanHex = hexChunk;
+    if (semicolonPos != std::string::npos) {
+        cleanHex = hexChunk.substr(0, semicolonPos);
+    }
+    return hexToDec(cleanHex);
+}
+
+size_t Client::hexToDec(const std::string& hex) {
+    size_t result = 0;
+    for (size_t i = 0; i < hex.length(); i++) {
+        result *= 16;
+        if (hex[i] >= '0' && hex[i] <= '9') {
+            result += hex[i] - '0';
+        } else if (hex[i] >= 'a' && hex[i] <= 'f') {
+            result += hex[i] - 'a' + 10;
+        } else if (hex[i] >= 'A' && hex[i] <= 'F') {
+            result += hex[i] - 'A' + 10;
+        } else {
+            std::cerr << "Invalid hex character" << std::endl;
+            return 0;
+        }
+    }
+    return result;
 }
 
 //parses the body and stores it
@@ -125,7 +186,14 @@ void Client::parseRequest() {
     }
     std::string headers = request_buf.substr(headerStart, headerEnd - headerStart);
     parseHeaders(headers);
-    parseBody(headerEnd);
+	
+	// Check if there is chunked transfer encoding
+	if (request.headerGet("Transfer-Encoding") == "chunked") {
+		parseChunkedBody();
+	}
+	else {
+		parseBody(headerEnd);
+	}
     request.setRawRequest(request_buf);
 }
 

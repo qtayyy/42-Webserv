@@ -13,7 +13,6 @@ class Client
 {
 	public:
 		Client(int fd);
-		Client();
 		~Client();
 
 		void		receiveRequest();
@@ -25,10 +24,15 @@ class Client
 		void		parseRequestLine(const std::string& request_line);
 		void		parseHeaders(const std::string& headers);
 		void		parseBody(size_t header_end);
+		void		parseChunkedBody();
+		size_t		parseChunkSize(const std::string& chunk_size);
+		size_t		hexToDec(const std::string& hex);
 		
 		int			socket_fd;
 		std::string	request_buf;
 		HttpRequest request;
+
+		
 };
 
 #endif
