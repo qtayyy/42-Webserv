@@ -301,7 +301,7 @@ void Cluster::run(void) {
 						continue;
 					}
 					buffer[byteRecv] = '\0';
-					this->_clients[_pollFds[i].fd]->handleRequest();
+					this->_clients[_pollFds[i].fd]->handleRequest(byteRecv, buffer);
 					_pollFds[i].events = POLLOUT;
             	}
 			}

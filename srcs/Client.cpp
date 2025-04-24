@@ -18,15 +18,9 @@ Client::Client(int fd) : socket_fd(fd), request_buf("") {
 Client::~Client() {
 }
 
-void Client::receiveRequest() {
-    char buffer[BUFFER_SIZE];
-    ssize_t read_buf;
-    
+void Client::receiveRequest(ssize_t read_buf, char *buffer) {
     //Reads specified number of bytes from the socket
-    read_buf = recv(socket_fd, buffer, BUFFER_SIZE - 1, 0);
     std::cout << "READ BUFFER:" << read_buf << std::endl;
-    perror("recv failed");               // prints "recv failed: <error>"
-    std::cerr << "Error: " << strerror(errno) << std::endl; // optional
     if (read_buf <= 0) {
         if (read_buf == 0) {
             std::cout << "hang" << read_buf << std::endl;
@@ -34,7 +28,7 @@ void Client::receiveRequest() {
         
         else {
             std::cerr << "Error receiving data on socket fd " << socket_fd << ": " << strerror(errno) << std::endl;
-            perror("RECVV");
+            perror("RECV");
         }
     }
     
@@ -203,8 +197,8 @@ void Client::parseRequest() {
     request.setRawRequest(request_buf);
 }
 
-void Client::handleRequest() {
-    receiveRequest();
+void Client::handleRequest(ssize_t byteRec, char *buffer) {
+    receiveRequest(byteRec, buffer);
     parseRequest();
     request.printInfo();
 }

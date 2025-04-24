@@ -15,9 +15,9 @@ class Client
 		Client(int fd);
 		~Client();
 
-		void		receiveRequest();
+		void		receiveRequest(ssize_t read_buf, char *buffer);
 		void		parseRequest();
-		void		handleRequest();
+		void		handleRequest(ssize_t byteRec, char *buffer);
 		HttpRequest &getRequest();
 	
 	private:
