@@ -278,8 +278,10 @@ void Cluster::run(void) {
         }
         for (int i = 0; i < _numOfFds; i++) {
             if (_pollFds[i].revents & (POLLIN | POLLHUP)) { // If an fd is ready for reading
-                if (_listenerToServer.find(_pollFds[i].fd) != _listenerToServer.end())
-                    handleNewClient(_pollFds[i].fd);
+                if (_listenerToServer.find(_pollFds[i].fd) != _listenerToServer.end()) {
+                    std::cout << "CONNECTION RECEIVED" << "" << std::endl;
+					handleNewClient(_pollFds[i].fd);
+				}
                 else {
 					char buffer[BUFFER_SIZE];
 					ssize_t byteRecv;
@@ -304,8 +306,13 @@ void Cluster::run(void) {
             	}
 			}
             if (_pollFds[i].revents & POLLOUT) { // If an fd is ready for writing
+				std::cout << "READY FOR WRITING" << "" << std::endl;
                 // HttpRequest request = mockUploadGETRequest();
-                HttpRequest	request = mockUploadPOSTRequest();
+                // HttpRequest	request = mockUploadPOSTRequest();
+				HttpRequest request = this->_clients[_pollFds[i].fd]->getRequest();
+				std::cout << "METHOD: [" << request.getMethod() << "]" << std::endl;
+				request.printInfo();
+
                 HttpResponse response = HttpResponse(request, &_servers[0]);
                 
                 string		finalMsg = response.getFinalResponseMsg();

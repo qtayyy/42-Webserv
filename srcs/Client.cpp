@@ -24,13 +24,17 @@ void Client::receiveRequest() {
     
     //Reads specified number of bytes from the socket
     read_buf = recv(socket_fd, buffer, BUFFER_SIZE - 1, 0);
+    std::cout << "READ BUFFER:" << read_buf << std::endl;
+    perror("recv failed");               // prints "recv failed: <error>"
+    std::cerr << "Error: " << strerror(errno) << std::endl; // optional
     if (read_buf <= 0) {
-        if (read_buf == 0)
+        if (read_buf == 0) {
             std::cout << "hang" << read_buf << std::endl;
+        }
         
         else {
             std::cerr << "Error receiving data on socket fd " << socket_fd << ": " << strerror(errno) << std::endl;
-            perror("recv");
+            perror("RECVV");
         }
     }
     
@@ -72,9 +76,11 @@ void Client::parseRequestLine(const std::string& requestLine) {
     request.headerSet("path", path);
     request.headerSet("queryString", queryString);
     request.headerSet("absolute_path", path);
-    std::cout << "PATH" << path << std::endl;
-    std::cout << "Query string" << queryString << std::endl;
-    std::cout << "abs path" << path << std::endl;
+    // std::cout << "PATH" << path << std::endl;
+    // std::cout << "Query string" << queryString << std::endl;
+    // std::cout << "abs path" << path << std::endl;
+
+    request.printInfo();
 }
 
 void Client::parseHeaders(const std::string& headers) {
@@ -118,7 +124,7 @@ void Client::parseChunkedBody() {
         chunkSize = parseChunkSize(hexSize);
         pos = lineEnd + 2;
         if (pos + chunkSize > request_buf.length()) {
-            std::cerr << "Incomplete chunk data" << std::endl;
+            std::cerr << "Read over chunk data length" << std::endl;
             return;
         }
         if (chunkSize > 0) {
