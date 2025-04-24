@@ -21,6 +21,7 @@ private:
     stringDict headerParameters;
     std::vector<stringDict> formBlocks;
     string rawRequest;
+    std::string raw;
 
 public:
     void        appendFormBlock(stringDict formBlock);

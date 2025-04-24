@@ -278,8 +278,8 @@ void Cluster::run(void) {
         }
         for (int i = 0; i < _numOfFds; i++) {
             if (_pollFds[i].revents & (POLLIN | POLLHUP)) { // If an fd is ready for reading
+				std::cout << "Socket [" << _pollFds[i].fd << "] Event: " << _pollFds[i].revents << std::endl;
                 if (_listenerToServer.find(_pollFds[i].fd) != _listenerToServer.end()) {
-                    std::cout << "CONNECTION RECEIVED" << "" << std::endl;
 					handleNewClient(_pollFds[i].fd);
 				}
                 else {
@@ -302,6 +302,7 @@ void Cluster::run(void) {
 					}
 					buffer[byteRecv] = '\0';
 					this->_clients[_pollFds[i].fd]->handleRequest(byteRecv, buffer);
+					std::cout << "METHOD: " << this->_clients[_pollFds[i].fd]->getRequest().getMethod() << std::endl;
 					_pollFds[i].events = POLLOUT;
             	}
 			}
@@ -311,6 +312,7 @@ void Cluster::run(void) {
                 // HttpRequest	request = mockUploadPOSTRequest();
 				HttpRequest request = this->_clients[_pollFds[i].fd]->getRequest();
 				std::cout << "METHOD: [" << request.getMethod() << "]" << std::endl;
+				std::cout << request.getRawRequest() << std::endl;
 				request.printInfo();
 
                 HttpResponse response = HttpResponse(request, &_servers[0]);
@@ -379,7 +381,8 @@ void Cluster::run(void) {
                     
                     std::cout << std::endl << "Response from browser :" << std::endl;
                     std::cout << GREEN << std::string(buffer) << RESET << std::endl << std::endl;
-                }
+					continue;
+				}
             }
         }
     }

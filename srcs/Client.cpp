@@ -189,7 +189,7 @@ void Client::parseRequest() {
 	
 	// Check if there is chunked transfer encoding
 	if (request.headerGet("Transfer-Encoding") == "chunked") {
-		parseChunkedBody();
+		parseChunkedBody(); 
 	}
 	else {
 		parseBody(headerEnd);
