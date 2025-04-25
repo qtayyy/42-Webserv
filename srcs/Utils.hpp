@@ -2,6 +2,10 @@
 #define UTILS_HPP
 
 #include "../includes/Webserv.hpp"
+#include <string>
+#include <cctype>
+#include <sys/ioctl.h>
+#include <unistd.h>
 
 bool isDirectory(const string& path);
 bool endsWith(const string& str, const string& suffix);
@@ -19,6 +23,14 @@ stringList splitString(string str, char delimiter);
 int getFileSize(const std::string& filePath);
 std::string getDirectory(const std::string& fullPath);    
 string appendPaths(const std::string& path1, const std::string& path2);
+    
+int getTerminalWidth();
+bool isAnsiEscapeStart(char c);
+std::size_t visibleLength(const std::string& str);
+void printBorderedBox(const std::string& message, const std::string& title);
+    
+std::string urlEncode(const std::string& value);
+std::string urlDecode(const std::string& value);
     
 
 #endif

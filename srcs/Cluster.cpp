@@ -258,8 +258,27 @@ HttpRequest mockDeleteRequest() {
     return request;
 }
 
+void Cluster::removeFd(int i) {
+	close(_pollFds[i].fd);
+	_clients.erase(_pollFds[i].fd);
+	_pollFds[i] = _pollFds[--_numOfFds];
+	std::cout << GREEN << "Closed " << "[" << _pollFds[i].fd << "]" << RESET << std::endl;
+}
+
+void printIndented(const std::string& input, int indent) {
+    std::istringstream stream(input);
+    std::string line;
+    std::string indentStr(indent, ' ');
+
+    while (std::getline(stream, line)) {
+        std::cout << indentStr << line << std::endl;
+    }
+}
 
 // ============================== RUN ALL SERVERS =============================
+
+
+
 
 /**
  * @brief	Monitors each socket for incoming connections, request or reponses
@@ -278,116 +297,104 @@ void Cluster::run(void) {
         }
         for (int i = 0; i < _numOfFds; i++) {
             if (_pollFds[i].revents & (POLLIN | POLLHUP)) { // If an fd is ready for reading
-				std::cout << "Socket [" << _pollFds[i].fd << "] Event: " << _pollFds[i].revents << std::endl;
                 if (_listenerToServer.find(_pollFds[i].fd) != _listenerToServer.end()) {
-					handleNewClient(_pollFds[i].fd);
-				}
+                    std::cout << YELLOW << "handling new client " << _pollFds[i].fd << RESET << std::endl;
+                    handleNewClient(_pollFds[i].fd);
+                }
                 else {
-					char buffer[BUFFER_SIZE];
-					ssize_t byteRecv;
-					byteRecv = recv(_pollFds[i].fd, buffer, BUFFER_SIZE - 1, 0);
-					//check for disconnection or error
-					if (byteRecv <= 0){
-						if(byteRecv == 0){
-							std::cout << "Client disconnected" << std::endl;
-						}
-						else{
-							std::cerr << "Recv error" << strerror(errno) << std::endl;
-						}
-						close(_pollFds[i].fd);
-						_clients.erase(_pollFds[i].fd);
-						_pollFds[i] = _pollFds[--_numOfFds];
-						i--;
-						continue;
-					}
-					buffer[byteRecv] = '\0';
-					this->_clients[_pollFds[i].fd]->handleRequest(byteRecv, buffer);
-					std::cout << "METHOD: " << this->_clients[_pollFds[i].fd]->getRequest().getMethod() << std::endl;
-					_pollFds[i].events = POLLOUT;
-            	}
-			}
+                    char buffer[BUFFER_SIZE];
+                    ssize_t byteRecv;
+                    std::cout << YELLOW << "Reading from [" << _pollFds[i].fd << "]..." << std::endl;
+                    byteRecv = recv(_pollFds[i].fd, buffer, BUFFER_SIZE - 1, 0);
+                    if (byteRecv <= 0) {
+                        if (byteRecv == 0) {
+                            std::cout << RED << "Client disconnected [" << _pollFds[i].fd << "]" << RESET <<  std::endl;
+                        }
+                        else {
+                            std::cerr << RED << "Recv error: " << strerror(errno) << RESET << std::endl;
+                        }
+                        removeFd(i--);
+                        continue;
+                    }
+                    buffer[byteRecv] = '\0';
+					std::string message = std::string(buffer);
+					message.erase(std::remove(message.begin(), message.end(), '\r'), message.end());
+					printBorderedBox(message, std::string("Received raw request from [") + to_string(_pollFds[i].fd) + "]");
+					std::cout << YELLOW << "Parsing request..." << std::endl;
+                    this->_clients[_pollFds[i].fd]->handleRequest(byteRecv, buffer);
+                    _pollFds[i].events = POLLOUT;
+                }
+            }
             if (_pollFds[i].revents & POLLOUT) { // If an fd is ready for writing
-				std::cout << "READY FOR WRITING" << "" << std::endl;
-                // HttpRequest request = mockUploadGETRequest();
-                // HttpRequest	request = mockUploadPOSTRequest();
 				HttpRequest request = this->_clients[_pollFds[i].fd]->getRequest();
-				std::cout << "METHOD: [" << request.getMethod() << "]" << std::endl;
-				std::cout << request.getRawRequest() << std::endl;
-				request.printInfo();
-
+				// request = mockRequest("/dir2/file2.txt");
+                printBorderedBox(request.preview(), "Request parsed: ");
+				
+                std::cout << YELLOW << "handling request..." << std::endl;
                 HttpResponse response = HttpResponse(request, &_servers[0]);
+                string finalMsg = response.getFinalResponseMsg();
                 
-                string		finalMsg = response.getFinalResponseMsg();
-                
-                ssize_t		totalBytes = finalMsg.size();
-                ssize_t		bytesSent  = 0;
-                ssize_t		bytesLeft  = totalBytes;
-                const char* msgPtr 	   = finalMsg.c_str();
+                ssize_t totalBytes = finalMsg.size();
+                ssize_t bytesSent  = 0;
+                ssize_t bytesLeft  = totalBytes;
+                const char* msgPtr = finalMsg.c_str();
                 
                 std::cout << YELLOW << "Sending " << totalBytes << " Bytes to client [" << _pollFds[i].fd << "]..." << RESET << std::endl;
-                
+				std::cout << GREEN << "Response message generated" << std::endl;
+				// std::cout << (finalMsg);
+
                 while (bytesLeft > 0) {
-					ssize_t sent = send(_pollFds[i].fd, msgPtr + bytesSent, bytesLeft, 0);
-					std::cout << GREEN << "Sent " << sent << " bytes" << RESET << std::endl;
-					if (sent == -1) {
-						int error = 0;
-						socklen_t len = sizeof(error);
-						if (getsockopt(_pollFds[i].fd, SOL_SOCKET, SO_ERROR, &error, &len) == 0) {
-							if (error == EPIPE) {
-								std::cerr << "Client disconnected, closing fd: " << _pollFds[i].fd << std::endl;
-								close(_pollFds[i].fd);
-								_clients.erase(_pollFds[i].fd);
-								_pollFds[i] = _pollFds[--_numOfFds];
-								i--;
-								break;
-							} 
-							
-							else if (error == EAGAIN || error == EWOULDBLOCK) {
-								usleep(1000); // Sleep for 1 millisecond
-								continue;
-							} 
+                    ssize_t sent = send(_pollFds[i].fd, msgPtr + bytesSent, bytesLeft, 0);
+                    std::cout << GREEN << "Sent " << sent << " bytes" << RESET << std::endl;
+                    if (sent == -1) {
+                        int error = 0;
+                        socklen_t len = sizeof(error);
+                        
+                        if (getsockopt(_pollFds[i].fd, SOL_SOCKET, SO_ERROR, &error, &len) == 0) {
+                            if (error == EAGAIN || error == EWOULDBLOCK) {
+                                usleep(10); continue;
+                            }
 							
 							else {
-								std::cerr << "send error: " << strerror(error) << std::endl;
-								close(_pollFds[i].fd);
-								_clients.erase(_pollFds[i].fd);
-								_pollFds[i] = _pollFds[--_numOfFds];
-								i--;
-								break;
-							}
-						} 
-						
-						else {
-							perror("getsockopt");
-							close(_pollFds[i].fd);
-							_clients.erase(_pollFds[i].fd);
-							_pollFds[i] = _pollFds[--_numOfFds];
-							i--;
-							break;
-						}
-					}
-					bytesSent += sent;
-					bytesLeft -= sent;
-				}
-								
-                // Ensure all data has been sent before closing the file descriptor
-                if (bytesLeft == 0) {
-                    char buffer[4096] = {0};
-                    read(_pollFds[i].fd, buffer, 4095);
-                    close(_pollFds[i].fd);
-                    _clients.erase(_pollFds[i].fd);
-                    _pollFds[i] = _pollFds[--_numOfFds];
-                    i--;
-                    
-                    std::cout << std::endl << "Response from browser :" << std::endl;
-                    std::cout << GREEN << std::string(buffer) << RESET << std::endl << std::endl;
-					continue;
-				}
+                                std::cerr << "send error: " << strerror(error) << std::endl;
+                                removeFd(i--);
+                                break;
+                            }
+                        } 
+                        else {
+                            perror("getsockopt");
+                            removeFd(i--);
+                            break;
+                        }
+                    }
+                    bytesSent += sent;
+                    bytesLeft -= sent;
+                }
+
+                // Check if the connection should be kept alive
+                if (request.headerGet("Connection") == "keep-alive") {
+                    std::cout << YELLOW << "Keeping connection alive for client [" << _pollFds[i].fd << "]..." << RESET << std::endl;
+                    _pollFds[i].events = POLLIN; // Set back to POLLIN for further requests
+                }
+				
+				else {
+                    std::cout << RED << "Closing connection for client [" << _pollFds[i].fd << "]" << RESET << std::endl;
+                    removeFd(i--); // Close the connection
+                }
             }
         }
     }
 }
-
+                // Ensure all data has been sent before closing the file descriptor
+                // if (bytesLeft == 0) {
+                //     char buffer[4096] = {0};
+                //     read(_pollFds[i].fd, buffer, 4095);
+				// 	removeFd(i--);
+                    
+                //     std::cout << std::endl << "Response from browser :" << std::endl;
+                //     std::cout << GREEN << std::string(buffer) << RESET << std::endl << std::endl;
+				// 	continue;
+				// }
 // std::string constructHttpResponse(std::string pdf_file) {
 // 	std::ifstream file(pdf_file.c_str(), std::ios::in | std::ios::binary);
 
@@ -402,7 +409,7 @@ void Cluster::run(void) {
 //     headers += "Content-Length: " + to_string(file_content.size()) + "\r\n";
 //     headers += "\r\n";
     
-//     // Combine headers and file content
+//     // Combine headers and file content`
 //     std::string response = headers + file_content;
     
 //     // Send the entire response in a single send call

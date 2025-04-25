@@ -32,7 +32,7 @@ class ServerBlock : public Block
 		~ServerBlock(void) {};
 
 		void	printBlock(void);
-
+		string	getInfo();
 		// Setters
 		void	setListen(std::vector<std::string> args = std::vector<std::string>());
 		void	setServerName(std::vector<std::string> args = std::vector<std::string>());

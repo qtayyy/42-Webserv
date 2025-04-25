@@ -159,3 +159,116 @@ std::vector<string> listFiles(const string &path) {
     closedir(dir);
     return files;
 }
+
+
+
+int getTerminalWidth() {
+    struct winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    return w.ws_col;
+}
+
+bool isAnsiEscapeStart(char c) {
+    return c == '\033' || c == '\x1B' || c == '\001' || c == '\002';
+}
+
+std::size_t visibleLength(const std::string& str) {
+	std::size_t length = 0;
+	bool inEscape = false;
+
+	for (std::size_t i = 0; i < str.length(); ++i) {
+		if (!inEscape) {
+			if (isAnsiEscapeStart(str[i]) && i + 1 < str.length() && str[i + 1] == '[') {
+				inEscape = true;
+				++i; // skip the '['
+			} else {
+				++length;
+			}
+		} else {
+			// We're in an escape sequence. End when we hit a letter.
+			if (std::isalpha(static_cast<unsigned char>(str[i]))) {
+				inEscape = false;
+			}
+		}
+	}
+
+	return length;
+}
+
+void printBorderedBox(const std::string& message, const std::string& title) {
+	int width = getTerminalWidth();
+	std::istringstream stream(message);
+	std::string line;
+
+	std::string top = " " + std::string(width - 2, '_') + " ";
+	std::string bottom = " " + std::string(width - 2, '_') + " ";
+	std::cout << top << std::endl;
+
+	// Print the title in the center
+	if (!title.empty()) {
+		int titlePadding = (width - 2 - visibleLength(title)) / 2;
+		std::cout << "│" << std::string(titlePadding, ' ') << title 
+				  << std::string(width - 2 - titlePadding - visibleLength(title), ' ') << "│" << std::endl;
+	}
+
+	while (std::getline(stream, line)) {
+		while (visibleLength(line) > static_cast<size_t>(width - 4)) {
+			size_t cutOff = width - 4;
+			size_t actualCutOff = 0;
+			size_t visibleCount = 0;
+
+			// Find the actual cutoff point considering escape sequences
+			for (size_t i = 0; i < line.size(); ++i) {
+				if (isAnsiEscapeStart(line[i])) {
+					while (i < line.size() && line[i] != 'm') ++i;
+				} else {
+					visibleCount++;
+					if (visibleCount == cutOff) {
+						actualCutOff = i + 1;
+						break;
+					}
+				}
+			}
+
+			std::cout << "│ " << line.substr(0, actualCutOff) << std::string(width - 4 - visibleLength(line.substr(0, actualCutOff)), ' ') << " │" << std::endl;
+			line = line.substr(actualCutOff);
+		}
+		int padding = width - 4 - visibleLength(line); // 4 = 2 for '|' + 2 for space on both sides
+		std::cout << "│ " << line << std::string(padding, ' ') << " │" << std::endl;
+	}
+
+	std::cout << bottom << std::endl << std::endl;
+}
+
+std::string urlEncode(const std::string& value) {
+    std::ostringstream encoded;
+    for (std::string::const_iterator it = value.begin(); it != value.end(); ++it) {
+        unsigned char c = static_cast<unsigned char>(*it);
+        if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
+            encoded << c;
+        } else if (c == ' ') {
+            encoded << "%20";  // or '+' if you want form-style encoding
+        } else {
+            encoded << '%' << std::uppercase << std::setw(2) << std::setfill('0') << std::hex << (int)c;
+        }
+    }
+    return encoded.str();
+}
+
+// Function to URL-decode a string
+std::string urlDecode(const std::string& value) {
+    std::ostringstream decoded;
+    for (size_t i = 0; i < value.length(); ++i) {
+        if (value[i] == '%' && i + 2 < value.length()) {
+            int hex = 0;
+            std::istringstream(value.substr(i + 1, 2)) >> std::hex >> hex;
+            decoded << static_cast<char>(hex);
+            i += 2;
+        } else if (value[i] == '+') {
+            decoded << ' ';  // optional: handle '+' as space for form-encoded input
+        } else {
+            decoded << value[i];
+        }
+    }
+    return decoded.str();
+}

@@ -55,20 +55,22 @@ string HttpRequest::getRawRequest() const {
 
 
 
-
-void HttpRequest::printInfo() { 
-    std::cout << "\n-- request --" << std::endl;
-    // std::cout << GREEN << "\tpath: " << RESET         << this->headerGet("path") << std::endl;
-    // std::cout << GREEN << "\tpath_info: " << RESET    << this->headerGet("path_info") << std::endl;
-    // std::cout << GREEN << "\tquery_string: " << RESET << this->headerGet("query_string") << std::endl;
+string HttpRequest::preview() { 
+    std::ostringstream infoStream;
+    infoStream << "\n-- request --" << std::endl;
+    // infoStream << GREEN << "\tpath: " << RESET         << this->headerGet("path") << std::endl;
+    // infoStream << GREEN << "\tpath_info: " << RESET    << this->headerGet("path_info") << std::endl;
+    // infoStream << GREEN << "\tquery_string: " << RESET << this->headerGet("query_string") << std::endl;
 
     stringDict::iterator it = this->headerParameters.begin();
     stringDict::iterator end = this->headerParameters.end();
 
     while(it != end) {
-        std::cout << "\t" GREEN << it->first << ": " << RESET << it->second << std::endl;
+        infoStream << "" << it->first << ": " << it->second << std::endl;
         ++it;
     }
 
-    std::cout << GREEN << "\tmethod: " << RESET       << this->getMethod() << std::endl;
+    infoStream << "method: " << this->getMethod() << std::endl;
+
+    return infoStream.str();
 }

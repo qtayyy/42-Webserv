@@ -189,35 +189,43 @@ void	ServerBlock::setServerName(std::vector<std::string> args)
 /**
  * @brief	Prints all directives and their values in the server block.
  */
-void	ServerBlock::printBlock()
+
+void	ServerBlock::printBlock() {
+	std::cout << this->getInfo();
+}
+
+
+std::string	ServerBlock::getInfo()
 {
-	std::cout << BLUE << std::endl;
-	std::cout << " -- Server Block --------------------" << "\n";
-	std::cout << std::left << std::setw(17) << "root:"            << this->getRoot() << "\n";
-	std::cout << std::left << std::setw(17) << "autoindex:"       << this->getAutoindex() << "\n";
-	std::cout << std::left << std::setw(17) << "client max body:" << this->getClientMaxBodySize() << "\n";
+	std::ostringstream output;
+
+	output << " -- Server Block --------------------" << "\n";
+	output << std::left << std::setw(17) << "root:"            << this->getRoot() << "\n";
+	output << std::left << std::setw(17) << "autoindex:"       << this->getAutoindex() << "\n";
+	output << std::left << std::setw(17) << "client max body:" << this->getClientMaxBodySize() << "\n";
 
 	stringList allowedMethods = this->getLimitExcept();
 	for (stringList::iterator it = allowedMethods.begin(); it != allowedMethods.end(); it++)
-		std::cout << std::left << std::setw(17) << "allowed methods:" << *it << std::endl;
+		output << std::left << std::setw(17) << "allowed methods:" << *it << std::endl;
 
 	stringList allIndexes = this->getIndex();
 	for (stringList::iterator it = allIndexes.begin(); it != allIndexes.end(); it++)
-		std::cout << std::left << std::setw(17) << "indexes:" << *it << std::endl;
+		output << std::left << std::setw(17) << "indexes:" << *it << std::endl;
 
 	std::vector<std::pair<uint32_t, int> > allListens = this->getListen();
 	for (std::vector<std::pair<uint32_t, int> >::iterator it = allListens.begin(); it != allListens.end(); it++)
-		std::cout << std::left << std::setw(17) << "ip:port:" << intToIp(it->first) << ":" << it->second << std::endl;
+		output << std::left << std::setw(17) << "ip:port:" << intToIp(it->first) << ":" << it->second << std::endl;
 
 	stringList servernames = this->getServerName();
 	for (stringList::iterator it = servernames.begin(); it != servernames.end(); it++)
-		std::cout << std::left << std::setw(17) << "server names:" << *it << std::endl;
+		output << std::left << std::setw(17) << "server names:" << *it << std::endl;
 
 	std::map<int, std::string> errorpages = this->getErrorPage();
 	for (std::map<int, std::string>::iterator it = errorpages.begin(); it != errorpages.end(); it++)
-		std::cout << std::left << std::setw(17) << "error code:" << it->first << " " << it->second << std::endl;
+		output << std::left << std::setw(17) << "error code:" << it->first << " " << it->second << std::endl;
 
-	std::cout << "\n" << BLUE;
+
+	return output.str();
 }
 
 // ================================= STATIC =================================

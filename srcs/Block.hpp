@@ -30,6 +30,7 @@ class Block
 
 
 		virtual void	printBlock(void) = 0;
+		virtual string	getInfo(void) = 0;
 
 		// Setters (pass in as reference?)
 		void			setRoot(std::vector<std::string> args = std::vector<std::string>());

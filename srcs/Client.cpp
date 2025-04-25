@@ -20,7 +20,6 @@ Client::~Client() {
 
 void Client::receiveRequest(ssize_t read_buf, char *buffer) {
     //Reads specified number of bytes from the socket
-    std::cout << "READ BUFFER:" << read_buf << std::endl;
     if (read_buf <= 0) {
         if (read_buf == 0) {
             std::cout << "hang" << read_buf << std::endl;
@@ -74,7 +73,7 @@ void Client::parseRequestLine(const std::string& requestLine) {
     // std::cout << "Query string" << queryString << std::endl;
     // std::cout << "abs path" << path << std::endl;
 
-    request.printInfo();
+    request.preview();
 }
 
 void Client::parseHeaders(const std::string& headers) {
@@ -200,7 +199,7 @@ void Client::parseRequest() {
 void Client::handleRequest(ssize_t byteRec, char *buffer) {
     receiveRequest(byteRec, buffer);
     parseRequest();
-    request.printInfo();
+    request.preview();
 }
 
 HttpRequest& Client::getRequest() {

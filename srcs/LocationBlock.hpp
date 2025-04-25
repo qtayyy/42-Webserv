@@ -16,6 +16,7 @@
 #include "Block.hpp"
 #include "ServerBlock.hpp"
 #include "../includes/Webserv.hpp"
+#include "Utils.hpp"
 
 class ServerBlock;
 class LocationBlock : public Block
@@ -42,6 +43,7 @@ class LocationBlock : public Block
 		string	getCgiPass(void) { return (_cgiPass); };
 
 		void	printBlock(void);
+		std::string	getInfo();
 
 	private:
 		ServerBlock	*_parentServerBlock;

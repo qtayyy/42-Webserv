@@ -27,9 +27,10 @@ class Cluster
 		std::vector<std::string>	tokenizeConfig(std::string &configPath);
 		void						parseConfig(std::vector<std::string> tokens);
 		void						init(void);
-		void						run(void);
+        void removeFd(int i);
+        void run(void);
 
-		class	ClusterException : public Exception
+        class	ClusterException : public Exception
 		{
 			public:
 				ClusterException(const std::string& message)

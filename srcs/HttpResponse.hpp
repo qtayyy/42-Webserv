@@ -70,8 +70,8 @@ public:
     string decideCGIToUse(string resourcePath);
     static string getContentType(const string& resourcePath);
     string reroutePath(string urlPath);
+    string createAutoIndexHtml(string path, string root);
     static string createResponseString(const string &fileContent, const string &resourceType, const string &statusCode, const string &statusMessage);
-    static string createAutoIndexHtml(string path);
     static HttpResponse createHttpResponse(HttpRequest &request);
 
     void initHttpResponseSelf(string content, string resourceType, int statusCode);

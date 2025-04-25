@@ -202,30 +202,36 @@ std::map<std::string, void (LocationBlock::*)(std::vector<std::string>)>	Locatio
 // ================================= UTILS ==================================
 
 
-void	LocationBlock::printBlock()
+void	LocationBlock::printBlock() {
+	std::cout << this->getInfo();
+}
+
+
+std::string	LocationBlock::getInfo()
 {
-	std::cout << BLUE << std::endl;
-	std::cout << " -- " << this->getUri() << " --------------------" << "\n";
-	std::cout << std::left << std::setw(17) 	<< "root:" 			  << this->getRoot() << "\n";
-	std::cout << std::left << std::setw(17) 	<< "autoindex:" 	  << this->getAutoindex() << "\n";
-	std::cout << std::left << std::setw(17) 	<< "client max body:" << this->getClientMaxBodySize() << "\n";
+	std::ostringstream output;
+	output << " -- " << this->getUri() << " --------------------" << "\n";
+	output << std::left << std::setw(17) 	<< "root:" 			  << this->getRoot() << "\n";
+	output << std::left << std::setw(17) 	<< "autoindex:" 	  << this->getAutoindex() << "\n";
+	output << std::left << std::setw(17) 	<< "client max body:" << this->getClientMaxBodySize() << "\n";
 	
 	stringList allowedMethods = this->getLimitExcept();
 	for (stringList::iterator it = allowedMethods.begin(); it != allowedMethods.end(); it++)
-		std::cout << std::left << std::setw(17) << "allowed methods:" << *it << std::endl;
+		output << std::left << std::setw(17) << "allowed methods:" << *it << std::endl;
 		
 	stringList allIndexes = this->getIndex();
 	for (stringList::iterator it = allIndexes.begin(); it != allIndexes.end(); it++)
-		std::cout << std::left << std::setw(17) << "indexes:" 		  << *it << std::endl;
+		output << std::left << std::setw(17) << "indexes:" 		  << *it << std::endl;
 	
-	std::cout << std::left << std::setw(17) 	<< "cgi_pass:" 		  << this->getCgiPass() << "\n";
-	std::cout << std::left << std::setw(17) 	<< "uri:" 			  << this->getUri() << "\n";
-	std::cout << std::left << std::setw(17) 	<< "alias:" 		  << this->getAlias() << "\n";
+	output << std::left << std::setw(17) 	<< "cgi_pass:" 		  << this->getCgiPass() << "\n";
+	output << std::left << std::setw(17) 	<< "uri:" 			  << this->getUri() << "\n";
+	output << std::left << std::setw(17) 	<< "alias:" 		  << this->getAlias() << "\n";
 	if (_return.first != 0)
-		std::cout << std::left << std::setw(17) << "return:" 		  << this->getReturn().first << " " << this->getReturn().second << "\n";
+		output << std::left << std::setw(17) << "return:" 		  << this->getReturn().first << " " << this->getReturn().second << "\n";
 	
 	std::map<int, std::string> errorpages = this->getErrorPage();
 	for (std::map<int, std::string>::iterator it = errorpages.begin(); it != errorpages.end(); it++)
-		std::cout << std::left << std::setw(17) << "error code:" 	  << it->first << " " << it->second << std::endl;
-	std::cout << "\n" << BLUE;
+		output << std::left << std::setw(17) << "error code:" 	  << it->first << " " << it->second << std::endl;
+	
+	return output.str();
 }

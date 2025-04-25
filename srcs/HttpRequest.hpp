@@ -44,7 +44,7 @@ public:
     ~HttpRequest();
 
     string getMethod() const;
-    void printInfo();
+    string preview();
 };
 
 #endif

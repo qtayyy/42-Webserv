@@ -42,7 +42,7 @@ void HttpResponse::handleGET(HttpRequest &request, ServerBlock *serverBlock) {
     }
 
     try {
-        string reroutedPath = reroutePath(path);
+        string reroutedPath = urlDecode(reroutePath(path));
 
         if (!doesPathExist(reroutedPath)) {
             throw HttpException(404, reroutedPath);
@@ -65,7 +65,7 @@ void HttpResponse::handleGET(HttpRequest &request, ServerBlock *serverBlock) {
             // if autoindex is enabled, serve the autoindex page
             else if (serverBlock->getAutoindex()) {
                 std::cout << "Generating auto index... " << std::endl;
-                string autoIndex = createAutoIndexHtml(reroutedPath);
+                string autoIndex = createAutoIndexHtml(reroutedPath, path);
                 this->initHttpResponseSelf(autoIndex, CONTENT_TYPE_HTML, 200);
             } 
             
@@ -77,7 +77,9 @@ void HttpResponse::handleGET(HttpRequest &request, ServerBlock *serverBlock) {
         
         // if the path is a file
         else {
-            string content = readFileContent(reroutedPath);
+            string content = readFileContent((reroutedPath));
+            std::cout << "FILE CONTENT FROM: " << reroutedPath << content << std::endl;
+
             this->initHttpResponseSelf(content, getContentType(reroutedPath), 200);
         }
     } 
@@ -133,12 +135,14 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
         std::cout << YELLOW << path << " Does not match any location. Defaulting..." << RESET << std::endl;
         this->_locationBlockRef = serverBlock;
         this->isLocation = false;
-        this->_locationBlockRef->printBlock();
+        std::cout << BLUE;
+        printBorderedBox(_locationBlockRef->getInfo(), "Using block");
+        std::cout << RESET;
     }
     else {
         this->isLocation = true;
         std::cout << "Location matches location block: " << this->getBlock()->getUri() << std::endl;
-        this->getBlock()->printBlock();
+        printBorderedBox(this->getBlock()->getInfo(), "Using block");
     }
     
 
@@ -160,17 +164,22 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
         return;
     }
 
-
-
+    
     if (method == "GET") {
+        std::cout << "Handling GET..." << std::endl;
         this->handleGET(request, serverBlock);
-    } 
+    }
+
     else if (method == "POST") {
+        std::cout << "Handling POST..." << std::endl;
         this->handlePOST(request, serverBlock);
     }
+
     else if (method == "DELETE") {
+        std::cout << "Handling DELETE..." << std::endl;
         this->handleDELETE(path);
     }
+
     else {
         this->initErrorHttpResponse(400);
     }
@@ -255,7 +264,7 @@ string HttpResponse::reroutePath(string urlPath) {
     return reroutedPath;
 }
 
-string HttpResponse::createAutoIndexHtml(string path) {
+string HttpResponse::createAutoIndexHtml(string path, string root) {
     std::stringstream ss;
     ss << "<html><head><title>Index of " << path << "</title>";
     ss << "<style>" << Css() << "</style></head><body>";
@@ -269,12 +278,19 @@ string HttpResponse::createAutoIndexHtml(string path) {
                 continue;
             
             string fullPath = appendPaths(path, *it);
+
+            std::cout << "PATHS: " << path << std::endl;
+            std::cout << "PATHS: " << *it << std::endl;
+            std::cout << "PATHS: " << root << std::endl;
+
             string fileSize = isDirectory(fullPath) ? "-" : to_string(getFileSize(fullPath));
 
+            fullPath = "http://localhost:1234" + root + "/" + *it;
+
             if (isDirectory(fullPath))
-                ss << "<tr><td><a class=\"folder\" href=\"" << *it << "\">" << *it << "</a></td><td>" << fileSize << "bytes</td></tr>";
+                ss << "<tr><td><a class=\"folder\" href=\"" << fullPath << "\">" << *it << "</a></td><td>" << fileSize << "bytes</td></tr>";
             else
-                ss << "<tr><td><a href=\"" << *it << "\">" << *it << "</a></td><td>" << fileSize << "</td></tr>";
+                ss << "<tr><td><a href=\"" << fullPath << "\">" << *it << "</a></td><td>" << fileSize << "</td></tr>";
         }
     } 
     
@@ -430,7 +446,7 @@ string HttpResponse::applyAlias(string& path) {
 
 std::pair<std::string, std::string> HttpResponse::CodeToMessage(int statusCode) const {
     switch (statusCode) {
-        case 200: return std::make_pair("OK", "The request has succeeded.");
+        case 200: return std::make_pair("OK", "Success");
         case 201: return std::make_pair("Created", "The request has been fulfilled and resulted in a new resource being created.");
         case 202: return std::make_pair("Accepted", "The request has been accepted for processing, but the processing has not been completed.");
         case 400: return std::make_pair("Bad Request", "The server could not understand the request due to invalid syntax.");
