@@ -1,0 +1,21 @@
+HTTP/1.1 200 OK
+Content-Type: text/html
+Content-Length: 446
+
+<html><head><style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+}
+h2 {
+    color: #4CAF50;
+}
+p {
+    background: #fff;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+</style></head><body><h2>File Upload Successful</h2><p>File <strong>message.txt</strong> uploaded successfully to <strong>/home/cooper/coreProgram/webserve_ethan/</strong>.</p></body></html>

@@ -341,7 +341,7 @@ void Cluster::run(void) {
                 
                 std::cout << YELLOW << "Sending " << totalBytes << " Bytes to client [" << _pollFds[i].fd << "]..." << RESET << std::endl;
 				std::cout << GREEN << "Response message generated" << std::endl;
-				// std::cout << (finalMsg);
+				std::cout << (finalMsg);
 
                 while (bytesLeft > 0) {
                     ssize_t sent = send(_pollFds[i].fd, msgPtr + bytesSent, bytesLeft, 0);

@@ -6,17 +6,45 @@ import sys
 from urllib.parse import unquote
 import cgitb
 from textwrap import dedent
+import traceback
+from datetime import datetime
+FILE = "cgi_log"
+
+# Clear the cgi_log file
+with open(FILE, 'w') as log_file:
+    log_file.truncate(0)
+
+def write_to(msg, filepath:str=FILE):
+    with open(filepath, 'a') as f:
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        f.write(f"[{current_time}] {msg}\n")
+
+write_to("cgi called");
+for k, v in os.environ.items():
+    write_to(f"ENV {k}={v}")
 
 
 CONTENT_TYPES = {
-        ".html": "text/html",
-        ".css": "text/css",
-        ".js": "text/javascript",
-        ".jpg": "image/jpeg",
-        ".jpeg": "image/jpeg",
-        ".png": "image/png",
-        ".pdf": "application/pdf",
-    }
+    ".html": "text/html",
+    ".css": "text/css",
+    ".js": "text/javascript",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".png": "image/png",
+    ".pdf": "application/pdf",
+}
+
+def response():
+    debug_response = dedent("""
+    HTTP/1.1 200 OK
+    Content-Type: text/plain
+    Content-Length: 13
+
+    Hello, World!
+    """)
+
+    sys.stdout.write(debug_response)
+    sys.stdout.flush()
 
 cgitb.enable()
 
@@ -24,7 +52,17 @@ cgitb.enable()
 try:
     form = cgi.FieldStorage()
 except Exception as e:
+    error_message = traceback.format_exc()
+    write_to(f"Error: {error_message}")
     sys.exit(1)
+
+
+try:
+    received_data = {key: form.getvalue(key) for key in form.keys()}
+    write_to(f"Received data: {received_data}")
+except Exception as e:
+    error_message = traceback.format_exc()
+    write_to(f"Error logging received data: {error_message}")
 
 
 # Get request method and route
@@ -49,19 +87,15 @@ p {
 }
 '''
 
-raw_success_page = f'''
-<html>
-<head>
-    <style>
-        {style}
-    </style>
-</head>
-<body>
-    <h2>File Upload Successful</h2>
-    <p>File <strong>%filename</strong> uploaded successfully to <strong>%route</strong>.</p>
-</body>
-</html>
-'''
+raw_success_page = (
+    f"<html>"
+    f"<head><style>{style}</style></head>"
+    f"<body>"
+    f"<h2>File Upload Successful</h2>"
+    f"<p>File <strong>%filename</strong> uploaded successfully to <strong>%route</strong>.</p>"
+    f"</body>"
+    f"</html>"
+)
 
 
 def generate_error_page(title, message):
@@ -81,25 +115,39 @@ def generate_error_page(title, message):
     </body>
     </html>
     ''')
-    return raw_fail_page
+    return generate_response_string(
+        content=raw_fail_page,
+        status_code=404,
+        status_message="Not Found",
+        content_type="text/html"
+    )
 
 def generate_response_string(
-            content:str,
-            status_code:int = 404,
-            status_message:str = "Not Found",
-            content_length:int = None,
-            content_type:str = "text/html"): 
-        
-        return dedent(f"""
-        HTTP/1.1 {status_code} {status_message}
-        Content-Type: {content_type}
-        Content-Length: {len(content) if content_length is None else content_length}
-        
-        {content}
-        """)
+        content: str,
+        status_code: int = 404,
+        status_message: str = "Not Found",
+        content_length: int = None,
+        content_type: str = "text/html"):
+    
+    content = content.strip()  # Remove unintended whitespace or newlines
+    return (
+        f"HTTP/1.1 {status_code} {status_message}\r\n"
+        f"Content-Type: {content_type}\r\n"
+        f"Content-Length: {len(content) if content_length is None else content_length}\r\n"
+        f"\r\n"
+        f"{content}"
+    )
+
+
+def print_and_write_to(msg, file_path:str=FILE):
+    print(msg)
+    with open(file_path, 'a') as f:
+        f.write(msg)
+    return file_path
 
 # Handle POST request
 if request_method == "POST":
+    write_to("POST")
     try:
         if "file" in form:
             file_item = form["file"]
@@ -107,17 +155,35 @@ if request_method == "POST":
                 file_path = os.path.join(route, file_item.filename)
                 with open(file_path, 'wb') as f:
                     f.write(file_item.file.read())
-                string = generate_response_string(raw_success_page.replace("%filename", file_item.filename).replace("%route", route), status_code=200, status_message="OK")
-                print(string)
+                response_body = raw_success_page.replace("%filename", file_item.filename).replace("%route", route).strip()
+                response = generate_response_string(
+                    content=response_body,
+                    status_code=200,
+                    status_message="OK",
+                    content_type="text/html"
+                )
+                sys.stdout.write(response)
+                sys.stdout.flush()
+
+
             else:
-                print("No file content.")
+                error_response = generate_error_page("400 Bad Request", "No file content.")
+                sys.stdout.write(error_response)
+                sys.stdout.flush()
         else:
-            print(generate_error_page("400 Bad Request", "No file was uploaded."))
+            error_response = generate_error_page("400 Bad Request", "No file was uploaded.")
+            sys.stdout.write(error_response)
+            sys.stdout.flush()
     except Exception as e:
-        print(f"Error: {e}")
+        error_message = traceback.format_exc()
+        write_to(f"Error: {error_message}")
+        error_response = generate_error_page("500 Internal Server Error", "An error occurred while processing the request.")
+        sys.stdout.write(error_response)
+        sys.stdout.flush()
 
 # Handle GET request
 elif request_method == "GET":
+    write_to("GET")
     pdf_path = route
 
     extension = os.path.splitext(pdf_path)[1]
@@ -151,4 +217,5 @@ else:
     print("Content-Type: text/html")
     print("\r")
     print("Method not allowed.")
+    write_to("UNSUPPORTED METHOD")
 # todo post method handled incorrectly, doesnt consider set upload route

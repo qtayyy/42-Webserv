@@ -48,7 +48,7 @@ string CGIHandler:: handleCgi(string& cgiScriptPath, HttpRequest &request, int &
     this->setEnv("PATH_INFO",       requestedFilepath);
     this->setEnv("PATH_TRANSLATED", request.headerGet("absolute_path"));
     this->setEnv("CONTENT_LENGTH",  to_string(data.length()));
-    this->setEnv("CONTENT_TYPE",    request.headerGet("content_type"));
+    this->setEnv("CONTENT_TYPE",    request.headerGet("Content-Type"));
     setEnvironmentVariables(this->envVars);
 
     std::cout << YELLOW << "Running CGI..." << RESET << std::endl;
@@ -90,10 +90,22 @@ string CGIHandler:: handleCgi(string& cgiScriptPath, HttpRequest &request, int &
         char buffer[1024];
         ssize_t bytesRead;
         ssize_t totalBytes = 0;
+
+        // Open a file to write the CGI output
+        std::ofstream outputFile("cgi_output.txt", std::ios::out | std::ios::trunc);
+        if (!outputFile.is_open()) {
+            throw std::runtime_error("Failed to open file for writing CGI output");
+        }
+
         while ((bytesRead = read(outputPipe[0], buffer, sizeof(buffer))) > 0) {
             responseBuffer.insert(responseBuffer.end(), buffer, buffer + bytesRead);
             totalBytes += bytesRead;
+
+            // Write to the file
+            outputFile.write(buffer, bytesRead);
         }
+
+        outputFile.close(); // Close the file after writing
         std::cout << GREEN << "CGI completed. " << totalBytes << " bytes received from " << basename(cgiScriptPath.c_str()) << RESET << std::endl;
         
         close(outputPipe[0]);  // Close read end after reading
