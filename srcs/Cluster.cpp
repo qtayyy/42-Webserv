@@ -284,107 +284,136 @@ void printIndented(const std::string& input, int indent) {
  * @brief	Monitors each socket for incoming connections, request or reponses
  * 			(I/O operations).
  */
-void Cluster::run(void) {
-    int ready;
-    int timeout = 500; // 500 ms timeout
 
-    signal(SIGPIPE, SIG_IGN);
 
-    while (true) {
-        if ((ready = poll(_pollFds, _numOfFds, timeout)) == -1) {
-            perror("poll");
-            throw ClusterException("");
-        }
-        for (int i = 0; i < _numOfFds; i++) {
-            if (_pollFds[i].revents & (POLLIN | POLLHUP)) { // If an fd is ready for reading
-                if (_listenerToServer.find(_pollFds[i].fd) != _listenerToServer.end()) {
-                    std::cout << YELLOW << "handling new client " << _pollFds[i].fd << RESET << std::endl;
-                    handleNewClient(_pollFds[i].fd);
-                }
-                else {
-                    char buffer[BUFFER_SIZE];
-                    ssize_t byteRecv;
-                    std::cout << YELLOW << "Reading from [" << _pollFds[i].fd << "]..." << std::endl;
-                    byteRecv = recv(_pollFds[i].fd, buffer, BUFFER_SIZE - 1, 0);
-                    if (byteRecv <= 0) {
-                        if (byteRecv == 0) {
-                            std::cout << RED << "Client disconnected [" << _pollFds[i].fd << "]" << RESET <<  std::endl;
-                        }
-                        else {
-                            std::cerr << RED << "Recv error: " << strerror(errno) << RESET << std::endl;
-                        }
-                        removeFd(i--);
-                        continue;
-                    }
-                    buffer[byteRecv] = '\0';
-					std::string message = std::string(buffer);
-					message.erase(std::remove(message.begin(), message.end(), '\r'), message.end());
-					printBorderedBox(message, std::string("Received raw request from [") + to_string(_pollFds[i].fd) + "]");
-					std::cout << YELLOW << "Parsing request..." << std::endl;
-                    this->_clients[_pollFds[i].fd]->handleRequest(byteRecv, buffer);
-                    _pollFds[i].events = POLLOUT;
-                }
-            }
-            if (_pollFds[i].revents & POLLOUT) { // If an fd is ready for writing
-				HttpRequest request = this->_clients[_pollFds[i].fd]->getRequest();
-				// request = mockRequest("/dir2/file2.txt");
-                printBorderedBox(request.preview(), "Request parsed: ");
-				
-                std::cout << YELLOW << "handling request..." << std::endl;
-                HttpResponse response = HttpResponse(request, &_servers[0]);
-                string finalMsg = response.getFinalResponseMsg();
-                
-                ssize_t totalBytes = finalMsg.size();
-                ssize_t bytesSent  = 0;
-                ssize_t bytesLeft  = totalBytes;
-                const char* msgPtr = finalMsg.c_str();
-                
-                std::cout << YELLOW << "Sending " << totalBytes << " Bytes to client [" << _pollFds[i].fd << "]..." << RESET << std::endl;
-				std::cout << GREEN << "Response message generated" << std::endl;
-				std::cout << (finalMsg);
 
-                while (bytesLeft > 0) {
-                    ssize_t sent = send(_pollFds[i].fd, msgPtr + bytesSent, bytesLeft, 0);
-                    std::cout << GREEN << "Sent " << sent << " bytes" << RESET << std::endl;
-                    if (sent == -1) {
-                        int error = 0;
-                        socklen_t len = sizeof(error);
-                        
-                        if (getsockopt(_pollFds[i].fd, SOL_SOCKET, SO_ERROR, &error, &len) == 0) {
-                            if (error == EAGAIN || error == EWOULDBLOCK) {
-                                usleep(10); continue;
-                            }
+	// std::string fileContent = readFileContent("test");
+	// char *test = (char *)(fileContent.c_str());
+	// Client(4).handleRequest(fileContent.size(), test);
+
+	// exit(0);
+	void Cluster::run(void) {
+		int ready;
+		int timeout = 500; // 500 ms timeout
+	
+		signal(SIGPIPE, SIG_IGN);
+	
+		while (true) {
+			if ((ready = poll(_pollFds, _numOfFds, timeout)) == -1) {
+				perror("poll");
+				throw ClusterException("");
+			}
+			for (int i = 0; i < _numOfFds; i++) {
+				if (_pollFds[i].revents & (POLLIN | POLLHUP)) { // Ready to read
+					if (_listenerToServer.find(_pollFds[i].fd) != _listenerToServer.end()) {
+						std::cout << YELLOW << "Handling new client " << _pollFds[i].fd << RESET << std::endl;
+						handleNewClient(_pollFds[i].fd);
+					}
+					else {
+						char buffer[BUFFER_SIZE];
+						ssize_t byteRecv;
+						std::cout << YELLOW << "Reading from [" << _pollFds[i].fd << "]..." << RESET << std::endl;
+						byteRecv = recv(_pollFds[i].fd, buffer, BUFFER_SIZE - 1, 0);
+						if (byteRecv <= 0) {
+							if (byteRecv == 0) {
+								std::cout << RED << "Client disconnected [" << _pollFds[i].fd << "]" << RESET << std::endl;
+							} else {
+								std::cerr << RED << "Recv error: " << strerror(errno) << RESET << std::endl;
+							}
+							removeFd(i--);
+							continue;
+						}
+						buffer[byteRecv] = '\0';
+	
+						// 🛑 Accumulate the buffer into client's own buffer
+						this->_clients[_pollFds[i].fd]->appendToBuffer(std::string(buffer, byteRecv));
+	
+						// 🛑 Check if full request is received
+						if (this->_clients[_pollFds[i].fd]->requestComplete()) {
+							std::string fullRequest = this->_clients[_pollFds[i].fd]->getFullRequest();
+	
+							string message = fullRequest;
+							message.erase(std::remove(message.begin(), message.end(), '\r'), message.end());
+							printBorderedBox(message, string("Received full raw request from [") + to_string(_pollFds[i].fd) + "]");
+	
+							std::cout << YELLOW << "Parsing request..." << RESET << std::endl;
+							this->_clients[_pollFds[i].fd]->handleRequest();
+	
+							_pollFds[i].events = POLLOUT; // Ready to send
 							
+							// Optional: Save raw request
+							std::ofstream outFile("raw_request.log", std::ios::trunc);
+							if (outFile.is_open()) {
+								outFile << message << std::endl;
+								outFile.close();
+							} else {
+								std::cerr << RED << "Unable to open raw_request.log for writing" << RESET << std::endl;
+							}
+						}
+						else {
+							std::cout << YELLOW << "Partial request received, waiting for more..." << RESET << std::endl;
+						}
+					}
+				}
+	
+				if (_pollFds[i].revents & POLLOUT) { // Ready to write
+					HttpRequest request = this->_clients[_pollFds[i].fd]->getRequest();
+					printBorderedBox(request.preview(), "Request parsed: ");
+	
+					std::cout << YELLOW << "Handling request..." << RESET << std::endl;
+					HttpResponse response = HttpResponse(request, &_servers[0]);
+					string finalMsg = response.getFinalResponseMsg();
+	
+					ssize_t totalBytes = finalMsg.size();
+					ssize_t bytesSent  = 0;
+					ssize_t bytesLeft  = totalBytes;
+					const char* msgPtr = finalMsg.c_str();
+	
+					std::cout << YELLOW << "Sending " << totalBytes << " Bytes to client [" << _pollFds[i].fd << "]..." << RESET << std::endl;
+					std::cout << GREEN << "Response message generated" << std::endl;
+					std::cout << finalMsg;
+	
+					while (bytesLeft > 0) {
+						ssize_t sent = send(_pollFds[i].fd, msgPtr + bytesSent, bytesLeft, 0);
+						if (sent == -1) {
+							int error = 0;
+							socklen_t len = sizeof(error);
+	
+							if (getsockopt(_pollFds[i].fd, SOL_SOCKET, SO_ERROR, &error, &len) == 0) {
+								if (error == EAGAIN || error == EWOULDBLOCK) {
+									usleep(10);
+									continue;
+								}
+								else {
+									std::cerr << "Send error: " << strerror(error) << std::endl;
+									removeFd(i--);
+									break;
+								}
+							} 
 							else {
-                                std::cerr << "send error: " << strerror(error) << std::endl;
-                                removeFd(i--);
-                                break;
-                            }
-                        } 
-                        else {
-                            perror("getsockopt");
-                            removeFd(i--);
-                            break;
-                        }
-                    }
-                    bytesSent += sent;
-                    bytesLeft -= sent;
-                }
-
-                // Check if the connection should be kept alive
-                if (request.headerGet("Connection") == "keep-alive") {
-                    std::cout << YELLOW << "Keeping connection alive for client [" << _pollFds[i].fd << "]..." << RESET << std::endl;
-                    _pollFds[i].events = POLLIN; // Set back to POLLIN for further requests
-                }
-				
-				else {
-                    std::cout << RED << "Closing connection for client [" << _pollFds[i].fd << "]" << RESET << std::endl;
-                    removeFd(i--); // Close the connection
-                }
-            }
-        }
-    }
-}
+								perror("getsockopt");
+								removeFd(i--);
+								break;
+							}
+						}
+						bytesSent += sent;
+						bytesLeft -= sent;
+					}
+	
+					// Connection keep-alive?
+					if (request.headerGet("Connection") == "keep-alive") {
+						std::cout << YELLOW << "Keeping connection alive for client [" << _pollFds[i].fd << "]..." << RESET << std::endl;
+						_pollFds[i].events = POLLIN;
+					}
+					else {
+						std::cout << RED << "Closing connection for client [" << _pollFds[i].fd << "]" << RESET << std::endl;
+						removeFd(i--);
+					}
+				}
+			}
+		}
+	}
+	
                 // Ensure all data has been sent before closing the file descriptor
                 // if (bytesLeft == 0) {
                 //     char buffer[4096] = {0};

@@ -19,7 +19,8 @@ class Client
 		void		parseRequest();
 		void		handleRequest(ssize_t byteRec, char *buffer);
 		HttpRequest &getRequest();
-	
+		std::string &getRequestBuffer() { return request_buf; }
+
 	private:
 		void		parseRequestLine(const std::string& request_line);
 		void		parseHeaders(const std::string& headers);

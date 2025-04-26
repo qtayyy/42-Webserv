@@ -1,0 +1,6 @@
+------geckoformboundaryb109240d72174c5bab882e7ed4a7323d
+Content-Disposition: form-data; name="file"; filename="42logo.png"
+Content-Type: image/png
+
+‰PNG
+

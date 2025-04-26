@@ -23,6 +23,7 @@ write_to("cgi called");
 for k, v in os.environ.items():
     write_to(f"ENV {k}={v}")
 
+write_to("Received data: {}")
 
 CONTENT_TYPES = {
     ".html": "text/html",
@@ -33,6 +34,8 @@ CONTENT_TYPES = {
     ".png": "image/png",
     ".pdf": "application/pdf",
 }
+
+#sometimes upload fails, reason being that the content recieved by cgi is empty. Reffer to "cgi_log"
 
 def response():
     debug_response = dedent("""
@@ -157,14 +160,13 @@ if request_method == "POST":
                     f.write(file_item.file.read())
                 response_body = raw_success_page.replace("%filename", file_item.filename).replace("%route", route).strip()
                 response = generate_response_string(
-                    content=response_body,
-                    status_code=200,
-                    status_message="OK",
-                    content_type="text/html"
+                    content        = response_body,
+                    status_code    = 200,
+                    status_message = "OK",
+                    content_type   = "text/html"
                 )
                 sys.stdout.write(response)
                 sys.stdout.flush()
-
 
             else:
                 error_response = generate_error_page("400 Bad Request", "No file content.")

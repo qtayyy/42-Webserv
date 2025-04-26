@@ -69,10 +69,6 @@ void Client::parseRequestLine(const std::string& requestLine) {
     request.headerSet("path", path);
     request.headerSet("queryString", queryString);
     request.headerSet("absolute_path", path);
-    // std::cout << "PATH" << path << std::endl;
-    // std::cout << "Query string" << queryString << std::endl;
-    // std::cout << "abs path" << path << std::endl;
-
     request.preview();
 }
 
