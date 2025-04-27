@@ -4,7 +4,7 @@
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ethanlim <ethanlim@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
+/*
 /*   Created: 2025/03/06 02:31:50 by ethanlim          #+#    #+#             */
 /*   Updated: 2025/03/13 11:33:47 by ethanlim         ###   ########.fr       */
 /*                                                                            */
@@ -18,22 +18,35 @@ Client::Client(int fd) : socket_fd(fd), request_buf("") {
 Client::~Client() {
 }
 
+std::string& Client::getRecvBuffer() {
+    return request_buf;
+}
+
+bool Client::isRequestReady() const {
+    return request_ready;
+}
+
+void Client::reset() {
+    request_buf.clear();
+    headers_parsed = false;
+    is_chunked = false;
+    content_length = 0;
+    request_ready = false;
+}
+
 void Client::receiveRequest(ssize_t read_buf, char *buffer) {
-    //Reads specified number of bytes from the socket
     if (read_buf <= 0) {
         if (read_buf == 0) {
             std::cout << "hang" << read_buf << std::endl;
         }
-        
         else {
             std::cerr << "Error receiving data on socket fd " << socket_fd << ": " << strerror(errno) << std::endl;
             perror("RECV");
         }
     }
-    
-    buffer[read_buf] = '\0';
-    request_buf = buffer;
+    request_buf = std::string(buffer, read_buf); // <- CORRECT way
 }
+
 
 //parses the first line into the 3 parts(methods, path, query)
 //this first part is to get the method(GET, POST)
@@ -192,11 +205,12 @@ void Client::parseRequest() {
     request.setRawRequest(request_buf);
 }
 
-void Client::handleRequest(ssize_t byteRec, char *buffer) {
-    receiveRequest(byteRec, buffer);
+void Client::handleRequest(ssize_t read_buf, char *buffer) {
+    request_buf = std::string(buffer, read_buf); // <- Again, use this
     parseRequest();
     request.preview();
 }
+
 
 HttpRequest& Client::getRequest() {
     return request;

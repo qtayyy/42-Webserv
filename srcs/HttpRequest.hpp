@@ -27,7 +27,7 @@ public:
     void        appendFormBlock(stringDict formBlock);
     stringDict *getFormBlock(int index);
     void        setBody(string body);
-    string      getBody();
+    string      &getBody();
 
 
     void setMethod(string method);

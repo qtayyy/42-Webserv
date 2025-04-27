@@ -12,7 +12,7 @@ void HttpRequest::setBody(string body) {
     this->body = body;
 }
 
-string HttpRequest::getBody() {
+string &HttpRequest::getBody() {
     return body;
 }
 

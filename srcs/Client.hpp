@@ -15,10 +15,14 @@ class Client
 		Client(int fd);
 		~Client();
 
+        std::string& getRecvBuffer(); // Get the buffer for accumulating data
+        bool isRequestReady() const; // Check if the request is fully parsed
+        void reset(); // Reset the state for keep-alive connections
+
 		void		receiveRequest(ssize_t read_buf, char *buffer);
 		void		parseRequest();
-		void		handleRequest(ssize_t byteRec, char *buffer);
-		HttpRequest &getRequest();
+        void handleRequest(ssize_t read_buf, char *buffer);
+        HttpRequest &getRequest();
 		std::string &getRequestBuffer() { return request_buf; }
 
 	private:
@@ -30,10 +34,12 @@ class Client
 		size_t		hexToDec(const std::string& hex);
 		
 		int			socket_fd;
-		std::string	request_buf;
+		std::string request_buf; 
+		bool		headers_parsed;
+		bool		is_chunked; 
+		size_t		content_length; 
+		bool		request_ready; 
 		HttpRequest request;
-
-		
 };
 
 #endif
