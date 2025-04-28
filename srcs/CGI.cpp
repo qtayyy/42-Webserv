@@ -67,6 +67,8 @@ string CGIHandler::handleCgi(string& cgiScriptPath, HttpRequest &request, int &e
     requestFile << data;
     requestFile.close();
 
+    signal(SIGPIPE, SIG_IGN); // Ignore SIGPIPE to prevent crashes when writing to a closed pipe
+
     pid_t pid = fork();
 
     if (pid < 0) throw std::runtime_error("fork failed: " + string(strerror(errno)));
@@ -102,6 +104,10 @@ string CGIHandler::handleCgi(string& cgiScriptPath, HttpRequest &request, int &e
         while (bytesWritten < data.length()) {
             ssize_t result = write(inputPipe[1], data.c_str() + bytesWritten, data.length() - bytesWritten);
             if (result == -1) {
+                if (errno == EPIPE) {
+                    std::cerr << RED << "Broken pipe: CGI process terminated prematurely." << RESET << std::endl;
+                    break;
+                }
                 close(inputPipe[1]);
                 throw std::runtime_error("Failed to write to CGI stdin: " + string(strerror(errno)));
             }

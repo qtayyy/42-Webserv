@@ -318,13 +318,18 @@ for (int i = 0; i < _numOfFds; i++) {
 			while (true) {
 				byteRecv = recv(_pollFds[i].fd, buffer, BUFFER_SIZE - 1, 0);
 				if (byteRecv <= 0) {
-					if (byteRecv == 0)
+					if (byteRecv == 0) {
 						std::cout << RED << "Client disconnected [" << _pollFds[i].fd << "]" << RESET << std::endl;
-					else
+					} else if (errno == EAGAIN || errno == EWOULDBLOCK) {
+						std::cout << YELLOW << "No data available yet, waiting for more data from [" << _pollFds[i].fd << "]..." << RESET << std::endl;
+						break; // Exit the loop and wait for the next poll event
+					} else {
 						std::cerr << RED << "Recv error: " << strerror(errno) << RESET << std::endl;
+					}
 					removeFd(i--);
 					break;
 				}
+				
 	
 				std::cout << "BYTES READ: " << byteRecv << std::endl;
 
@@ -346,29 +351,24 @@ for (int i = 0; i < _numOfFds; i++) {
 					if (requestBuffer.size() >= headerEnd + 4 + contentLength) {
 						std::cout << GREEN << "Full request received from [" << _pollFds[i].fd << "]" << RESET << std::endl;
 
-
-
 						// Write the full request to the cumulative log
 						std::ofstream cumulative_log("cumulative_request.log", std::ios::app);
 						if (cumulative_log.is_open()) {
 							cumulative_log << requestBuffer;
 							cumulative_log.close();
 
-						 	// Print the size of the log file
+							// Print the size of the log file
 							std::ifstream logFile("cumulative_request.log", std::ios::binary | std::ios::ate);
 							if (logFile.is_open()) {
 								std::streamsize size = logFile.tellg();
 								logFile.close();
 								std::cout << GREEN << "Log file size: " << size << " bytes" << RESET << std::endl;
-							} 
-							else
+							} else {
 								std::cerr << RED << "Failed to open cumulative_request.log to get size" << RESET << std::endl;
-						} 
-						else
+							}
+						} else {
 							std::cerr << RED << "Failed to open cumulative_request.log for writing" << RESET << std::endl;
-						
-						
-
+						}
 
 						// Process the request
 
