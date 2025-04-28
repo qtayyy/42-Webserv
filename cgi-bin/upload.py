@@ -96,6 +96,7 @@ raw_success_page = (
     f"<body>"
     f"<h2>File Upload Successful</h2>"
     f"<p>File <strong>%filename</strong> uploaded successfully to <strong>%route</strong>.</p>"
+    f"%additional_info"
     f"</body>"
     f"</html>"
 )
@@ -148,6 +149,8 @@ def print_and_write_to(msg, file_path:str=FILE):
         f.write(msg)
     return file_path
 
+
+
 # Handle POST request
 if request_method == "POST":
     write_to("POST")
@@ -158,7 +161,16 @@ if request_method == "POST":
                 file_path = os.path.join(route, file_item.filename)
                 with open(file_path, 'wb') as f:
                     f.write(file_item.file.read())
+
+                
                 response_body = raw_success_page.replace("%filename", file_item.filename).replace("%route", route).strip()
+                file_size = os.path.getsize(file_path)
+                env_variables = "".join([f"<li>{key}: {value}</li>" for key, value in os.environ.items()])
+                response_body = raw_success_page.replace("%additional_info", dedent(f"""
+                <li>bytes received: {file_size} bytes</li>
+                <li>bytes written to file: {file_size} bytes</li>
+                {env_variables}
+                """))
                 response = generate_response_string(
                     content        = response_body,
                     status_code    = 200,

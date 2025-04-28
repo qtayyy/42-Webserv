@@ -342,7 +342,6 @@ for (int i = 0; i < _numOfFds; i++) {
 					}
 	
 					std::cout << "BUFFER SIZE: " << requestBuffer.size() << std::endl;
-					std::cout << "BUFFER SIZE: " << requestBuffer << std::endl;
 					// Check if the entire body is received
 					if (requestBuffer.size() >= headerEnd + 4 + contentLength) {
 						std::cout << GREEN << "Full request received from [" << _pollFds[i].fd << "]" << RESET << std::endl;
@@ -373,12 +372,10 @@ for (int i = 0; i < _numOfFds; i++) {
 
 						// Process the request
 
-						std::cout << "REQ BUFFER SIZE" << requestBuffer.size() << std::endl;
-						std::cout << "SIZE" << strlen(requestBuffer.c_str()) << std::endl;
-						this->_clients[_pollFds[i].fd]->handleRequest(byteRecv, (char *)(requestBuffer.c_str()));
+						this->_clients[_pollFds[i].fd]->handleRequest(requestBuffer.size(), (char *)(requestBuffer.c_str()));
+						std::cout << "RECV SIZE" << byteRecv << std::endl;
 
 						std::cout << "BODY SIZE" << this->_clients[_pollFds[i].fd]->getRequest().getBody().size() << std::endl;
-						std::cout << "BODY SIZE" << this->_clients[_pollFds[i].fd]->getRequest().getBody() << std::endl;
 
 						_pollFds[i].events = POLLOUT;
 						break;
