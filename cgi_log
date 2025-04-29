@@ -1,62 +1,62 @@
-[2025-04-29 13:49:57] cgi called
-[2025-04-29 13:49:57] ENV SHELL=/bin/bash
-[2025-04-29 13:49:57] ENV COLORTERM=truecolor
-[2025-04-29 13:49:57] ENV VSCODE_DEBUGPY_ADAPTER_ENDPOINTS=/home/cooper/.vscode-server/extensions/ms-python.debugpy-2025.6.0-linux-x64/.noConfigDebugAdapterEndpoints/endpoint-22230aefa498b062.txt
-[2025-04-29 13:49:57] ENV WSL2_GUI_APPS_ENABLED=1
-[2025-04-29 13:49:57] ENV TERM_PROGRAM_VERSION=1.99.3
-[2025-04-29 13:49:57] ENV WSL_DISTRO_NAME=Ubuntu
-[2025-04-29 13:49:57] ENV PYDEVD_DISABLE_FILE_VALIDATION=1
-[2025-04-29 13:49:57] ENV HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew
-[2025-04-29 13:49:57] ENV NAME=Cyber
-[2025-04-29 13:49:57] ENV PWD=/home/cooper/coreProgram/webserv_proper/webserv1
-[2025-04-29 13:49:57] ENV LOGNAME=cooper
-[2025-04-29 13:49:57] ENV BUNDLED_DEBUGPY_PATH=/home/cooper/.vscode-server/extensions/ms-python.debugpy-2025.6.0-linux-x64/bundled/libs/debugpy
-[2025-04-29 13:49:57] ENV VSCODE_GIT_ASKPASS_NODE=/home/cooper/.vscode-server/bin/17baf841131aa23349f217ca7c570c76ee87b957/node
-[2025-04-29 13:49:57] ENV POSH_SHELL=bash
-[2025-04-29 13:49:57] ENV MOTD_SHOWN=update-motd
-[2025-04-29 13:49:57] ENV HOME=/home/cooper
-[2025-04-29 13:49:57] ENV LANG=C.UTF-8
-[2025-04-29 13:49:57] ENV WSL_INTEROP=/run/WSL/445_interop
-[2025-04-29 13:49:57] ENV LS_COLORS=rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:
-[2025-04-29 13:49:57] ENV POSH_SHELL_VERSION=5.1.16(1)-release
-[2025-04-29 13:49:57] ENV POSH_SESSION_ID=ca26fd75-cffb-493f-bbba-870863639a92
-[2025-04-29 13:49:57] ENV WAYLAND_DISPLAY=wayland-0
-[2025-04-29 13:49:57] ENV OSTYPE=linux-gnu
-[2025-04-29 13:49:57] ENV CONDA_PROMPT_MODIFIER=false
-[2025-04-29 13:49:57] ENV GIT_ASKPASS=/home/cooper/.vscode-server/bin/17baf841131aa23349f217ca7c570c76ee87b957/extensions/git/dist/askpass.sh
-[2025-04-29 13:49:57] ENV INFOPATH=/home/linuxbrew/.linuxbrew/share/info:
-[2025-04-29 13:49:57] ENV VSCODE_GIT_ASKPASS_EXTRA_ARGS=
-[2025-04-29 13:49:57] ENV LESSCLOSE=/usr/bin/lesspipe %s %s
-[2025-04-29 13:49:57] ENV TERM=xterm-256color
-[2025-04-29 13:49:57] ENV LESSOPEN=| /usr/bin/lesspipe %s
-[2025-04-29 13:49:57] ENV USER=cooper
-[2025-04-29 13:49:57] ENV VSCODE_GIT_IPC_HANDLE=/run/user/1000/vscode-git-63d12b50a6.sock
-[2025-04-29 13:49:57] ENV HOMEBREW_CELLAR=/home/linuxbrew/.linuxbrew/Cellar
-[2025-04-29 13:49:57] ENV DISPLAY=:0
-[2025-04-29 13:49:57] ENV SHLVL=1
-[2025-04-29 13:49:57] ENV HOMEBREW_REPOSITORY=/home/linuxbrew/.linuxbrew/Homebrew
-[2025-04-29 13:49:57] ENV POSH_THEME=/home/cooper/ohmyposh.json
-[2025-04-29 13:49:57] ENV XDG_RUNTIME_DIR=/run/user/1000/
-[2025-04-29 13:49:57] ENV WSLENV=VSCODE_WSL_EXT_LOCATION/up
-[2025-04-29 13:49:57] ENV VSCODE_GIT_ASKPASS_MAIN=/home/cooper/.vscode-server/bin/17baf841131aa23349f217ca7c570c76ee87b957/extensions/git/dist/askpass-main.js
-[2025-04-29 13:49:57] ENV XDG_DATA_DIRS=/home/linuxbrew/.linuxbrew/share:/usr/local/share:/usr/share:/var/lib/snapd/desktop
-[2025-04-29 13:49:57] ENV PATH=/home/cooper/.local/bin:/home/cooper/.vscode-server/bin/17baf841131aa23349f217ca7c570c76ee87b957/bin/remote-cli:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:/home/cooper/.local/bin:/home/cooper/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib:/mnt/c/Program Files/Common Files/Oracle/Java/javapath:/mnt/c/Program Files (x86)/Common Files/Intel/Shared Libraries/redist/intel64/compiler:/mnt/c/Program Files (x86)/Common Files/Oracle/Java/javapath:/mnt/c/Windows/system32:/mnt/c/Windows:/mnt/c/Windows/System32/Wbem:/mnt/c/Windows/System32/WindowsPowerShell/v1.0/:/mnt/c/Windows/System32/OpenSSH/:/mnt/c/Program Files (x86)/NVIDIA Corporation/PhysX/Common:/mnt/c/Program Files (x86)/QuickTime/QTSystem/:/mnt/c/Program Files (x86)/dotnet/:/mnt/c/Program Files/dotnet/:/mnt/c/Program Files/NVIDIA Corporation/NVIDIA NvDLISR:/mnt/c/WINDOWS/system32:/mnt/c/WINDOWS:/mnt/c/WINDOWS/System32/Wbem:/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0/:/mnt/c/WINDOWS/System32/OpenSSH/:/mnt/c/Program Files/Git/cmd:/mnt/c/Program Files/GitHub CLI/:/mnt/c/Program Files/nodejs/:/mnt/c/Program Files/Microsoft SQL Server/120/Tools/Binn/:/mnt/c/Users/emers/AppData/Local/Programs/Python/Python39/Scripts/:/mnt/c/Users/emers/AppData/Local/Programs/Python/Python39/:/mnt/c/Users/emers/scoop/shims:/mnt/c/Users/emers/AppData/Local/Programs/Python/Launcher/:/mnt/c/Users/emers/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/emers/.dotnet/tools:/mnt/c/Users/emers/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/emers/AppData/Local/Programs/Microsoft VS Code/bin:/mnt/c/PATH_Programs:/mnt/c/Program Files (x86)/SWFTools:/mnt/c/Program Files (x86)/OptiPNG:/mnt/c/Users/emers/AppData/Local/GitHubDesktop/bin:/mnt/c/Users/emers/AppData/Local/Microsoft/WinGet/Packages/Gyan.FFmpeg.Essentials_Microsoft.Winget.Source_8wekyb3d8bbwe/ffmpeg-7.0-essentials_build/bin:/mnt/c/Program Files/Git/cmd:/mnt/c/Users/emers/AppData/Local/Programs/oh-my-posh/bin:/mnt/c/Users/emers/AppData/Roaming/npm:/mnt/c/Users/emers/AppData/Local/gitkraken/bin:/mnt/c/Users/emers/AppData/Local/Packages/PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0/LocalCache/local-packages/Python312/site-packages:/mnt/c/Program Files/JetBrains/CLion 2024.3/bin:/mnt/c/Users/emers/AppData/Local/Muse Hub/lib:/snap/bin:/home/cooper/.vscode-server/extensions/ms-python.debugpy-2025.6.0-linux-x64/bundled/scripts/noConfigScripts:/home/cooper/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand
-[2025-04-29 13:49:57] ENV DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
-[2025-04-29 13:49:57] ENV HOSTTYPE=x86_64
-[2025-04-29 13:49:57] ENV POWERLINE_COMMAND=oh-my-posh
-[2025-04-29 13:49:57] ENV PULSE_SERVER=unix:/mnt/wslg/PulseServer
-[2025-04-29 13:49:57] ENV TERM_PROGRAM=vscode
-[2025-04-29 13:49:57] ENV VSCODE_IPC_HOOK_CLI=/run/user/1000/vscode-ipc-1a852d57-0ecb-42a9-8db2-aef5c527e907.sock
-[2025-04-29 13:49:57] ENV _=./webserv
-[2025-04-29 13:49:57] ENV CONTENT_LENGTH=0
-[2025-04-29 13:49:57] ENV CONTENT_TYPE=
-[2025-04-29 13:49:57] ENV PATH_INFO=/home/cooper/coreProgram/webserv_proper/webserv1/
-[2025-04-29 13:49:57] ENV PATH_TRANSLATED=/home/cooper/coreProgram/webserv_proper/webserv1/
-[2025-04-29 13:49:57] ENV QUERY_STRING=
-[2025-04-29 13:49:57] ENV REQUEST_METHOD=GET
-[2025-04-29 13:49:57] ENV SCRIPT_NAME=/home/cooper/coreProgram/webserv_proper/webserv1//cgi-bin/upload.py
-[2025-04-29 13:49:57] ENV SERVER_NAME=localhost
-[2025-04-29 13:49:57] ENV SERVER_PORT=8080
-[2025-04-29 13:49:57] Received data: {}
-[2025-04-29 13:49:57] Received data: {}
-[2025-04-29 13:49:57] GET
+[2025-04-29 14:50:27] cgi called
+[2025-04-29 14:50:27] ENV SHELL=/bin/bash
+[2025-04-29 14:50:27] ENV COLORTERM=truecolor
+[2025-04-29 14:50:27] ENV VSCODE_DEBUGPY_ADAPTER_ENDPOINTS=/home/cooper/.vscode-server/extensions/ms-python.debugpy-2025.6.0-linux-x64/.noConfigDebugAdapterEndpoints/endpoint-22230aefa498b062.txt
+[2025-04-29 14:50:27] ENV WSL2_GUI_APPS_ENABLED=1
+[2025-04-29 14:50:27] ENV TERM_PROGRAM_VERSION=1.99.3
+[2025-04-29 14:50:27] ENV WSL_DISTRO_NAME=Ubuntu
+[2025-04-29 14:50:27] ENV PYDEVD_DISABLE_FILE_VALIDATION=1
+[2025-04-29 14:50:27] ENV HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew
+[2025-04-29 14:50:27] ENV NAME=Cyber
+[2025-04-29 14:50:27] ENV PWD=/home/cooper/coreProgram/webserv_proper/webserv1
+[2025-04-29 14:50:27] ENV LOGNAME=cooper
+[2025-04-29 14:50:27] ENV BUNDLED_DEBUGPY_PATH=/home/cooper/.vscode-server/extensions/ms-python.debugpy-2025.6.0-linux-x64/bundled/libs/debugpy
+[2025-04-29 14:50:27] ENV VSCODE_GIT_ASKPASS_NODE=/home/cooper/.vscode-server/bin/17baf841131aa23349f217ca7c570c76ee87b957/node
+[2025-04-29 14:50:27] ENV POSH_SHELL=bash
+[2025-04-29 14:50:27] ENV MOTD_SHOWN=update-motd
+[2025-04-29 14:50:27] ENV HOME=/home/cooper
+[2025-04-29 14:50:27] ENV LANG=C.UTF-8
+[2025-04-29 14:50:27] ENV WSL_INTEROP=/run/WSL/445_interop
+[2025-04-29 14:50:27] ENV LS_COLORS=rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:
+[2025-04-29 14:50:27] ENV POSH_SHELL_VERSION=5.1.16(1)-release
+[2025-04-29 14:50:27] ENV POSH_SESSION_ID=ca26fd75-cffb-493f-bbba-870863639a92
+[2025-04-29 14:50:27] ENV WAYLAND_DISPLAY=wayland-0
+[2025-04-29 14:50:27] ENV OSTYPE=linux-gnu
+[2025-04-29 14:50:27] ENV CONDA_PROMPT_MODIFIER=false
+[2025-04-29 14:50:27] ENV GIT_ASKPASS=/home/cooper/.vscode-server/bin/17baf841131aa23349f217ca7c570c76ee87b957/extensions/git/dist/askpass.sh
+[2025-04-29 14:50:27] ENV INFOPATH=/home/linuxbrew/.linuxbrew/share/info:
+[2025-04-29 14:50:27] ENV VSCODE_GIT_ASKPASS_EXTRA_ARGS=
+[2025-04-29 14:50:27] ENV LESSCLOSE=/usr/bin/lesspipe %s %s
+[2025-04-29 14:50:27] ENV TERM=xterm-256color
+[2025-04-29 14:50:27] ENV LESSOPEN=| /usr/bin/lesspipe %s
+[2025-04-29 14:50:27] ENV USER=cooper
+[2025-04-29 14:50:27] ENV VSCODE_GIT_IPC_HANDLE=/run/user/1000/vscode-git-63d12b50a6.sock
+[2025-04-29 14:50:27] ENV HOMEBREW_CELLAR=/home/linuxbrew/.linuxbrew/Cellar
+[2025-04-29 14:50:27] ENV DISPLAY=:0
+[2025-04-29 14:50:27] ENV SHLVL=1
+[2025-04-29 14:50:27] ENV HOMEBREW_REPOSITORY=/home/linuxbrew/.linuxbrew/Homebrew
+[2025-04-29 14:50:27] ENV POSH_THEME=/home/cooper/ohmyposh.json
+[2025-04-29 14:50:27] ENV XDG_RUNTIME_DIR=/run/user/1000/
+[2025-04-29 14:50:27] ENV WSLENV=VSCODE_WSL_EXT_LOCATION/up
+[2025-04-29 14:50:27] ENV VSCODE_GIT_ASKPASS_MAIN=/home/cooper/.vscode-server/bin/17baf841131aa23349f217ca7c570c76ee87b957/extensions/git/dist/askpass-main.js
+[2025-04-29 14:50:27] ENV XDG_DATA_DIRS=/home/linuxbrew/.linuxbrew/share:/usr/local/share:/usr/share:/var/lib/snapd/desktop
+[2025-04-29 14:50:27] ENV PATH=/home/cooper/.local/bin:/home/cooper/.vscode-server/bin/17baf841131aa23349f217ca7c570c76ee87b957/bin/remote-cli:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:/home/cooper/.local/bin:/home/cooper/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib:/mnt/c/Program Files/Common Files/Oracle/Java/javapath:/mnt/c/Program Files (x86)/Common Files/Intel/Shared Libraries/redist/intel64/compiler:/mnt/c/Program Files (x86)/Common Files/Oracle/Java/javapath:/mnt/c/Windows/system32:/mnt/c/Windows:/mnt/c/Windows/System32/Wbem:/mnt/c/Windows/System32/WindowsPowerShell/v1.0/:/mnt/c/Windows/System32/OpenSSH/:/mnt/c/Program Files (x86)/NVIDIA Corporation/PhysX/Common:/mnt/c/Program Files (x86)/QuickTime/QTSystem/:/mnt/c/Program Files (x86)/dotnet/:/mnt/c/Program Files/dotnet/:/mnt/c/Program Files/NVIDIA Corporation/NVIDIA NvDLISR:/mnt/c/WINDOWS/system32:/mnt/c/WINDOWS:/mnt/c/WINDOWS/System32/Wbem:/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0/:/mnt/c/WINDOWS/System32/OpenSSH/:/mnt/c/Program Files/Git/cmd:/mnt/c/Program Files/GitHub CLI/:/mnt/c/Program Files/nodejs/:/mnt/c/Program Files/Microsoft SQL Server/120/Tools/Binn/:/mnt/c/Users/emers/AppData/Local/Programs/Python/Python39/Scripts/:/mnt/c/Users/emers/AppData/Local/Programs/Python/Python39/:/mnt/c/Users/emers/scoop/shims:/mnt/c/Users/emers/AppData/Local/Programs/Python/Launcher/:/mnt/c/Users/emers/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/emers/.dotnet/tools:/mnt/c/Users/emers/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/emers/AppData/Local/Programs/Microsoft VS Code/bin:/mnt/c/PATH_Programs:/mnt/c/Program Files (x86)/SWFTools:/mnt/c/Program Files (x86)/OptiPNG:/mnt/c/Users/emers/AppData/Local/GitHubDesktop/bin:/mnt/c/Users/emers/AppData/Local/Microsoft/WinGet/Packages/Gyan.FFmpeg.Essentials_Microsoft.Winget.Source_8wekyb3d8bbwe/ffmpeg-7.0-essentials_build/bin:/mnt/c/Program Files/Git/cmd:/mnt/c/Users/emers/AppData/Local/Programs/oh-my-posh/bin:/mnt/c/Users/emers/AppData/Roaming/npm:/mnt/c/Users/emers/AppData/Local/gitkraken/bin:/mnt/c/Users/emers/AppData/Local/Packages/PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0/LocalCache/local-packages/Python312/site-packages:/mnt/c/Program Files/JetBrains/CLion 2024.3/bin:/mnt/c/Users/emers/AppData/Local/Muse Hub/lib:/snap/bin:/home/cooper/.vscode-server/extensions/ms-python.debugpy-2025.6.0-linux-x64/bundled/scripts/noConfigScripts:/home/cooper/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand
+[2025-04-29 14:50:27] ENV DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
+[2025-04-29 14:50:27] ENV HOSTTYPE=x86_64
+[2025-04-29 14:50:27] ENV POWERLINE_COMMAND=oh-my-posh
+[2025-04-29 14:50:27] ENV PULSE_SERVER=unix:/mnt/wslg/PulseServer
+[2025-04-29 14:50:27] ENV TERM_PROGRAM=vscode
+[2025-04-29 14:50:27] ENV VSCODE_IPC_HOOK_CLI=/run/user/1000/vscode-ipc-1a852d57-0ecb-42a9-8db2-aef5c527e907.sock
+[2025-04-29 14:50:27] ENV _=./webserv
+[2025-04-29 14:50:27] ENV CONTENT_LENGTH=1295
+[2025-04-29 14:50:27] ENV CONTENT_TYPE=multipart/form-data; boundary=----WebKitFormBoundaryQ7mCEjIBe58gwhsY
+[2025-04-29 14:50:27] ENV PATH_INFO=/home/cooper/coreProgram/webserv_proper/webserv1/
+[2025-04-29 14:50:27] ENV PATH_TRANSLATED=/home/cooper/coreProgram/webserv_proper/webserv1/
+[2025-04-29 14:50:27] ENV QUERY_STRING=
+[2025-04-29 14:50:27] ENV REQUEST_METHOD=POST
+[2025-04-29 14:50:27] ENV SCRIPT_NAME=/home/cooper/coreProgram/webserv_proper/webserv1//cgi-bin/upload.py
+[2025-04-29 14:50:27] ENV SERVER_NAME=localhost
+[2025-04-29 14:50:27] ENV SERVER_PORT=8080
+[2025-04-29 14:50:27] Received data: {}
+[2025-04-29 14:50:27] Received data: {'file': b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\xe1\x00\x00\x00\xe1\x08\x03\x00\x00\x00\tm"H\x00\x00\x00iPLTE\xff\xff\xff\x00\x00\x00\xf4\xf4\xf4```\x85\x85\x85\x17\x17\x17\x9c\x9c\x9c\xad\xad\xad\x1d\x1d\x1dMMM\xd4\xd4\xd4\xec\xec\xec\xc6\xc6\xc6\xf8\xf8\xf8ZZZccc\xe6\xe6\xe6VVV$$$\xda\xda\xda555\x7f\x7f\x7f\xe0\xe0\xe0===+++sss\x8c\x8c\x8c@@@000\xcc\xcc\xcc(((www\x94\x94\x94\x11\x11\x11GGGW\xbf\x9b[\x00\x00\x03\xaaIDATx\x9c\xed\xdciW\xdaP\x14\x85\xe1\x00\x0e`QP\x8b\xb5\xb5V\xf0\xff\xff\xc8b\x18Lr\xa7\xcd\xcd\x1d\xcf\xda\xef\xe7\x10\xf3\xac\x13\x93\xd6\x84\xdb4\x8c1\xc6\x18c\x8c1\xc6\x18c\x8c1\xc6\x18c\x8c1\xc6\x98\xad)\xd4\xbd\xdf\xc7\xc0\x94\xbd\x87\xeca\x82\xf4\xa4\x1c\x03\xf4\xb1\xc9-\xb6\xd96"\xf0\x11:\x827\xf5\x83s\xe4s\xebgLx\x13\x0f\x88MP\x03\x84\x84/\xcd]n\xa1\xf7\x04!\xe1K\x93]\x88M\xf0\x97\xf6\xb3n\xe1\x1e\x98[\xe8\x7f\x8a"\xc2/`f\xe1\x98\t\xba\x85-0\xafp\x1c\xd0%<\x00\xb3\nG\x02\x1d\xc2#0\xa7p,\xd0.<\x013\n\xb1\xdb\x84\x05h\x15\x9e\x81\xf9\x84\xa3\'h\x15~\x03\xb3\t\xc7O\xd0&\xec\x00s\t\xb1\t\xfe\xb4\xef\xc4(|\xeen\x95G\x18\xe0\x14\xb5\x08{\xc0<\xc2 \x134\n\xfb\xc0,\xc2@@\x83p\x00\xcc!\x0c\x05\xd4\x0b\x87\xc0\x0c\xc2`@\xadP\x01\xa6\x17b\xb7\t\x04\xa8\x13\xaa\xc0\xe4\xc2\x19\xf4\xe3\xfeB\x7f\x17R\x85\x1a`ja\xb8ST\'\xd4\x01\x13\x0b\xc1\t\x82{\x1b\n\xb5\xc0\xb4Bp\x82\xe8\x9f.\x07B=0\xa90\xec\x04\x87\xc2;\xc3V\t\x85!/2\xaa\xd0\x04L(\xc4NQ|\x82}\xa1\x11\x98N\x88M\xf0\xf5\x92\xc7\x07\x1d\xa1\x19\x98L\x18~\x82]\xa1\x05\x98J\x18a\x82\x1d\xa1\r\x98H\x08N\xf0\xc2\'\\\'\xa1\x15\x98F\x18e\x82g\xa1\x1d\x98D\x18\tx\x14:\x80)\x84\x18\xf0\xdf\xe5\x0fa\xe7\x080\x810\xd6\x04\x0fB\'0\xbe0\xda\x04[\xe1\xbb{\xab\xd8\xc2\x15\xb4{\xf5\x19=\xd2\x1c\x01\xc6\x16b\xb7\t\x9fSt\x1f\x04\x8c,\x8c9\xc1\xfd\xb1C[\xbdc\xc2[\xafC\xc0&\xe8\xf5;\x08\xb7\xc6\x80\x1f^;\x8f;A,\x10\xf8\xdbk\xe7\x11\xaf\xa2pQ\x81\xd8\x04\xe7\xd2\x81\xe2O\xd1\x8a\x81\xe2O\xd1\x8a&\x18\xf36\xc1\t\x8e\x8a\x13\x1c\x03\x04\'8\rl\xea\xc5\t&\x00\xd6;A\xec\x14\x15?\xc1kNpL p\xe3\xb5sN\xb0\xad\x88\x8b\x8c\xf8\t\xfa\x019\xc1\xb6\x8a\'X\xd1\x8d>\xe6)Z\xc4\x04\xaf\xbcv\x8eMp\x17\x15\xf8#&\xb0\x84\x8bLT`\t\x17\x19N\xf0\xd0\x1f\xaf\x9d\x97\xf0;\x18\xf5"S\xc2UT\xfc\x04\x0b\x00V<A\x9e\xa2m\x15\x9f\xa2\x15Mp\xeb\xb5sN\xb0M\xfc\x04/}\xdb\xf0\xb2\xa2\x02o\xb0\x9d/V\xb3`=,\x87\x07\xf1\x04\x1d\xc3\'&\x1a\xbe\x9b\x03\n\x83\xa6\xbc\xf1\x02\xad\xfc1Y@\xc0\x87\xadp\xe1Jy\'J\x98p\xa6\xbe\xf5%K\xf8u\xd9\x14-lo|\x92\x85\x87;\xbb`\xe1\xf1\xf5B\xb9\xc2\xd3\xfb\x93b\x85\xe7\x7f|J\x15~\xbf\x01+T\xd8\xf9\xef\x83La\xf7\x1df\x91\xc2\xdeK\xda\x12\x85\xfd\x95\x01\x04\n\x07\xaf\xd9\xcb\x13\x0e\xbfG N\xa8|QB\x9aP\xfd&\x880\xa1f\xf9\x11YB\xdd\xfa*\xa2\x84\xda\x05d$\t\xf5+\xe4\x08\x12\x1a\x96\x00\x92#4\xadq$Fh\\\xc4I\x8a\xd0\xbcJ\x95\x10\xe1\xc2\xbc\x99\x0c\xa1\x05(Ch]HM\x82\xd06AU\xb8\xdc\\\x85k\x93D\xe8X\n/\xe2\xaa\xf3M3M!\xb4O0\xb2\x10|\x96;J\xe8\x02V/t\x02k\x17~\xba7\xab[\x08\x00\xeb\x16\xbe!\x9b\x15)|\xdd]\xbb\xdb=\xce&\xc0fe\n\xeb\x89B\n\xcb\x8fB\n\xcb\x8fB\n\xcb\x8fB\n\xcb\x8fB\n\xcb\x8fB\n\xcb\x8fB\n\xcb\x8fB\n\xcb\x8fB\n\xcb\x8fB\n\xcb\xef~\t\xb5\xce}\x9c\x8c1\xc6\x18c\x8c1\xc6\x18c\x8c1\xc6\x18c\x8c1\xc6\x18c\x8c1V]\xff\x01\x99\x9e\\\x9d\xb6\xe9\xd0-\x00\x00\x00\x00IEND\xaeB`\x82'}
+[2025-04-29 14:50:27] POST

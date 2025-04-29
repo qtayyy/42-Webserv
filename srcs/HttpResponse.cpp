@@ -336,11 +336,12 @@ void HttpResponse::initHttpResponseSelf(string content, string resourceType, int
     this->finalResponseMsg = createResponseString(content, resourceType, to_string(statusCode), message);
 }
 
+
 void HttpResponse::initRedirectResponse(string & redirectUrl, int statusCode) {
-    this->rawContent = "";
-    this->contentType = CONTENT_TYPE_HTML;
-    this->statusCode = statusCode;
-    this->message = CodeToMessage(statusCode).second;
+    this->rawContent    = "";
+    this->contentType   = CONTENT_TYPE_HTML;
+    this->statusCode    = statusCode;
+    this->message       = CodeToMessage(statusCode).second;
     
     std::stringstream response;
     response << PROTOCOL << " " << statusCode << " " << message << "\r\n";
@@ -350,6 +351,7 @@ void HttpResponse::initRedirectResponse(string & redirectUrl, int statusCode) {
     
     this->finalResponseMsg = response.str();
 }
+
 
 void HttpResponse::initErrorHttpResponse(int statusCode) {
     if (!this->_locationBlockRef->getErrorPage().empty() && 
@@ -367,16 +369,17 @@ void HttpResponse::initErrorHttpResponse(int statusCode) {
         }
     }
 
-    std::pair<string, string> details = CodeToMessage(statusCode, "wow");
-    std::stringstream ss;
-    ss << "<html><head><title>" << details.first << "</title>";
-    ss << "<style>" << Css() << "</style></head><body>";
-    ss << "<h1 class=\"error\">" << details.first << "</h1>";
-    ss << "<p>" << details.second << "</p>";
-    ss << "</body></html>";
+    std::pair<string, string> details = CodeToMessage(statusCode);
+    std::stringstream output;
+    output  << "<html><head><title>" << details.first << "</title>"
+            << "<style>" << Css() << "</style></head><body>"
+            << "<h1 class=\"error\">" << details.first << "</h1>"
+            << "<p>" << details.second << "</p>"
+            << "</body></html>";
 
-    this->initHttpResponseSelf(ss.str(), CONTENT_TYPE_HTML, statusCode);
+    this->initHttpResponseSelf(output.str(), CONTENT_TYPE_HTML, statusCode);
 }
+
 
 void HttpResponse::initCGIResponse(string cgiPath, HttpRequest request) {
 
