@@ -44,7 +44,7 @@ void HttpResponse::handleGET(HttpRequest &request, ServerBlock *serverBlock) {
     try {
         string reroutedPath = urlDecode(reroutePath(path));
 
-        std::cout << "PATH: " << path << std::endl;
+        std::cout << "REROUTED PATH: " << path << std::endl;
 
 
         if (!doesPathExist(reroutedPath)) {
@@ -67,7 +67,7 @@ void HttpResponse::handleGET(HttpRequest &request, ServerBlock *serverBlock) {
             
             // if autoindex is enabled, serve the autoindex page
             else if (serverBlock->getAutoindex()) {
-                std::cout << "Generating auto index... " << std::endl;
+                std::cout << "Generating auto index... " << reroutedPath<< std::endl;
                 string autoIndex = createAutoIndexHtml(reroutedPath, path);
                 this->initHttpResponseSelf(autoIndex, CONTENT_TYPE_HTML, 200);
             } 
@@ -267,6 +267,7 @@ string Css() {
 
 
 string HttpResponse::reroutePath(string urlPath) {
+
     string reroutedPath = joinPaths(this->_serverBlockRef->getRoot(), urlPath);
 
     if (this->isLocation)
