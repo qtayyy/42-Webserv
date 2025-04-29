@@ -161,16 +161,13 @@ if request_method == "POST":
                 file_path = os.path.join(route, file_item.filename)
                 with open(file_path, 'wb') as f:
                     f.write(file_item.file.read())
-
-                
-                response_body = raw_success_page.replace("%filename", file_item.filename).replace("%route", route).strip()
                 file_size = os.path.getsize(file_path)
                 env_variables = "".join([f"<li>{key}: {value}</li>" for key, value in os.environ.items()])
                 response_body = raw_success_page.replace("%additional_info", dedent(f"""
                 <li>bytes received: {file_size} bytes</li>
                 <li>bytes written to file: {file_size} bytes</li>
                 {env_variables}
-                """))
+                """)).replace("%filename", file_item.filename).replace("%route", route).strip()
                 response = generate_response_string(
                     content        = response_body,
                     status_code    = 200,

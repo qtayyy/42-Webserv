@@ -321,18 +321,15 @@ for (int i = 0; i < _numOfFds; i++) {
 					if (byteRecv == 0) {
 						std::cout << RED << "Client disconnected [" << _pollFds[i].fd << "]" << RESET << std::endl;
 					} else if (errno == EAGAIN || errno == EWOULDBLOCK) {
-						std::cout << YELLOW << "No data available yet, waiting for more data from [" << _pollFds[i].fd << "]..." << RESET << std::endl;
-						break; // Exit the loop and wait for the next poll event
+						std::cout << YELLOW << "No data available yet, will try again next iteration [" << _pollFds[i].fd << "]..." << RESET << std::endl;
+						break;
 					} else {
 						std::cerr << RED << "Recv error: " << strerror(errno) << RESET << std::endl;
 					}
 					removeFd(i--);
 					break;
 				}
-				
 	
-				std::cout << "BYTES READ: " << byteRecv << std::endl;
-
 				buffer[byteRecv] = '\0';
 				requestBuffer.append(buffer, byteRecv);
 	
@@ -346,7 +343,6 @@ for (int i = 0; i < _numOfFds; i++) {
 						contentLength = std::strtod(requestBuffer.substr(start, end - start).c_str(), NULL);
 					}
 	
-					std::cout << "BUFFER SIZE: " << requestBuffer.size() << std::endl;
 					// Check if the entire body is received
 					if (requestBuffer.size() >= headerEnd + 4 + contentLength) {
 						std::cout << GREEN << "Full request received from [" << _pollFds[i].fd << "]" << RESET << std::endl;
