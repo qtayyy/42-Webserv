@@ -272,3 +272,11 @@ std::string urlDecode(const std::string& value) {
     }
     return decoded.str();
 }
+
+std::string joinPaths(const std::string& base, const std::string& sub) {
+    if (base.empty()) return "/" + sub;
+    if (base[base.size() - 1] == '/')
+        return base + sub;
+    else
+        return base + "/" + sub;
+}

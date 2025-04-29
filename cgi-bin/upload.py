@@ -167,7 +167,9 @@ if request_method == "POST":
                 <li>bytes received: {file_size} bytes</li>
                 <li>bytes written to file: {file_size} bytes</li>
                 {env_variables}
+                Program called with arguments: {sys.argv}
                 """)).replace("%filename", file_item.filename).replace("%route", route).strip()
+
                 response = generate_response_string(
                     content        = response_body,
                     status_code    = 200,

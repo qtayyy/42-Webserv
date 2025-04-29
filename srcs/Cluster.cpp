@@ -403,6 +403,16 @@ for (int i = 0; i < _numOfFds; i++) {
 		std::cout << (finalMsg);
 
 		while (bytesLeft > 0) {
+
+			std::ofstream responseLog("response.log", std::ios::app);
+			if (responseLog.is_open()) {
+				responseLog << finalMsg;
+				responseLog.close();
+				std::cout << GREEN << "Response written to response.log" << RESET << std::endl;
+			} else {
+				std::cerr << RED << "Failed to open response.log for writing" << RESET << std::endl;
+			}
+
 			ssize_t sent = send(_pollFds[i].fd, msgPtr + bytesSent, bytesLeft, 0);
 			std::cout << GREEN << "Sent " << sent << " bytes" << RESET << std::endl;
 			if (sent == -1) {

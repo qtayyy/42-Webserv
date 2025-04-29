@@ -33,7 +33,7 @@ LocationBlock *HttpResponse::getBlock() {
 
 void HttpResponse::handleGET(HttpRequest &request, ServerBlock *serverBlock) {
     string path = request.headerGet("path");
-    
+
     path = applyAlias(path);
 
     if (!this->getBlock()->getCgiPass().empty()) {
@@ -43,6 +43,9 @@ void HttpResponse::handleGET(HttpRequest &request, ServerBlock *serverBlock) {
 
     try {
         string reroutedPath = urlDecode(reroutePath(path));
+
+        std::cout << "PATH: " << path << std::endl;
+
 
         if (!doesPathExist(reroutedPath)) {
             throw HttpException(404, reroutedPath);
@@ -93,6 +96,8 @@ void HttpResponse::handleGET(HttpRequest &request, ServerBlock *serverBlock) {
 
 void HttpResponse::handlePOST(HttpRequest &request, ServerBlock *serverBlock) {
     string cgiPass = this->getBlock()->getCgiPass();
+
+    
 
     this->initCGIResponse(cgiPass, request);
 }
@@ -164,7 +169,13 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
         return;
     }
 
-    
+    std::cout << "GROOT" << this->getBlock()->getRoot() << std::endl;
+
+    if (!doesPathExist(this->getBlock()->getRoot())) {
+        this->initErrorHttpResponse(404);
+    }
+
+
     if (method == "GET") {
         std::cout << "Handling GET..." << std::endl;
         this->handleGET(request, serverBlock);
@@ -256,10 +267,10 @@ string Css() {
 
 
 string HttpResponse::reroutePath(string urlPath) {
-    string reroutedPath = appendPaths(this->_serverBlockRef->getRoot(), urlPath);
+    string reroutedPath = joinPaths(this->_serverBlockRef->getRoot(), urlPath);
 
     if (this->isLocation)
-        reroutedPath = appendPaths(this->getBlock()->getRoot(), urlPath);
+        reroutedPath = joinPaths(this->getBlock()->getRoot(), urlPath);
 
     return reroutedPath;
 }
@@ -277,15 +288,15 @@ string HttpResponse::createAutoIndexHtml(string path, string root) {
             if (*it == "." || *it == "..")
                 continue;
             
-            string fullPath = appendPaths(path, *it);
+            string fullPath = joinPaths(path, *it);
 
-            std::cout << "PATHS: " << path << std::endl;
-            std::cout << "PATHS: " << *it << std::endl;
-            std::cout << "PATHS: " << root << std::endl;
+            // std::cout << "PATHS: " << path << std::endl;
+            // std::cout << "PATHS: " << *it << std::endl;
+            // std::cout << "PATHS: " << root << std::endl;
 
             string fileSize = isDirectory(fullPath) ? "-" : to_string(getFileSize(fullPath));
 
-            fullPath = "http://localhost:1234" + root + "/" + *it;
+            fullPath = "http://localhost:1234" + joinPaths(root, *it);
 
             if (isDirectory(fullPath))
                 ss << "<tr><td><a class=\"folder\" href=\"" << fullPath << "\">" << *it << "</a></td><td>" << fileSize << "bytes</td></tr>";
@@ -385,8 +396,10 @@ void HttpResponse::initCGIResponse(string cgiPath, HttpRequest request) {
     request.headerSet("absolute_path", absolutePath);
 
     int exit_status = 0;
-    string response_content = cgiHandler.handleCgi(cgiPath, request, exit_status, *this->_serverBlockRef);
+    string response_content = cgiHandler.handleCgi(cgiPath, request, exit_status, *this->getBlock());
    
+    std::cout << "SERV BLOCK" << this->_serverBlockRef->getInfo() << std::endl;
+
     this->finalResponseMsg = response_content;
 }
 
@@ -424,7 +437,8 @@ LocationBlock* HttpResponse::getRelevantLocationBlock(const string& path, Server
     
     
     for (std::vector<LocationBlock>::iterator it = locations->begin(); it != locations->end(); ++it) {
-        if (startsWith(directory, it->getUri()) && (locationBlock == NULL || it->getUri().size() > locationBlock->getUri().size())) {
+        std::cout << "URI " << it->getUri() << " " << path << std::endl;
+        if (startsWith(path, it->getUri()) && (locationBlock == NULL || it->getUri().size() > locationBlock->getUri().size())) {
             locationBlock = &(*it);
         }
     }

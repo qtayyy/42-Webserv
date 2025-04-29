@@ -29,7 +29,7 @@ void CGIHandler:: runCGIExecutable(string &cgiScriptPath, string &requestedFilep
     }
 }
 
-string CGIHandler::handleCgi(string& cgiScriptPath, HttpRequest &request, int &exitStatus, ServerBlock &serverBlock) {
+string CGIHandler::handleCgi(string& cgiScriptPath, HttpRequest &request, int &exitStatus, LocationBlock &serverBlock) {
     int inputPipe[2];  // Pipe for sending request body (stdin for CGI)
     int outputPipe[2]; // Pipe for capturing CGI output (stdout from CGI)
 
@@ -89,7 +89,9 @@ string CGIHandler::handleCgi(string& cgiScriptPath, HttpRequest &request, int &e
         }
         close(inputPipe[0]);
         close(outputPipe[1]);
-        runCGIExecutable(cgiScriptPath, requestedFilepath);
+        std::string rootPath = serverBlock.getRoot();
+        // std::cout << "BLOQ" << serverBlock.getInfo() << std::endl;
+        runCGIExecutable(cgiScriptPath, rootPath);
         
         perror(("execl failed: " + cgiScriptPath).c_str());
         exit(1);

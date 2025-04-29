@@ -32,5 +32,5 @@ void printBorderedBox(const std::string& message, const std::string& title);
 std::string urlEncode(const std::string& value);
 std::string urlDecode(const std::string& value);
     
-
+std::string joinPaths(const std::string& base, const std::string& sub);
 #endif
