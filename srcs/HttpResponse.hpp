@@ -36,6 +36,10 @@ private:
 
     string applyAlias(string &path);
 
+    std::pair<string, string> GetMsg(int statusCode) const;
+
+    std::pair<string, string> CodeToMessage(int statusCode, string message="", string description="") const;
+
     std::vector<LocationBlock>::iterator getRelevantLocationBlock(ServerBlock *serverBlock, string path);
 
     int httpStatusCode;       // HTTP status code (e.g., 404, 500)
@@ -45,7 +49,6 @@ private:
     string method;            // HTTP method (GET, POST, etc.)
     std::time_t timestamp;    // Error occurrence time
 
-    std::pair<std::string, std::string> CodeToMessage(int code) const;
     string createStatusPageStr(string errorPagePath, int statusCode) const;
     void displayError() const;
 
@@ -80,8 +83,8 @@ public:
     void initCGIResponse(string cgiPath, HttpRequest request);
 
     void handleGET(HttpRequest &request, ServerBlock *serverBlock);
+    void handlePOST(HttpRequest &request);
     LocationBlock *getBlock();
-    void handlePOST(HttpRequest &request, ServerBlock *serverBlock);
 
     void NewFunction(HttpRequest &request);
 

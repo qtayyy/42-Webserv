@@ -5,7 +5,7 @@ Content-Type: text/html
 <body bgcolor="#f0f0f8"><font color="#f0f0f8" size="-5"> --> -->
 </font> </font> </font> </script> </object> </blockquote> </pre>
 </table> </table> </table> </table> </table> </font> </font> </font><pre>Traceback (most recent call last):
-  File "/home/cooper/coreProgram/webserv_proper/webserv1//cgi-bin/upload.py", line 213, in &lt;module&gt;
+  File "/home/cooper/coreProgram/webserv_proper/webserv1//cgi-bin/upload.py", line 238, in &lt;module&gt;
     with open(pdf_path, 'rb') as file:
 IsADirectoryError: [Errno 21] Is a directory: '/home/cooper/coreProgram/webserv_proper/webserv1/'
 </pre>

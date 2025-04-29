@@ -79,14 +79,30 @@ body {
     margin: 0;
     padding: 20px;
 }
-h2 {
+h1 {
     color: #4CAF50;
 }
-p {
-    background: #fff;
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
     padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+}
+th, td {
+    text-align: left;
+    background: #fff;
+    padding: 10px 5px;
+}
+a {
+    color: #1E90FF;
+}
+.folder {
+    color:rgb(0, 255, 251);
+}
+.error {
+    color: red;
+    font-weight: bold;
 }
 '''
 
@@ -149,7 +165,18 @@ def print_and_write_to(msg, file_path:str=FILE):
         f.write(msg)
     return file_path
 
-
+def generate_env_representation():
+    return dedent("""
+    <div style="overflow-x:auto;">
+        <table border='1' style="width: 100%; table-layout: fixed;">
+            <tr><th style="width: 20%;">Key</th><th>Value</th></tr>
+            {}
+        </table>
+    </div>
+    """).format("".join(
+        f"<tr><td style='word-wrap: break-word; width: 20%;'>{key}</td><td style='word-wrap: break-word;'>{value}</td></tr>"
+        for key, value in os.environ.items()
+    ))
 
 # Handle POST request
 if request_method == "POST":
@@ -162,11 +189,9 @@ if request_method == "POST":
                 with open(file_path, 'wb') as f:
                     f.write(file_item.file.read())
                 file_size = os.path.getsize(file_path)
-                env_variables = "".join([f"<li>{key}: {value}</li>" for key, value in os.environ.items()])
+
                 response_body = raw_success_page.replace("%additional_info", dedent(f"""
-                <li>bytes received: {file_size} bytes</li>
-                <li>bytes written to file: {file_size} bytes</li>
-                {env_variables}
+                {generate_env_representation()}
                 Program called with arguments: {sys.argv}
                 """)).replace("%filename", file_item.filename).replace("%route", route).strip()
 

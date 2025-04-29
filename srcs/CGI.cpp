@@ -90,7 +90,6 @@ string CGIHandler::handleCgi(string& cgiScriptPath, HttpRequest &request, int &e
         close(inputPipe[0]);
         close(outputPipe[1]);
         std::string rootPath = serverBlock.getRoot();
-        // std::cout << "BLOQ" << serverBlock.getInfo() << std::endl;
         runCGIExecutable(cgiScriptPath, rootPath);
         
         perror(("execl failed: " + cgiScriptPath).c_str());

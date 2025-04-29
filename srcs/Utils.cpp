@@ -2,7 +2,7 @@
 #include "HttpException.hpp"
 
 
-void createFileWithContents(const std::string& filePath, const std::string& contents) {
+void createFileWithContents(const string& filePath, const string& contents) {
     std::ofstream outFile(filePath.c_str());
     if (outFile.is_open()) {
         outFile << contents;
@@ -83,8 +83,8 @@ void replaceIfFound(string *haystack, const string& needle, const string& replac
 }
 
 stringList splitString(string str, char delimiter) {
-    std::vector<std::string> tokens;
-    std::string token;
+    std::vector<string> tokens;
+    string token;
     std::istringstream tokenStream(str);
     while (std::getline(tokenStream, token, delimiter)) {
         tokens.push_back(token);
@@ -92,21 +92,21 @@ stringList splitString(string str, char delimiter) {
     return tokens;
 }
 
-int getFileSize(const std::string& filePath) {
+int getFileSize(const string& filePath) {
     struct stat stat_buf;
     int rc = stat(filePath.c_str(), &stat_buf);
     return rc == 0 ? stat_buf.st_size : -1;
 }
 
-std::string getDirectory(const std::string& fullPath) {
+string getDirectory(const string& fullPath) {
     size_t pos = fullPath.find_last_of("/\\");
-    if (pos != std::string::npos) {
+    if (pos != string::npos) {
         return fullPath.substr(0, pos);
     }
     return "";
 }
 
-string appendPaths(const std::string& path1, const std::string& path2) {
+string appendPaths(const string& path1, const string& path2) {
     if (path1.empty()) return path2;
     if (path2.empty()) return path1;
 
@@ -172,7 +172,7 @@ bool isAnsiEscapeStart(char c) {
     return c == '\033' || c == '\x1B' || c == '\001' || c == '\002';
 }
 
-std::size_t visibleLength(const std::string& str) {
+std::size_t visibleLength(const string& str) {
 	std::size_t length = 0;
 	bool inEscape = false;
 
@@ -195,20 +195,20 @@ std::size_t visibleLength(const std::string& str) {
 	return length;
 }
 
-void printBorderedBox(const std::string& message, const std::string& title) {
+void printBorderedBox(const string& message, const string& title) {
 	int width = getTerminalWidth();
 	std::istringstream stream(message);
-	std::string line;
+	string line;
 
-	std::string top = " " + std::string(width - 2, '_') + " ";
-	std::string bottom = " " + std::string(width - 2, '_') + " ";
+	string top = " " + string(width - 2, '_') + " ";
+	string bottom = " " + string(width - 2, '_') + " ";
 	std::cout << top << std::endl;
 
 	// Print the title in the center
 	if (!title.empty()) {
 		int titlePadding = (width - 2 - visibleLength(title)) / 2;
-		std::cout << "│" << std::string(titlePadding, ' ') << title 
-				  << std::string(width - 2 - titlePadding - visibleLength(title), ' ') << "│" << std::endl;
+		std::cout << "│" << string(titlePadding, ' ') << title 
+				  << string(width - 2 - titlePadding - visibleLength(title), ' ') << "│" << std::endl;
 	}
 
 	while (std::getline(stream, line)) {
@@ -230,19 +230,19 @@ void printBorderedBox(const std::string& message, const std::string& title) {
 				}
 			}
 
-			std::cout << "│ " << line.substr(0, actualCutOff) << std::string(width - 4 - visibleLength(line.substr(0, actualCutOff)), ' ') << " │" << std::endl;
+			std::cout << "│ " << line.substr(0, actualCutOff) << string(width - 4 - visibleLength(line.substr(0, actualCutOff)), ' ') << " │" << std::endl;
 			line = line.substr(actualCutOff);
 		}
 		int padding = width - 4 - visibleLength(line); // 4 = 2 for '|' + 2 for space on both sides
-		std::cout << "│ " << line << std::string(padding, ' ') << " │" << std::endl;
+		std::cout << "│ " << line << string(padding, ' ') << " │" << std::endl;
 	}
 
 	std::cout << bottom << std::endl << std::endl;
 }
 
-std::string urlEncode(const std::string& value) {
+string urlEncode(const string& value) {
     std::ostringstream encoded;
-    for (std::string::const_iterator it = value.begin(); it != value.end(); ++it) {
+    for (string::const_iterator it = value.begin(); it != value.end(); ++it) {
         unsigned char c = static_cast<unsigned char>(*it);
         if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
             encoded << c;
@@ -256,7 +256,7 @@ std::string urlEncode(const std::string& value) {
 }
 
 // Function to URL-decode a string
-std::string urlDecode(const std::string& value) {
+string urlDecode(const string& value) {
     std::ostringstream decoded;
     for (size_t i = 0; i < value.length(); ++i) {
         if (value[i] == '%' && i + 2 < value.length()) {
@@ -273,7 +273,7 @@ std::string urlDecode(const std::string& value) {
     return decoded.str();
 }
 
-std::string joinPaths(const std::string& base, const std::string& sub) {
+string joinPaths(const string& base, const string& sub) {
     if (base.empty()) 
         return "/" + sub;
     if (sub == "/") 

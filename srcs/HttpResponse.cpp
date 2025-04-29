@@ -94,7 +94,7 @@ void HttpResponse::handleGET(HttpRequest &request, ServerBlock *serverBlock) {
 }
 
 
-void HttpResponse::handlePOST(HttpRequest &request, ServerBlock *serverBlock) {
+void HttpResponse::handlePOST(HttpRequest &request) {
     string cgiPass = this->getBlock()->getCgiPass();
 
     
@@ -162,7 +162,7 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
     string method = request.getMethod();
 
     // Check if a redirect is required
-    std::pair<int, std::string> redirectInfo = this->getBlock()->getReturn();
+    std::pair<int, string> redirectInfo = this->getBlock()->getReturn();
     if (!redirectInfo.second.empty()) {
         std::cout << "redirecting to :" << redirectInfo.second << std::endl;
         this->initRedirectResponse(redirectInfo.second, redirectInfo.first);
@@ -183,7 +183,7 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
 
     else if (method == "POST") {
         std::cout << "Handling POST..." << std::endl;
-        this->handlePOST(request, serverBlock);
+        this->handlePOST(request);
     }
 
     else if (method == "DELETE") {
@@ -204,7 +204,7 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
 string HttpResponse::createStatusPageStr(string errorPagePath, int statusCode) const {
     string errorFileContents = readFileContent(errorPagePath);
         
-    std::pair<std::string, std::string> details = CodeToMessage(statusCode);
+    std::pair<string, string> details = CodeToMessage(statusCode);
 
     replaceIfFound(&errorFileContents, "{{ERROR_CODE}}", to_string(statusCode));
     replaceIfFound(&errorFileContents, "{{ERROR_MESSAGE}}", details.first);
@@ -367,7 +367,7 @@ void HttpResponse::initErrorHttpResponse(int statusCode) {
         }
     }
 
-    std::pair<std::string, std::string> details = CodeToMessage(statusCode);
+    std::pair<string, string> details = CodeToMessage(statusCode, "wow");
     std::stringstream ss;
     ss << "<html><head><title>" << details.first << "</title>";
     ss << "<style>" << Css() << "</style></head><body>";
@@ -411,8 +411,6 @@ void HttpResponse::initCGIResponse(string cgiPath, HttpRequest request) {
 string HttpResponse::getContentType(const string& resourcePath) {
     
     for (stringDict::const_iterator it = contentTypeMap.begin(); it != contentTypeMap.end(); ++it) {
-        size_t extension_start = resourcePath.size() - it->first.size();
-
         if (endsWith(resourcePath, it->first))
             return it->second;
     }
@@ -421,8 +419,8 @@ string HttpResponse::getContentType(const string& resourcePath) {
 }
 
 string HttpResponse::containsIndexFile(string path) {
-    const std::vector<std::string>& indices = this->_serverBlockRef->getIndex();
-    for (std::vector<std::string>::const_iterator it = indices.begin(); it != indices.end(); ++it) {
+    const std::vector<string>& indices = this->_serverBlockRef->getIndex();
+    for (std::vector<string>::const_iterator it = indices.begin(); it != indices.end(); ++it) {
         if (doesPathExist(path + "/" + *it)) {
             return path + "/" + *it;
         }
@@ -434,12 +432,13 @@ string HttpResponse::containsIndexFile(string path) {
 LocationBlock* HttpResponse::getRelevantLocationBlock(const string& path, ServerBlock* serverBlock) {
     std::vector<LocationBlock> *locations = serverBlock->getLocation();
     LocationBlock* locationBlock = NULL;
-    string directory = getDirectory(path);
-    
-    
+
     for (std::vector<LocationBlock>::iterator it = locations->begin(); it != locations->end(); ++it) {
-        std::cout << "URI " << it->getUri() << " " << path << std::endl;
-        if (startsWith(path, it->getUri()) && (locationBlock == NULL || it->getUri().size() > locationBlock->getUri().size())) {
+        const string& locUri = it->getUri();
+        if (startsWith(path, locUri) &&
+            (path.size() == locUri.size() || path[locUri.size()] == '/') &&
+            (locationBlock == NULL || locUri.size() > locationBlock->getUri().size()))
+        {
             locationBlock = &(*it);
         }
     }
@@ -459,7 +458,7 @@ string HttpResponse::applyAlias(string& path) {
     return path;
 }
 
-std::pair<std::string, std::string> HttpResponse::CodeToMessage(int statusCode) const {
+std::pair<string, string> HttpResponse::GetMsg(int statusCode) const {
     switch (statusCode) {
         case 200: return std::make_pair("OK", "Success");
         case 201: return std::make_pair("Created", "The request has been fulfilled and resulted in a new resource being created.");
@@ -473,5 +472,15 @@ std::pair<std::string, std::string> HttpResponse::CodeToMessage(int statusCode) 
         case 504: return std::make_pair("Gateway Timeout", "The server, while acting as a gateway or proxy, did not receive a timely response from an upstream server it needed to access in order to complete the request.");
     }
     return std::make_pair("Unknown", "Unknown error code.");
+}
+
+std::pair<string, string> HttpResponse::CodeToMessage(int statusCode, string message, string description) const {
+    std::pair<string, string> statusMsg = HttpResponse::GetMsg(statusCode);
+    if (message != "")
+        statusMsg.first = message;
+    if (description != "")
+        statusMsg.second = description;
+
+    return statusMsg;
 }
 
