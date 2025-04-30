@@ -19,12 +19,12 @@ class LoggerBuffer : public std::streambuf {
 
 class Logger : public std::ostream {
     public:
+    Logger();
         static const int RESET_COLOR; 
         static const int RESET_STREAM;
         static const int RESET_ALL;
         static string reset();
 
-        Logger();
         static string setStream(std::ostream* stream);
         static string setStream(const std::string& filename, std::ios_base::openmode mode = std::ios::out);
 

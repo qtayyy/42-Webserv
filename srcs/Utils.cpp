@@ -283,3 +283,12 @@ string joinPaths(const string& base, const string& sub) {
     else
         return base + (sub[0] == '/' ? sub : "/" + sub);
 }
+
+string currentDateTime() {
+    // Get the current date and time
+    time_t now = time(NULL);
+    tm* localTime = localtime(&now);
+    char timeBuffer[100];
+    strftime(timeBuffer, sizeof(timeBuffer), "%S:%M:%H %d-%m-%Y", localTime);
+    return timeBuffer;
+}

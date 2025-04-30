@@ -55,6 +55,9 @@ std::string	intToIp(uint32_t ip);
 #include <sys/stat.h>
 #include <cstring>
 
+#define LOG_FOLDER "logs/"
+#define REQUESTS_FOLDER "logs/requests/"
+
 #define METHOD_GET "GET"
 #define METHOD_POST "POST"
 #define METHOD_PUT "PUT"

@@ -18,19 +18,20 @@ string to_string(int number);
 void replaceIfFound(string *haystack, const string& needle, const string& replacement);
 string readFileContent(const string& filePath);
 std::vector<string> listFiles(const string &path);
-void createFileWithContents(const std::string& filePath, const std::string& contents);
+void createFileWithContents(const string& filePath, const string& contents);
 stringList splitString(string str, char delimiter);
-int getFileSize(const std::string& filePath);
-std::string getDirectory(const std::string& fullPath);    
-string appendPaths(const std::string& path1, const std::string& path2);
+int getFileSize(const string& filePath);
+string getDirectory(const string& fullPath);    
+string appendPaths(const string& path1, const string& path2);
     
 int getTerminalWidth();
 bool isAnsiEscapeStart(char c);
-std::size_t visibleLength(const std::string& str);
-void printBorderedBox(const std::string& message, const std::string& title);
+std::size_t visibleLength(const string& str);
+void printBorderedBox(const string& message, const string& title);
     
-std::string urlEncode(const std::string& value);
-std::string urlDecode(const std::string& value);
+string urlEncode(const string& value);
+string urlDecode(const string& value);
     
-std::string joinPaths(const std::string& base, const std::string& sub);
+string joinPaths(const string& base, const string& sub);
+string currentDateTime();
 #endif

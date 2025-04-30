@@ -205,10 +205,14 @@ void Client::parseRequest() {
     request.setRawRequest(request_buf);
 }
 
+
 void Client::handleRequest(ssize_t read_buf, char *buffer) {
     request_buf = std::string(buffer, read_buf); // <- Again, use this
     parseRequest();
     request.preview();
+
+    string outputFolder = string(REQUESTS_FOLDER) + request.getMethod() + "_request [" + currentDateTime() + "].log";
+    Log::log << Logger::setStream(outputFolder, std::ios::app) << request.getRawRequest() << Logger::reset();
 }
 
 

@@ -7,7 +7,8 @@
 #include <iostream>
 #include <unistd.h>
 #include <sys/socket.h>
-
+#include "Log.hpp"
+#include "Utils.hpp"
 
 class Client
 {

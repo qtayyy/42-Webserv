@@ -347,19 +347,14 @@ for (int i = 0; i < _numOfFds; i++) {
 					// Check if the entire body is received
 					if (requestBuffer.size() >= headerEnd + 4 + contentLength) {
 						std::cout << GREEN << "Full request received from [" << _pollFds[i].fd << "]" << RESET << std::endl;
-						Log::log << Logger::setStream("cumulative_request.log", std::ios::app) << requestBuffer << Logger::reset();
-						
-						// Process the request
-
 						this->_clients[_pollFds[i].fd]->handleRequest(requestBuffer.size(), (char *)(requestBuffer.c_str()));
-						std::cout << "RECV SIZE" << byteRecv << std::endl;
 
-						std::cout << "BODY SIZE" << this->_clients[_pollFds[i].fd]->getRequest().getBody().size() << std::endl;
+						Log::log << GREEN << "RECV SIZE: " << byteRecv << Logger::reset();
+						Log::log << GREEN << "BODY SIZE: " << this->_clients[_pollFds[i].fd]->getRequest().getBody().size() << Logger::reset();
 
 						_pollFds[i].events = POLLOUT;
 						break;
 					} else {
-						// Wait for more data if the full body is not yet received
 						std::cout << YELLOW << "Waiting for more data from [" << _pollFds[i].fd << "]..." << RESET << std::endl;
 					}
 				}

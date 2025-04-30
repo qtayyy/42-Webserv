@@ -66,6 +66,9 @@ int LoggerBuffer::reset(int flags) {
 
 string Logger::reset() {
     LoggerBuffer::reset(Logger::RESET_ALL);
+    if (LoggerBuffer::file_stream.is_open()) {
+        LoggerBuffer::file_stream.close();
+    }
     return "\n";
 }
 
@@ -80,9 +83,6 @@ string Logger::setStream(std::ostream* stream) {
 
 // Set the stream to a file stream
 string Logger::setStream(const std::string& filename, std::ios_base::openmode mode) {
-    if (LoggerBuffer::file_stream.is_open()) {
-        LoggerBuffer::file_stream.close();
-    }
     LoggerBuffer::file_stream.open(filename.c_str(), mode);
     if (LoggerBuffer::file_stream.is_open()) {
         LoggerBuffer::out_stream = &LoggerBuffer::file_stream;
