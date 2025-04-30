@@ -54,7 +54,6 @@ string CGIHandler::handleCgi(string& cgiScriptPath, HttpRequest &request, int &e
     std::cout << YELLOW << "Running CGI..." << RESET << std::endl;
     std::cout << YELLOW << "Bytes to be written to CGI stdin: " << data.length() << RESET << std::endl;
 
-    // std::cout << "WRITING: " << data << std::endl;
     std::cout << "Input PIPE: " << inputPipe[0] << ", " << inputPipe[1] << " | Output PIPE: " << outputPipe[0] << ", " << outputPipe[1] << std::endl;
 
     // Write the request body to an output file for debugging or logging purposes
@@ -90,6 +89,7 @@ string CGIHandler::handleCgi(string& cgiScriptPath, HttpRequest &request, int &e
         close(inputPipe[0]);
         close(outputPipe[1]);
         std::string rootPath = serverBlock.getRoot();
+
         runCGIExecutable(cgiScriptPath, rootPath);
         
         perror(("execl failed: " + cgiScriptPath).c_str());

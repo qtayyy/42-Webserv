@@ -401,7 +401,7 @@ void HttpResponse::initErrorHttpResponse(int statusCode, string error, string de
 
 void HttpResponse::initCGIResponse(string cgiPath, HttpRequest request) {
 
-    std::cout << YELLOW << "Initializing CGI: " << cgiPath << RESET << std::endl;
+    std::cout << YELLOW << "Initializing CGI: \"" << cgiPath << "\"" RESET << std::endl;
 
     cgiPath = getAbsolutePath(cgiPath);
     if (!isPathExist(cgiPath)) {
@@ -451,14 +451,14 @@ string HttpResponse::containsIndexFile(string path) {
 }
 
 LocationBlock* HttpResponse::resolveLocationBlock(const string& path, ServerBlock* serverBlock) {
-    std::vector<LocationBlock> *locations = serverBlock->getLocation();
+    std::vector<LocationBlock>* locations = serverBlock->getLocation();
     LocationBlock* locationBlock = NULL;
 
     for (std::vector<LocationBlock>::iterator it = locations->begin(); it != locations->end(); ++it) {
         const string& uri = it->getUri();
-        
+
         if (startsWith(path, uri) &&
-            (path.size() == uri.size() || endsWith(uri, "/")) &&
+            (path.size() == uri.size() || path[uri.size()] == '/') &&
             (locationBlock == NULL || uri.size() > locationBlock->getUri().size()))
         {
             locationBlock = &(*it);
@@ -466,6 +466,7 @@ LocationBlock* HttpResponse::resolveLocationBlock(const string& path, ServerBloc
     }
     return locationBlock;
 }
+
 
 string HttpResponse::applyAlias(string& path) {
     std::vector<LocationBlock> *locations = this->_serverBlockRef->getLocation();
