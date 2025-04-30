@@ -30,7 +30,8 @@ SRC		= 	Block.cpp \
 			CGI.cpp \
 			StatusHandler.cpp \
 			HttpRequest.cpp \
-			Logger.cpp 
+			Logger.cpp \
+			Log.cpp
 
 
 SRCS	= $(addprefix $(SRC_PATH), $(SRC))

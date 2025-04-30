@@ -12,20 +12,19 @@
 
 #include "../includes/Webserv.hpp"
 #include "Cluster.hpp"
-#include "Logger.hpp"
+#include "Log.hpp"
 
 int	main(int argc, char **argv)
 {
 
-	Logger logger;
-	logger << LoggerBuffer::setColor(YELLOW) << "hello"  << std::endl;
-	logger  << "hi"  << std::endl;
+	// Logger logger;
+	// Log::log << Logger::setStream("hi.txt", std::ios::app) << "hello"  << std::endl;
+	// logger  << "hi"  << std::endl;
 
-	exit(0);
 	std::string	defaultPath = "conf/good/custom.conf";
 	if (argc > 2)
 	{
-		std::cerr << RED "Usage error: invalid num of args\n" <<
+		std::cerr << RED "Usage error: invalid num o f args\n" <<
 		"Usage: ./webserv [config file]\n" RESET;
 		return (EXIT_FAILURE);
 	}

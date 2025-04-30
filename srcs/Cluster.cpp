@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "Cluster.hpp"
+#include "Log.hpp"
 
 // ================================= DESTRUCTOR ===============================
 
@@ -346,26 +347,8 @@ for (int i = 0; i < _numOfFds; i++) {
 					// Check if the entire body is received
 					if (requestBuffer.size() >= headerEnd + 4 + contentLength) {
 						std::cout << GREEN << "Full request received from [" << _pollFds[i].fd << "]" << RESET << std::endl;
-
-						// Write the full request to the cumulative log
-						std::ofstream cumulative_log("cumulative_request.log", std::ios::app);
-						if (cumulative_log.is_open()) {
-							cumulative_log << requestBuffer;
-							cumulative_log.close();
-
-							// Print the size of the log file
-							std::ifstream logFile("cumulative_request.log", std::ios::binary | std::ios::ate);
-							if (logFile.is_open()) {
-								std::streamsize size = logFile.tellg();
-								logFile.close();
-								std::cout << GREEN << "Log file size: " << size << " bytes" << RESET << std::endl;
-							} else {
-								std::cerr << RED << "Failed to open cumulative_request.log to get size" << RESET << std::endl;
-							}
-						} else {
-							std::cerr << RED << "Failed to open cumulative_request.log for writing" << RESET << std::endl;
-						}
-
+						Log::log << Logger::setStream("cumulative_request.log", std::ios::app) << requestBuffer << Logger::reset();
+						
 						// Process the request
 
 						this->_clients[_pollFds[i].fd]->handleRequest(requestBuffer.size(), (char *)(requestBuffer.c_str()));
