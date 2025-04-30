@@ -12,9 +12,16 @@
 
 #include "../includes/Webserv.hpp"
 #include "Cluster.hpp"
+#include "Logger.hpp"
 
 int	main(int argc, char **argv)
 {
+
+	Logger logger;
+	logger << LoggerBuffer::setColor(YELLOW) << "hello"  << std::endl;
+	logger  << "hi"  << std::endl;
+
+	exit(0);
 	std::string	defaultPath = "conf/good/custom.conf";
 	if (argc > 2)
 	{

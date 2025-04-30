@@ -39,7 +39,6 @@ public:
     void   setRawRequest(string rawRequest);
     string getRawRequest() const;
 
-    HttpRequest(HttpMethod method, string path, string version);
     HttpRequest();
     ~HttpRequest();
 

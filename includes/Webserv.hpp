@@ -24,7 +24,7 @@
 #include <sstream>
 #include <stack>
 #include <string>
-
+#include <cstdarg>
 
 #define BLACK "\001\033[30m\002"
 #define RED "\001\033[31m\002"

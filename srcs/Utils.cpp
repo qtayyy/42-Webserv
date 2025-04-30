@@ -32,7 +32,7 @@ bool startsWith(const string& str, const string& prefix) {
     return str.compare(0, prefix.size(), prefix) == 0;
 }
 
-bool doesPathExist(const string& resourcePath) {
+bool isPathExist(const string& resourcePath) {
     struct stat buffer;
     return (stat(resourcePath.c_str(), &buffer) == 0);
 }
@@ -126,7 +126,7 @@ string appendPaths(const string& path1, const string& path2) {
 string readFileContent(const string& filePath) {
     std::ifstream file(filePath.c_str()); // Open the file
     if (!file.is_open()) {
-        if (!doesPathExist(filePath)) {
+        if (!isPathExist(filePath)) {
             throw HttpException(404, "error reading from " + filePath); // Assuming file not found
         } else if (file.fail()) {
             throw HttpException(403); // Assuming permission denied

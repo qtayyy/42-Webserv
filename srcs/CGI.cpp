@@ -102,8 +102,9 @@ string CGIHandler::handleCgi(string& cgiScriptPath, HttpRequest &request, int &e
 
         // **Write request body to CGI stdin**
         ssize_t bytesWritten = 0;
-        while (bytesWritten < data.length()) {
-            ssize_t result = write(inputPipe[1], data.c_str() + bytesWritten, data.length() - bytesWritten);
+        ssize_t length = data.length();
+        while (bytesWritten < length) {
+            ssize_t result = write(inputPipe[1], data.c_str() + bytesWritten, length - bytesWritten);
             if (result == -1) {
                 if (errno == EPIPE) {
                     std::cerr << RED << "Broken pipe: CGI process terminated prematurely." << RESET << std::endl;

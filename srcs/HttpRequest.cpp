@@ -33,10 +33,6 @@ string HttpRequest::headerGet(string key) {
     return headerParameters[key];
 }
 
-HttpRequest::HttpRequest(HttpMethod method, string path, string version) {
-    // Constructor implementation
-}
-
 HttpRequest::HttpRequest() {
     // Constructor implementation
 }

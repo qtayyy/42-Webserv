@@ -10,7 +10,7 @@
 bool isDirectory(const string& path);
 bool endsWith(const string& str, const string& suffix);
 bool startsWith(const string& str, const string& prefix);
-bool doesPathExist(const string& resourcePath);
+bool isPathExist(const string& resourcePath);
 string getAbsolutePath(string filepath);
 std::vector<string> splitBy1stInstance(string str, char delimiter);
 std::vector<string> splitByNthInstance(string str, char delimiter, int n);

@@ -1,6 +1,8 @@
 #include "HttpResponse.hpp"
 #include "Utils.hpp"
 
+/* DEFAULT VALUES */
+
 stringDict HttpResponse::createContentTypeMap() {
     stringDict map;
     map[".html"] = CONTENT_TYPE_HTML;
@@ -14,7 +16,38 @@ stringDict HttpResponse::createContentTypeMap() {
 }
 
 const stringDict HttpResponse::contentTypeMap = HttpResponse::createContentTypeMap();
-
+const string HttpResponse::css = 
+"       body {"
+"           font-family: Arial, sans-serif;"
+"           background-color: #f4f4f4;"
+"           margin: 0;"
+"           padding: 20px;"
+"       }"
+"       h1 {"
+"           color: #4CAF50;"
+"       }"
+"       table {"
+"           width: 100%;"
+"           border-collapse: collapse;"
+"           border-radius: 10px;"
+"           overflow: hidden;"
+"           padding: 10px;"
+"       }"
+"       th, td {"
+"           text-align: left;"
+"           background: #fff;"
+"           padding: 10px;"
+"       }"
+"       a {"
+"           color: #1E90FF;"
+"       }"
+"       .folder {"
+"           color:rgb(0, 255, 251);"
+"       }"
+"       .error {"
+"           color: red;"
+"           font-weight: bold;"
+"       }";
 
 
 /* CONSTRUCTORS */
@@ -47,7 +80,7 @@ void HttpResponse::handleGET(HttpRequest &request, ServerBlock *serverBlock) {
         std::cout << "REROUTED PATH: " << path << std::endl;
 
 
-        if (!doesPathExist(reroutedPath)) {
+        if (!isPathExist(reroutedPath)) {
             throw HttpException(404, reroutedPath);
         }
 
@@ -59,7 +92,7 @@ void HttpResponse::handleGET(HttpRequest &request, ServerBlock *serverBlock) {
             // if index file is found, serve it
             if (!indexFile.empty()) {
                 try {
-                    this->initHttpResponseSelf(readFileContent(indexFile), CONTENT_TYPE_HTML, 200);
+                    this->initHttpResponse(readFileContent(indexFile), CONTENT_TYPE_HTML, 200);
                 } catch (const HttpException& e) { }
                 
                 return;
@@ -69,7 +102,7 @@ void HttpResponse::handleGET(HttpRequest &request, ServerBlock *serverBlock) {
             else if (serverBlock->getAutoindex()) {
                 std::cout << "Generating auto index... " << reroutedPath<< std::endl;
                 string autoIndex = createAutoIndexHtml(reroutedPath, path);
-                this->initHttpResponseSelf(autoIndex, CONTENT_TYPE_HTML, 200);
+                this->initHttpResponse(autoIndex, CONTENT_TYPE_HTML, 200);
             } 
             
             // if autoindex is disabled, return 403
@@ -83,7 +116,7 @@ void HttpResponse::handleGET(HttpRequest &request, ServerBlock *serverBlock) {
             string content = readFileContent((reroutedPath));
             std::cout << "FILE CONTENT FROM: " << reroutedPath << content << std::endl;
 
-            this->initHttpResponseSelf(content, getContentType(reroutedPath), 200);
+            this->initHttpResponse(content, getContentType(reroutedPath), 200);
         }
     } 
 
@@ -96,16 +129,13 @@ void HttpResponse::handleGET(HttpRequest &request, ServerBlock *serverBlock) {
 
 void HttpResponse::handlePOST(HttpRequest &request) {
     string cgiPass = this->getBlock()->getCgiPass();
-
-    
-
     this->initCGIResponse(cgiPass, request);
 }
 
 
 void HttpResponse::handleDELETE(string path) {
     path = reroutePath(path);
-    if (!doesPathExist(path)) {
+    if (!isPathExist(path)) {
         this->initErrorHttpResponse(404);
         std::cout << "FILE DOESN'T EXIST: " << path << std::endl;
         return; 
@@ -114,7 +144,7 @@ void HttpResponse::handleDELETE(string path) {
     int status = remove(path.c_str());
 
     if (status == 0) {
-        this->initHttpResponseSelf("File deleted successfully", CONTENT_TYPE_HTML, 200);
+        this->initHttpResponse("File deleted successfully", CONTENT_TYPE_HTML, 200);
     } 
     
     else {
@@ -133,7 +163,7 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
     this->emptyBlock        = new LocationBlock();
     string path             = request.headerGet("path");
     this->_serverBlockRef   = serverBlock;
-    this->_locationBlockRef = getRelevantLocationBlock(path, serverBlock);
+    this->_locationBlockRef = resolveLocationBlock(path, serverBlock);
 
 
     if (this->_locationBlockRef == NULL) {
@@ -169,12 +199,12 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
         return;
     }
 
-    std::cout << "GROOT" << this->getBlock()->getRoot() << std::endl;
-
-    if (!doesPathExist(this->getBlock()->getRoot())) {
+    if (!isPathExist(this->getBlock()->getRoot())) {
         this->initErrorHttpResponse(404);
     }
 
+
+    /* HANDLE METHODS */
 
     if (method == "GET") {
         std::cout << "Handling GET..." << std::endl;
@@ -190,6 +220,8 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
         std::cout << "Handling DELETE..." << std::endl;
         this->handleDELETE(path);
     }
+
+    /* INVALID METHOD */
 
     else {
         this->initErrorHttpResponse(400);
@@ -213,59 +245,6 @@ string HttpResponse::createStatusPageStr(string errorPagePath, int statusCode) c
     return errorFileContents;
 }
 
-string HttpResponse::createResponseString(
-    const string& fileContent, 
-    const string& resourceType, 
-    const string& statusCode, 
-    const string& statusMessage) {
-
-    std::stringstream response;
-    response << PROTOCOL << " " << statusCode << " " << statusMessage << "\n";
-    response << "Content-Length: " << fileContent.size() << "\n";
-    response << "Connection: " << "close" << "\n";
-    response << "Content-Type: " << resourceType << "\n\n";
-    response << fileContent;
-
-    return response.str();
-}
-
-string Css() {
-    return 
-"       body {"
-"           font-family: Arial, sans-serif;"
-"           background-color: #f4f4f4;"
-"           margin: 0;"
-"           padding: 20px;"
-"       }"
-"       h1 {"
-"           color: #4CAF50;"
-"       }"
-"       table {"
-"           width: 100%;"
-"           border-collapse: collapse;"
-"           border-radius: 10px;"
-"           overflow: hidden;"
-"           padding: 10px;"
-"       }"
-"       th, td {"
-"           text-align: left;"
-"           background: #fff;"
-"           padding: 10px;"
-"       }"
-"       a {"
-"           color: #1E90FF;"
-"       }"
-"       .folder {"
-"           color:rgb(0, 255, 251);"
-"       }"
-"       .error {"
-"           color: red;"
-"           font-weight: bold;"
-"       }";
-}
-
-
-
 string HttpResponse::reroutePath(string urlPath) {
 
     string reroutedPath = joinPaths(this->_serverBlockRef->getRoot(), urlPath);
@@ -276,12 +255,13 @@ string HttpResponse::reroutePath(string urlPath) {
     return reroutedPath;
 }
 
+
 string HttpResponse::createAutoIndexHtml(string path, string root) {
-    std::stringstream ss;
-    ss << "<html><head><title>Index of " << path << "</title>";
-    ss << "<style>" << Css() << "</style></head><body>";
-    ss << "<h1>Index of " << path << "</h1><table>";
-    ss << "<tr><th>Name</th><th>Size</th></tr>"; // Table header
+    std::stringstream output;
+    output << "<html><head><title>Index of " << path << "</title>"
+           << "<style>" << HttpResponse::css << "</style></head><body>"
+           << "<h1>Index of " << path << "</h1><table>"
+           << "<tr><th>Name</th><th>Size</th></tr>";
 
     stringList files = listFiles(path);
     if (!files.empty()) {
@@ -290,28 +270,23 @@ string HttpResponse::createAutoIndexHtml(string path, string root) {
                 continue;
             
             string fullPath = joinPaths(path, *it);
-
-            // std::cout << "PATHS: " << path << std::endl;
-            // std::cout << "PATHS: " << *it << std::endl;
-            // std::cout << "PATHS: " << root << std::endl;
-
             string fileSize = isDirectory(fullPath) ? "-" : to_string(getFileSize(fullPath));
 
             fullPath = "http://localhost:1234" + joinPaths(root, *it);
 
             if (isDirectory(fullPath))
-                ss << "<tr><td><a class=\"folder\" href=\"" << fullPath << "\">" << *it << "</a></td><td>" << fileSize << "bytes</td></tr>";
+                output << "<tr><td><a class=\"folder\" href=\"" << fullPath << "\">" << *it << "</a></td><td>" << fileSize << "bytes</td></tr>";
             else
-                ss << "<tr><td><a href=\"" << fullPath << "\">" << *it << "</a></td><td>" << fileSize << "</td></tr>";
+                output << "<tr><td><a href=\"" << fullPath << "\">" << *it << "</a></td><td>" << fileSize << "</td></tr>";
         }
     } 
     
     else {
-        ss << "<tr><td>Unable to open directory</td></tr>";
+        output << "<tr><td>Unable to open directory</td></tr>";
     }
 
-    ss << "</table></body></html>";
-    return ss.str();
+    output << "</table></body></html>";
+    return output.str();
 }
 
 
@@ -326,15 +301,54 @@ int    HttpResponse::getContentLength()    const { return contentLength; }
 
 
 
+
+string HttpResponse::composeHttpResponse(
+    const string& body,
+    int statusCode,
+    const string& msg,
+    ... ) 
+{
+    std::map<string, string> headers;
+    va_list args;
+    va_start(args, msg);
+
+    while (true) {
+        const char* key = va_arg(args, const char*);
+        if (!key) break; // NULL signals end of pairs
+        const char* value = va_arg(args, const char*);
+        if (!value) break; // malformed input
+        headers[key] = value;
+    }
+
+    va_end(args);
+
+    // Construct response
+    std::ostringstream response;
+    response << "HTTP/1.1 " << statusCode << " " << msg << "\r\n";
+    for (stringDict::const_iterator it = headers.begin(); it != headers.end(); ++it) {
+        response << it->first << ": " << it->second << "\r\n";
+    }
+    response << "\r\n" << body;
+
+    return response.str();
+}
+
+
 /* INITIALIZERS */
 
-void HttpResponse::initHttpResponseSelf(string content, string resourceType, int statusCode) {
-    this->rawContent       = content;
+void HttpResponse::initHttpResponse(string body, string resourceType, int statusCode) {
+    this->rawContent       = body;
     this->contentType      = resourceType;
     this->statusCode       = statusCode;
     this->message          = CodeToMessage(statusCode).second;
-    this->finalResponseMsg = createResponseString(content, resourceType, to_string(statusCode), message);
+    // this->finalResponseMsg = composeResponse(body, resourceType, to_string(statusCode), message);
+    this->finalResponseMsg = composeHttpResponse(body, statusCode, message, 
+                                "Content-Length",  to_string(body.size()).c_str(),
+                                "Connection",      "close",
+                                "Content-Type",    resourceType.c_str(),
+                                NULL);
 }
+
 
 
 void HttpResponse::initRedirectResponse(string & redirectUrl, int statusCode) {
@@ -343,24 +357,21 @@ void HttpResponse::initRedirectResponse(string & redirectUrl, int statusCode) {
     this->statusCode    = statusCode;
     this->message       = CodeToMessage(statusCode).second;
     
-    std::stringstream response;
-    response << PROTOCOL << " " << statusCode << " " << message << "\r\n";
-    response << "Location: " + redirectUrl + "\r\n";
-    response << "Content-Length: 0\r\n";
-    response << "Content-Type: " << CONTENT_TYPE_HTML << "\r\n\r\n";
-    
-    this->finalResponseMsg = response.str();
+    this->finalResponseMsg = composeHttpResponse("", statusCode, message,
+        "Location",        redirectUrl.c_str(),
+        "Content-Length",  "0",
+        "Content-Type",    CONTENT_TYPE_HTML,
+        NULL);
 }
 
 
-void HttpResponse::initErrorHttpResponse(int statusCode) {
+void HttpResponse::initErrorHttpResponse(int statusCode, string error, string description) {
     if (!this->_locationBlockRef->getErrorPage().empty() && 
         this->_locationBlockRef->getErrorPage().find(statusCode) != this->_locationBlockRef->getErrorPage().end()) {
         try {
             string errorPage = this->_locationBlockRef->getErrorPage()[statusCode];
             std::cout << "error page: " << errorPage << "'" << std::endl;
-            std::cout << "exist?: " << doesPathExist(errorPage) << std::endl;
-            this->initHttpResponseSelf(readFileContent(errorPage), CONTENT_TYPE_HTML, statusCode);
+            this->initHttpResponse(readFileContent(errorPage), CONTENT_TYPE_HTML, statusCode);
             return ;
         }
         catch (const HttpException& e) {
@@ -370,14 +381,21 @@ void HttpResponse::initErrorHttpResponse(int statusCode) {
     }
 
     std::pair<string, string> details = CodeToMessage(statusCode);
+    
+    string errorMsg = details.first;
+    string errorDescription = details.second;
+    
+    if (error != "")       errorMsg = error;
+    if (description != "") errorDescription = description;
+    
     std::stringstream output;
-    output  << "<html><head><title>" << details.first << "</title>"
-            << "<style>" << Css() << "</style></head><body>"
-            << "<h1 class=\"error\">" << details.first << "</h1>"
-            << "<p>" << details.second << "</p>"
+    output  << "<html><head><title>" << errorMsg << "</title>"
+            << "<style>" << HttpResponse::css << "</style></head><body>"
+            << "<h1 class=\"error\">" << errorMsg << "</h1>"
+            << "<p>" << errorDescription << "</p>"
             << "</body></html>";
 
-    this->initHttpResponseSelf(output.str(), CONTENT_TYPE_HTML, statusCode);
+    this->initHttpResponse(output.str(), CONTENT_TYPE_HTML, statusCode);
 }
 
 
@@ -386,7 +404,7 @@ void HttpResponse::initCGIResponse(string cgiPath, HttpRequest request) {
     std::cout << YELLOW << "Initializing CGI: " << cgiPath << RESET << std::endl;
 
     cgiPath = getAbsolutePath(cgiPath);
-    if (!doesPathExist(cgiPath)) {
+    if (!isPathExist(cgiPath)) {
         std::cout << "path doesn't exist: " << cgiPath << std::endl;
         this->initErrorHttpResponse(500);
         return;
@@ -424,7 +442,7 @@ string HttpResponse::getContentType(const string& resourcePath) {
 string HttpResponse::containsIndexFile(string path) {
     const std::vector<string>& indices = this->_serverBlockRef->getIndex();
     for (std::vector<string>::const_iterator it = indices.begin(); it != indices.end(); ++it) {
-        if (doesPathExist(path + "/" + *it)) {
+        if (isPathExist(path + "/" + *it)) {
             return path + "/" + *it;
         }
     }
@@ -432,15 +450,16 @@ string HttpResponse::containsIndexFile(string path) {
     return "";
 }
 
-LocationBlock* HttpResponse::getRelevantLocationBlock(const string& path, ServerBlock* serverBlock) {
+LocationBlock* HttpResponse::resolveLocationBlock(const string& path, ServerBlock* serverBlock) {
     std::vector<LocationBlock> *locations = serverBlock->getLocation();
     LocationBlock* locationBlock = NULL;
 
     for (std::vector<LocationBlock>::iterator it = locations->begin(); it != locations->end(); ++it) {
-        const string& locUri = it->getUri();
-        if (startsWith(path, locUri) &&
-            (path.size() == locUri.size() || path[locUri.size()] == '/') &&
-            (locationBlock == NULL || locUri.size() > locationBlock->getUri().size()))
+        const string& uri = it->getUri();
+        
+        if (startsWith(path, uri) &&
+            (path.size() == uri.size() || endsWith(uri, "/")) &&
+            (locationBlock == NULL || uri.size() > locationBlock->getUri().size()))
         {
             locationBlock = &(*it);
         }
