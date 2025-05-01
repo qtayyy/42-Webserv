@@ -30,7 +30,6 @@ SRC		= 	Block.cpp \
 			CGI.cpp \
 			StatusHandler.cpp \
 			HttpRequest.cpp \
-			Logger.cpp \
 			Log.cpp
 
 

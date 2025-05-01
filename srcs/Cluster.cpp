@@ -349,8 +349,8 @@ for (int i = 0; i < _numOfFds; i++) {
 						std::cout << GREEN << "Full request received from [" << _pollFds[i].fd << "]" << RESET << std::endl;
 						this->_clients[_pollFds[i].fd]->handleRequest(requestBuffer.size(), (char *)(requestBuffer.c_str()));
 
-						Log::log << GREEN << "RECV SIZE: " << byteRecv << Logger::reset();
-						Log::log << GREEN << "BODY SIZE: " << this->_clients[_pollFds[i].fd]->getRequest().getBody().size() << Logger::reset();
+						LogStream::log() << GREEN << "RECV SIZE: " << byteRecv << std::endl;
+						LogStream::log() << GREEN << "BODY SIZE: " << this->_clients[_pollFds[i].fd]->getRequest().getBody().size() << std::endl;
 
 						_pollFds[i].events = POLLOUT;
 						break;
@@ -371,25 +371,17 @@ for (int i = 0; i < _numOfFds; i++) {
 		HttpResponse response = HttpResponse(request, &_servers[0]);
 		string finalMsg = response.getFinalResponseMsg();
 		
-		ssize_t totalBytes = finalMsg.size();
-		ssize_t bytesSent  = 0;
-		ssize_t bytesLeft  = totalBytes;
-		const char* msgPtr = finalMsg.c_str();
+		ssize_t 	totalBytes = finalMsg.size();
+		ssize_t 	bytesSent  = 0;
+		ssize_t 	bytesLeft  = totalBytes;
+		const char* msgPtr 	   = finalMsg.c_str();
 		
 		std::cout << YELLOW << "Sending " << totalBytes << " Bytes to client [" << _pollFds[i].fd << "]..." << RESET << std::endl;
 		std::cout << GREEN << "Response message generated" << std::endl;
-		std::cout << (finalMsg);
 
 		while (bytesLeft > 0) {
 
-			std::ofstream responseLog("response.log", std::ios::app);
-			if (responseLog.is_open()) {
-				responseLog << finalMsg;
-				responseLog.close();
-				std::cout << GREEN << "Response written to response.log" << RESET << std::endl;
-			} else {
-				std::cerr << RED << "Failed to open response.log for writing" << RESET << std::endl;
-			}
+			LogStream::log(string("logs/responses/") + "RESPONSE [" + currentDateTime() + "] " + generateRandomID(10) + ".log") << finalMsg << std::endl;
 
 			ssize_t sent = send(_pollFds[i].fd, msgPtr + bytesSent, bytesLeft, 0);
 			std::cout << GREEN << "Sent " << sent << " bytes" << RESET << std::endl;

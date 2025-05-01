@@ -185,9 +185,17 @@ if request_method == "POST":
         if "file" in form:
             file_item = form["file"]
             if file_item.file:
-                file_path = os.path.join(route, file_item.filename)
-                with open(file_path, 'wb') as f:
-                    f.write(file_item.file.read())
+                file_path = os.path.join(sys.argv[1], file_item.filename)
+                try:
+                    with open(file_path, 'wb') as f:
+                        f.write(file_item.file.read())
+                except Exception as e:
+                    error_message = traceback.format_exc()
+                    write_to(f"Error writing file: {error_message}")
+                    error_response = generate_error_page("500 Internal Server Error", "An error occurred while saving the file.")
+                    sys.stdout.write(error_response)
+                    sys.stdout.flush()
+                    sys.exit(1)
                 file_size = os.path.getsize(file_path)
 
                 response_body = raw_success_page.replace("%additional_info", dedent(f"""

@@ -284,11 +284,24 @@ string joinPaths(const string& base, const string& sub) {
         return base + (sub[0] == '/' ? sub : "/" + sub);
 }
 
+string generateRandomID(size_t length) {
+    static const char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    static const size_t charsetSize = sizeof(charset) - 1;
+
+    string randomID;
+    srand(static_cast<unsigned int>(time(NULL)));
+
+    for (size_t i = 0; i < length; ++i)
+        randomID += charset[rand() % charsetSize];
+
+    return randomID;
+}
+
 string currentDateTime() {
     // Get the current date and time
     time_t now = time(NULL);
     tm* localTime = localtime(&now);
     char timeBuffer[100];
-    strftime(timeBuffer, sizeof(timeBuffer), "%S:%M:%H %d-%m-%Y", localTime);
+    strftime(timeBuffer, sizeof(timeBuffer), "%I:%M%p %d-%m-%Y", localTime); // %I for 12-hour format, %p for AM/PM
     return timeBuffer;
 }

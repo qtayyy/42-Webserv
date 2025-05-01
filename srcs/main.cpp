@@ -16,11 +16,6 @@
 
 int	main(int argc, char **argv)
 {
-
-	// Logger logger;
-	// Log::log << Logger::setStream("hi.txt", std::ios::app) << "hello"  << std::endl;
-	// logger  << "hi"  << std::endl;
-
 	std::string	defaultPath = "conf/good/custom.conf";
 	if (argc > 2)
 	{

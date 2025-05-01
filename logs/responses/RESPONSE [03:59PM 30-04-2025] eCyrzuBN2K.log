@@ -1,0 +1,94 @@
+HTTP/1.1 200 Success
+Connection: close
+Content-Length: 2326
+Content-Type: text/html
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        #upload-form {
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin: 10px 0;
+            font-weight: bold;
+            color: #555;
+        }
+
+        input[type="file"] {
+            display: block;
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #file-size {
+            margin-top: 10px;
+            color: #444;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <h1>Please upload your file</h1>
+    <form action="/upload/" method="post" enctype="multipart/form-data" id="upload-form">
+        <label for="file">Choose a file:</label>
+        <input type="file" id="file" name="file" required>
+        <p id="file-size"></p>
+        <button type="submit">Upload</button>
+    </form>
+
+    <script>
+        const fileInput = document.getElementById('file');
+        const fileSizeDisplay = document.getElementById('file-size');
+
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            if (file) {
+                const sizeInKB = (file.size / 1024).toFixed(2);
+                fileSizeDisplay.textContent = `Selected file size: ${sizeInKB} KB`;
+            } 
+            else
+                fileSizeDisplay.textContent = '';
+        });
+    </script>
+</body>
+</html>

@@ -23,7 +23,7 @@ stringList splitString(string str, char delimiter);
 int getFileSize(const string& filePath);
 string getDirectory(const string& fullPath);    
 string appendPaths(const string& path1, const string& path2);
-    
+string generateRandomID(size_t length);
 int getTerminalWidth();
 bool isAnsiEscapeStart(char c);
 std::size_t visibleLength(const string& str);

@@ -114,7 +114,6 @@ void HttpResponse::handleGET(HttpRequest &request, ServerBlock *serverBlock) {
         // if the path is a file
         else {
             string content = readFileContent((reroutedPath));
-            std::cout << "FILE CONTENT FROM: " << reroutedPath << content << std::endl;
 
             this->initHttpResponse(content, getContentType(reroutedPath), 200);
         }
@@ -420,7 +419,7 @@ void HttpResponse::initCGIResponse(string cgiPath, HttpRequest request) {
     int exit_status = 0;
     string response_content = cgiHandler.handleCgi(cgiPath, request, exit_status, *this->getBlock());
    
-    std::cout << "SERV BLOCK" << this->_serverBlockRef->getInfo() << std::endl;
+    std::cout << "LOCATION BLOCK" << this->getBlock()->getInfo() << std::endl;
 
     this->finalResponseMsg = response_content;
 }

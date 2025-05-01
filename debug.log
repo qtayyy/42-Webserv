@@ -1,4 +1,0 @@
-[11860:21952:0327/144241.907:VERBOSE1:chrome\updater\win\installer\installer.cc:489] "C:\Users\emers\Downloads\ChromeSetup.exe" --install=appguid={8A69D345-D564-463C-AFF1-A69D9E530F96}&iid={11CDFAEB-E8E1-9F38-A23C-EE78276C6B7E}&lang=en&browser=4&usagestats=1&appname=Google%20Chrome&needsadmin=prefers&ap=x64-statsdef_1&installdataindex=empty --enable-logging --vmodule=*/components/winhttp/*=1,*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2
-[11860:21952:0327/144432.065:VERBOSE1:chrome\updater\win\installer\installer.cc:606] Metainstaller WMain returning: 3
-[0418/184327.396:ERROR:crashpad_client_win.cc(811)] not connected
-[0418/184327.797:ERROR:crashpad_client_win.cc(811)] not connected

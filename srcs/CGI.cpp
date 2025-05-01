@@ -29,7 +29,7 @@ void CGIHandler:: runCGIExecutable(string &cgiScriptPath, string &requestedFilep
     }
 }
 
-string CGIHandler::handleCgi(string& cgiScriptPath, HttpRequest &request, int &exitStatus, LocationBlock &serverBlock) {
+string CGIHandler::handleCgi(string& cgiScriptPath, HttpRequest &request, int &exitStatus, LocationBlock &locationBlock) {
     int inputPipe[2];  // Pipe for sending request body (stdin for CGI)
     int outputPipe[2]; // Pipe for capturing CGI output (stdout from CGI)
 
@@ -88,7 +88,7 @@ string CGIHandler::handleCgi(string& cgiScriptPath, HttpRequest &request, int &e
         }
         close(inputPipe[0]);
         close(outputPipe[1]);
-        std::string rootPath = serverBlock.getRoot();
+        std::string rootPath = locationBlock.getRoot();
 
         runCGIExecutable(cgiScriptPath, rootPath);
         
@@ -125,6 +125,7 @@ string CGIHandler::handleCgi(string& cgiScriptPath, HttpRequest &request, int &e
         ssize_t           totalBytes = 0;
 
         // Open a file to write the CGI output
+
         std::ofstream outputFile("cgi_output.txt", std::ios::out | std::ios::trunc);
         if (!outputFile.is_open()) {
             close(outputPipe[0]);
@@ -135,16 +136,15 @@ string CGIHandler::handleCgi(string& cgiScriptPath, HttpRequest &request, int &e
             responseBuffer.insert(responseBuffer.end(), buffer, buffer + bytesRead);
             totalBytes += bytesRead;
 
-            // Write to the file
-            outputFile.write(buffer, bytesRead);
         }
         if (bytesRead == -1) {
             close(outputPipe[0]);
-            outputFile.close();
             throw std::runtime_error("Failed to read from CGI stdout: " + string(strerror(errno)));
         }
 
-        outputFile.close(); // Close the file after writing
+        std::string finalMsg(responseBuffer.begin(), responseBuffer.end());
+        LogStream::log(string("logs/cgi/") + "CGI_OUTPUT [" + currentDateTime() + "] " + generateRandomID(10) + ".log", std::ios::out | std::ios::trunc)  << finalMsg << std::endl;
+
         std::cout << GREEN << "CGI completed. " << totalBytes << " bytes received from " << basename(cgiScriptPath.c_str()) << RESET << std::endl;
         
         close(outputPipe[0]);  // Close read end after reading

@@ -5,6 +5,7 @@
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
 #include "ServerBlock.hpp"
+#include "Log.hpp"
 
 #include "Utils.hpp"
 
