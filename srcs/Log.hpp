@@ -81,25 +81,54 @@ class LogStream {
     
         typedef std::ios_base::openmode openmode;
     
-        static LogStream& info(std::string outputFile = "", openmode mode = std::ios::out) {
-            static LogStream instance(outputFile.empty() ? std::cout : *new std::ofstream(outputFile.c_str(), mode), "\033[34m");
-            return instance;
-        }
-    
-        static LogStream& warning(std::string outputFile = "", openmode mode = std::ios::out) {
-            static LogStream instance(outputFile.empty() ? std::cout : *new std::ofstream(outputFile.c_str(), mode), "\033[33m");
-            return instance;
-        }
-    
         static LogStream& log(std::string outputFile = "", openmode mode = std::ios::out) {
-            static LogStream instance(outputFile.empty() ? std::cout : *new std::ofstream(outputFile.c_str(), mode), "");
+            static LogStream instance(std::cout, ""); // default to cout with no color
+        
+            if (outputFile.empty()) {
+                instance.resetstream(); // reset to std::cout
+            } else {
+                setstream(instance, outputFile, mode); // redirect to file
+            }
+        
             return instance;
         }
-    
+        
+        static LogStream& info(std::string outputFile = "", openmode mode = std::ios::out) {
+            static LogStream instance(std::cout, "\033[34m"); // Blue
+        
+            if (outputFile.empty()) {
+                instance.resetstream();
+            } else {
+                setstream(instance, outputFile, mode);
+            }
+        
+            return instance;
+        }
+        
+        static LogStream& warning(std::string outputFile = "", openmode mode = std::ios::out) {
+            static LogStream instance(std::cout, "\033[33m"); // Yellow
+        
+            if (outputFile.empty()) {
+                instance.resetstream();
+            } else {
+                setstream(instance, outputFile, mode);
+            }
+        
+            return instance;
+        }
+        
         static LogStream& error(std::string outputFile = "", openmode mode = std::ios::out) {
-            static LogStream instance(outputFile.empty() ? std::cerr : *new std::ofstream(outputFile.c_str(), mode), "\033[31m");
+            static LogStream instance(std::cerr, "\033[31m"); // Red
+        
+            if (outputFile.empty()) {
+                instance.resetstream();
+            } else {
+                setstream(instance, outputFile, mode);
+            }
+        
             return instance;
         }
+        
     };
 
 #endif

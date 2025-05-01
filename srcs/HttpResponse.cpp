@@ -133,6 +133,7 @@ void HttpResponse::handlePOST(HttpRequest &request) {
 
 
 void HttpResponse::handleDELETE(string path) {
+
     path = reroutePath(path);
     if (!isPathExist(path)) {
         this->initErrorHttpResponse(404);
@@ -184,6 +185,7 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
 
     // Check if the request method is allowed
     if (std::find(limitExcept.begin(), limitExcept.end(), request.getMethod()) == limitExcept.end()) {
+        std::cout << "ALLOWED?" << "" << std::endl;
         this->initErrorHttpResponse(405);
         return;
     }
@@ -205,6 +207,8 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
 
     /* HANDLE METHODS */
 
+    std::cout << "SELECTING METHOD" << "" << std::endl;
+
     if (method == "GET") {
         std::cout << "Handling GET..." << std::endl;
         this->handleGET(request, serverBlock);
@@ -217,6 +221,7 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
 
     else if (method == "DELETE") {
         std::cout << "Handling DELETE..." << std::endl;
+        LogStream::log("DELETE") << request.getRawRequest() << std::endl;
         this->handleDELETE(path);
     }
 
@@ -258,35 +263,57 @@ string HttpResponse::reroutePath(string urlPath) {
 string HttpResponse::createAutoIndexHtml(string path, string root) {
     std::stringstream output;
     output << "<html><head><title>Index of " << path << "</title>"
-           << "<style>" << HttpResponse::css << "</style></head><body>"
+           << "<style>" << HttpResponse::css << "</style>"
+           << "<script>"
+           << "async function deleteFile(filePath, rowId) {"
+           << "  if (!confirm('Delete this file?')) return;"
+           << "  try {"
+           << "    const response = await fetch(filePath, { method: 'DELETE' });"
+           << "    if (response.ok) {"
+           << "      document.getElementById(rowId).remove();"
+           << "    } else {"
+           << "      alert('Failed to delete: ' + response.status);"
+           << "    }"
+           << "  } catch (err) {"
+           << "    alert('Error: ' + err);"
+           << "  }"
+           << "}"
+           << "</script>"
+           << "</head><body>"
            << "<h1>Index of " << path << "</h1><table>"
-           << "<tr><th>Name</th><th>Size</th></tr>";
+           << "<tr><th>Name</th><th>Size</th><th>Action</th></tr>";
 
     stringList files = listFiles(path);
     if (!files.empty()) {
+        int rowCounter = 0;
         for (stringList::iterator it = files.begin(); it != files.end(); ++it) {
             if (*it == "." || *it == "..")
                 continue;
-            
-            string fullPath = joinPaths(path, *it);
-            string fileSize = isDirectory(fullPath) ? "-" : to_string(getFileSize(fullPath));
 
-            fullPath = "http://localhost:1234" + joinPaths(root, *it);
+            std::string rowId = "row" + to_string(rowCounter++);
+            std::string fullPath = joinPaths(path, *it);
+            std::string relativePath = joinPaths(root, *it); // Use relative path for DELETE
+            std::string fileSize = isDirectory(fullPath) ? "-" : to_string(getFileSize(fullPath));
+            std::string hrefPath = "http://localhost:1234" + relativePath; // Full URL for display
 
-            if (isDirectory(fullPath))
-                output << "<tr><td><a class=\"folder\" href=\"" << fullPath << "\">" << *it << "</a></td><td>" << fileSize << "bytes</td></tr>";
-            else
-                output << "<tr><td><a href=\"" << fullPath << "\">" << *it << "</a></td><td>" << fileSize << "</td></tr>";
+            output << "<tr id=\"" << rowId << "\"><td>";
+
+            if (isDirectory(fullPath)) output << "<a class=\"folder\" href=\"" << hrefPath << "\">" << *it << "</a>";
+            else                       output << "<a href=\"" << hrefPath << "\">" << *it << "</a>";
+
+            std::cout << "HREF PATH: " << hrefPath << std::endl;
+
+            output << "</td><td>" << fileSize << " bytes</td>"
+                   << "<td><button onclick=\"deleteFile('" << hrefPath << "', '" << rowId << "')\">Delete</button></td></tr>";
         }
-    } 
-    
-    else {
-        output << "<tr><td>Unable to open directory</td></tr>";
+    } else {
+        output << "<tr><td colspan=\"3\">Unable to open directory</td></tr>";
     }
 
     output << "</table></body></html>";
     return output.str();
 }
+
 
 
 

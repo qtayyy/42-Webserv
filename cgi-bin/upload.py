@@ -258,6 +258,8 @@ elif request_method == "GET":
     sys.stdout.buffer.write(file_content)
     sys.stdout.buffer.flush()
 
+
+
 else:
     print("HTTP/1.1 405 Method Not Allowed")
     print("Content-Type: text/html")

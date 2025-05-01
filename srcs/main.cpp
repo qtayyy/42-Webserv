@@ -14,8 +14,44 @@
 #include "Cluster.hpp"
 #include "Log.hpp"
 
+#include <dirent.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <iostream>
+#include <cstdio>
+
+void deleteLogs(const std::string& folderPath) {
+	DIR* dir = opendir(folderPath.c_str());
+	if (!dir) {
+		std::cerr << "Error opening directory: " << folderPath << std::endl;
+		return;
+	}
+
+	struct dirent* entry;
+	while ((entry = readdir(dir)) != NULL) {
+		std::string filePath = folderPath + "/" + entry->d_name;
+		if (entry->d_type == DT_DIR) {
+			if (std::string(entry->d_name) != "." && std::string(entry->d_name) != "..") {
+				deleteLogs(filePath);
+				rmdir(filePath.c_str());
+			}
+		} else {
+			if (remove(filePath.c_str()) != 0) {
+				std::cerr << "Error deleting file: " << filePath << std::endl;
+			}
+		}
+	}
+	closedir(dir);
+	std::cout << "Deleted files in: " << folderPath << std::endl;
+}
+
 int	main(int argc, char **argv)
 {
+	deleteLogs("logs/cgi");
+	deleteLogs("logs/requests");
+	deleteLogs("logs/responses");
+
 	std::string	defaultPath = "conf/good/custom.conf";
 	if (argc > 2)
 	{
