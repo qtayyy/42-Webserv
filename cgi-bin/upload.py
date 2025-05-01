@@ -186,6 +186,11 @@ if request_method == "POST":
             file_item = form["file"]
             if file_item.file:
                 file_path = os.path.join(sys.argv[1], file_item.filename)
+                if (os.path.exists(file_path)):
+                    error_response = generate_error_page("400 Bad Request", "File already exists.")
+                    sys.stdout.write(error_response)
+                    sys.stdout.flush()
+                    sys.exit(1)
                 try:
                     with open(file_path, 'wb') as f:
                         f.write(file_item.file.read())
@@ -201,7 +206,7 @@ if request_method == "POST":
                 response_body = raw_success_page.replace("%additional_info", dedent(f"""
                 {generate_env_representation()}
                 Program called with arguments: {sys.argv}
-                """)).replace("%filename", file_item.filename).replace("%route", route).strip()
+                """)).replace("%filename", file_item.filename).replace("%route", file_path).strip()
 
                 response = generate_response_string(
                     content        = response_body,
