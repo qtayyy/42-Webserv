@@ -1,9 +1,10 @@
-DELETE /dir2/ok.txt HTTP/1.1
+DELETE /dir2/file2.txt HTTP/1.1
 Host: localhost:1234
 Connection: keep-alive
 sec-ch-ua-platform: "Windows"
 User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
-sec-ch-ua: "Google Chrome";v="135", "Not-A.Brand";v="8", "Chromium";v="135"
+sec-ch-ua: "Chromium";v="135", "Not-A.Brand";v="8"
+DNT: 1
 sec-ch-ua-mobile: ?0
 Accept: */*
 Origin: http://localhost:1234

@@ -104,13 +104,17 @@ a {
     color: red;
     font-weight: bold;
 }
+.success {
+    color: green;
+    font-weight: bold;
+}
 '''
 
 raw_success_page = (
     f"<html>"
     f"<head><style>{style}</style></head>"
     f"<body>"
-    f"<h2>File Upload Successful</h2>"
+    f"<h2 class='success'>File Upload Successful</h2>"
     f"<p>File <strong>%filename</strong> uploaded successfully to <strong>%route</strong>.</p>"
     f"%additional_info"
     f"</body>"
@@ -143,19 +147,22 @@ def generate_error_page(title, message):
     )
 
 def generate_response_string(
-        content: str,
-        status_code: int = 404,
-        status_message: str = "Not Found",
-        content_length: int = None,
-        content_type: str = "text/html"):
+    content: str,
+    status_code: int = 404,
+    status_message: str = "Not Found",
+    content_length: int = None,
+    content_type: str = "text/html",
+    **kwargs):
     
     content = content.strip()  # Remove unintended whitespace or newlines
+    additional_headers = "".join(f"{key}: {value}\r\n" for key, value in kwargs.items())
     return (
-        f"HTTP/1.1 {status_code} {status_message}\r\n"
-        f"Content-Type: {content_type}\r\n"
-        f"Content-Length: {len(content) if content_length is None else content_length}\r\n"
-        f"\r\n"
-        f"{content}"
+    f"HTTP/1.1 {status_code} {status_message}\r\n"
+    f"Content-Type: {content_type}\r\n"
+    f"Content-Length: {len(content) if content_length is None else content_length}\r\n"
+    f"{additional_headers}"
+    f"\r\n"
+    f"{content}"
     )
 
 
@@ -204,15 +211,20 @@ if request_method == "POST":
                 file_size = os.path.getsize(file_path)
 
                 response_body = raw_success_page.replace("%additional_info", dedent(f"""
-                {generate_env_representation()}
-                Program called with arguments: {sys.argv}
                 """)).replace("%filename", file_item.filename).replace("%route", file_path).strip()
+
+                additional_args = {
+                    "Pragma": "no-cache",
+                    "Connection": "close",
+                    "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+                }
 
                 response = generate_response_string(
                     content        = response_body,
-                    status_code    = 200,
-                    status_message = "OK",
-                    content_type   = "text/html"
+                    status_code    = 303,
+                    status_message = "See Other",
+                    content_type   = "text/html",
+                    **additional_args
                 )
                 sys.stdout.write(response)
                 sys.stdout.flush()

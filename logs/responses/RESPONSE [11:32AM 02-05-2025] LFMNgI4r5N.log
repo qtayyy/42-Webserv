@@ -1,0 +1,30 @@
+HTTP/1.1 200 Success
+Connection: close
+Content-Length: 293
+Content-Type: text/css
+
+/* styles.css */
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f2f2f2;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+center {
+    margin-top: 50px;
+}
+
+h1 {
+    color: #d9534f;
+    font-size: 48px;
+    margin: 10px 0;
+}
+
+p {
+    font-size: 18px;
+    color: #5a5a5a;
+}
+

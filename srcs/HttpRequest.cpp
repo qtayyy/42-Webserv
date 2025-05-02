@@ -50,23 +50,31 @@ string HttpRequest::getRawRequest() const {
 }
 
 
-
 string HttpRequest::preview() { 
     std::ostringstream infoStream;
-    infoStream << "\n-- request --" << std::endl;
-    // infoStream << GREEN << "\tpath: " << RESET         << this->headerGet("path") << std::endl;
-    // infoStream << GREEN << "\tpath_info: " << RESET    << this->headerGet("path_info") << std::endl;
-    // infoStream << GREEN << "\tquery_string: " << RESET << this->headerGet("query_string") << std::endl;
+    infoStream << "-- request --" << std::endl;
 
+    infoStream << "method: " << this->getMethod() << std::endl;
+
+    infoStream << "--------------------------|" << std::endl;
     stringDict::iterator it = this->headerParameters.begin();
     stringDict::iterator end = this->headerParameters.end();
 
-    while(it != end) {
-        infoStream << "" << it->first << ": " << it->second << std::endl;
-        ++it;
+    // Calculate the maximum key length for alignment
+    size_t maxKeyLength = 0;
+    for (it = headerParameters.begin(); it != end; ++it) {
+        if (it->first.length() > maxKeyLength) {
+            maxKeyLength = it->first.length();
+        }
     }
 
-    infoStream << "method: " << this->getMethod() << std::endl;
+    for (it = headerParameters.begin(); it != end; ++it) {
+        infoStream << std::setw(maxKeyLength) << std::left << it->first << " | " << it->second << std::endl;
+    }
+
+    infoStream << "__________________________|" << std::endl;
+    infoStream << "body size (bytes): " << this->body.size() << std::endl;
+    infoStream << "raw request size (bytes): " << this->rawRequest.size() << std::endl;
 
     return infoStream.str();
 }

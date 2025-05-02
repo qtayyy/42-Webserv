@@ -141,6 +141,10 @@ void HttpResponse::handleDELETE(string path) {
         return; 
     } 
 
+    if (isDirectory(path)) {
+        this->initErrorHttpResponse(403);
+    }
+
     int status = remove(path.c_str());
 
     if (status == 0) {
@@ -258,9 +262,11 @@ string HttpResponse::reroutePath(string urlPath) {
 
     return reroutedPath;
 }
-
-
 string HttpResponse::createAutoIndexHtml(string path, string root) {
+
+    std::cout << "PATH:: " << path << std::endl;
+    std::cout << "ROOT:: " << root << std::endl;
+
     std::stringstream output;
     output << "<html><head><title>Index of " << path << "</title>"
            << "<style>" << HttpResponse::css << "</style>"
@@ -279,9 +285,21 @@ string HttpResponse::createAutoIndexHtml(string path, string root) {
            << "  }"
            << "}"
            << "</script>"
-           << "</head><body>"
-           << "<h1>Index of " << path << "</h1><table>"
-           << "<tr><th>Name</th><th>Size</th><th>Action</th></tr>";
+           << "</head><body>";
+    
+    stringList breadcrumbList = splitString(root, '/');
+    std::stringstream breadcrumbHtml;
+    breadcrumbHtml << "<a href=\"" << "/" << "\">" << "~" << "</a>";
+    for (stringList::iterator it = breadcrumbList.begin(); it != breadcrumbList.end(); it++) {
+        std::stringstream ss;
+        for (stringList::iterator it2 = breadcrumbList.begin(); it2 != (it + 1); it2++)
+            ss << *it2 << ((it2 + 1 != (it + 1)) ? "/" : "");
+        breadcrumbHtml << "<a href=\"" << ss.str() << "\">" << *it << "</a>";
+        breadcrumbHtml << ((it + 1 != breadcrumbList.end()) ? " / " : " ");
+    }
+
+    output << "<h1>Index of " << breadcrumbHtml.str() << "</h1><table>";
+    output << "<tr><th>Name</th><th>Size</th><th>Action</th></tr>";
 
     stringList files = listFiles(path);
     if (!files.empty()) {
@@ -294,17 +312,25 @@ string HttpResponse::createAutoIndexHtml(string path, string root) {
             std::string fullPath = joinPaths(path, *it);
             std::string relativePath = joinPaths(root, *it); // Use relative path for DELETE
             std::string fileSize = isDirectory(fullPath) ? "-" : to_string(getFileSize(fullPath));
-            std::string hrefPath = "http://localhost:1234" + relativePath; // Full URL for display
+            std::string hrefPath = relativePath; // Full URL for display
 
             output << "<tr id=\"" << rowId << "\"><td>";
 
-            if (isDirectory(fullPath)) output << "<a class=\"folder\" href=\"" << hrefPath << "\">" << *it << "</a>";
-            else                       output << "<a href=\"" << hrefPath << "\">" << *it << "</a>";
+            if (isDirectory(fullPath)) {
+                output << "<a class=\"folder\" href=\"" << hrefPath << "\">" << *it << "</a>";
+            } else {
+                output << "<a href=\"" << hrefPath << "\">" << *it << "</a>";
+            }
 
-            std::cout << "HREF PATH: " << hrefPath << std::endl;
+            output << "</td><td>" << fileSize << " bytes</td>";
 
-            output << "</td><td>" << fileSize << " bytes</td>"
-                   << "<td><button onclick=\"deleteFile('" << hrefPath << "', '" << rowId << "')\">Delete</button></td></tr>";
+            if (!isDirectory(fullPath)) {
+                output << "<td><button onclick=\"deleteFile('" << hrefPath << "', '" << rowId << "')\">Delete</button></td>";
+            } else {
+                output << "<td></td>";
+            }
+
+            output << "</tr>";
         }
     } else {
         output << "<tr><td colspan=\"3\">Unable to open directory</td></tr>";
