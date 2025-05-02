@@ -49,7 +49,22 @@ string CGIHandler::handleCgi(string& cgiScriptPath, HttpRequest &request, int &e
     this->setEnv("PATH_TRANSLATED", request.headerGet("absolute_path"));
     this->setEnv("CONTENT_LENGTH",  to_string(data.length()));
     this->setEnv("CONTENT_TYPE",    request.headerGet("Content-Type"));
+    this->setEnv("SERVER_PROTOCOL", "HTTP/1.1");
+
+    // this->setEnv("REQUEST_METHOD",  "POST");
+    // this->setEnv("QUERY_STRING",    "");
+    // this->setEnv("SCRIPT_NAME",     "/cgi-bin/upload.py");
+    // this->setEnv("SERVER_NAME",     "localhost");
+    // this->setEnv("SERVER_PORT",     "8080");
+    // this->setEnv("PATH_INFO",       "/user/images"); // <-- extra path after script
+    // this->setEnv("PATH_TRANSLATED", "/var/www/user/images"); // <-- optional, filesystem path
+    // this->setEnv("CONTENT_LENGTH",  to_string(data.length()));
+    // this->setEnv("CONTENT_TYPE",    request.headerGet("Content-Type"));
+    // this->setEnv("SERVER_PROTOCOL", "HTTP/1.1");
+    
+
     setEnvironmentVariables(this->envVars);
+    system("./ubuntu_cgi_tester");
 
     std::cout << YELLOW << "Running CGI..." << RESET << std::endl;
     std::cout << YELLOW << "Bytes to be written to CGI stdin: " << data.length() << RESET << std::endl;

@@ -33,3 +33,7 @@
 
 .vscode/settings.json
 .vscode/c_cpp_properties.json
+
+logs/cgi/
+logs/requests/
+logs/responses/
