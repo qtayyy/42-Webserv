@@ -472,8 +472,6 @@ void HttpResponse::initCGIResponse(string cgiPath, HttpRequest request) {
     int exit_status = 0;
     string response_content = cgiHandler.handleCgi(cgiPath, request, exit_status, *this->getBlock());
    
-    std::cout << "LOCATION BLOCK" << this->getBlock()->getInfo() << std::endl;
-
     this->finalResponseMsg = response_content;
 }
 

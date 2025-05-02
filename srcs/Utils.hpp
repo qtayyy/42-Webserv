@@ -29,6 +29,7 @@ bool isAnsiEscapeStart(char c);
 std::size_t visibleLength(const string& str);
 void printBorderedBox(const string& message, const string& title);
     
+string formatTime(const string& format);
 string urlEncode(const string& value);
 string urlDecode(const string& value);
     

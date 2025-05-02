@@ -185,6 +185,12 @@ def generate_env_representation():
         for key, value in os.environ.items()
     ))
 
+additional_args = {
+    "Pragma": "no-cache",
+    "Connection": "close",
+    "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+}
+
 # Handle POST request
 if request_method == "POST":
     write_to("POST")
@@ -194,7 +200,8 @@ if request_method == "POST":
             if file_item.file:
                 file_path = os.path.join(sys.argv[1], file_item.filename)
                 if (os.path.exists(file_path)):
-                    error_response = generate_error_page("400 Bad Request", "File already exists.")
+                    write_to(f"Error writing file: path exists")
+                    error_response = generate_error_page("400 Bad Request", f"<b>\"{file_item.filename}\"</b> already exists in <b>\"{os.path.dirname(file_path)}\"</b>.")
                     sys.stdout.write(error_response)
                     sys.stdout.flush()
                     sys.exit(1)
@@ -212,12 +219,6 @@ if request_method == "POST":
 
                 response_body = raw_success_page.replace("%additional_info", dedent(f"""
                 """)).replace("%filename", file_item.filename).replace("%route", file_path).strip()
-
-                additional_args = {
-                    "Pragma": "no-cache",
-                    "Connection": "close",
-                    "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
-                }
 
                 response = generate_response_string(
                     content        = response_body,

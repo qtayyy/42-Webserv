@@ -305,3 +305,12 @@ string currentDateTime() {
     strftime(timeBuffer, sizeof(timeBuffer), "%I:%M%p %d-%m-%Y", localTime); // %I for 12-hour format, %p for AM/PM
     return timeBuffer;
 }
+
+string formatTime(const string& format) {
+    // Get the current date and time
+    time_t now = time(NULL);
+    tm* localTime = localtime(&now);
+    char timeBuffer[256];
+    strftime(timeBuffer, sizeof(timeBuffer), format.c_str(), localTime); // Use the provided format string
+    return string(timeBuffer);
+}

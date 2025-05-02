@@ -289,6 +289,9 @@ void printIndented(const std::string& input, int indent) {
 // Client(4).handleRequest(fileContent.size(), test);
 
 // exit(0);
+
+
+
 void Cluster::run(void) {
 	int ready;
 	int timeout = 500; // 500 ms timeout
@@ -299,6 +302,7 @@ std::ofstream cumulative_log("cumulative_request.log", std::ios::trunc);
 
 while (true) {
 
+std::cout << "listening " << formatTime("%I:%M%p %S") << std::endl;
 if ((ready = poll(_pollFds, _numOfFds, timeout)) == -1) {
 	perror("poll");
 	throw ClusterException("");
