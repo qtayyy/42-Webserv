@@ -64,7 +64,7 @@ LocationBlock *HttpResponse::getBlock() {
 
 /* REQUEST HANDLERS */
 
-void HttpResponse::handleGET(HttpRequest &request, ServerBlock *serverBlock) {
+void HttpResponse::handleGET(ServerBlock *serverBlock) {
     string path = request.headerGet("path");
 
     path = applyAlias(path);
@@ -126,7 +126,7 @@ void HttpResponse::handleGET(HttpRequest &request, ServerBlock *serverBlock) {
 }
 
 
-void HttpResponse::handlePOST(HttpRequest &request) {
+void HttpResponse::handlePOST() {
     string cgiPass = this->getBlock()->getCgiPass();
     this->initCGIResponse(cgiPass, request);
 }
@@ -161,9 +161,10 @@ void HttpResponse::handleDELETE(string path) {
 
 /* CONSTRUCTOR */
 
-HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
+HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) 
+    : request(request) {
     LogStream::pending() << "Constructing response" << std::endl; 
-    
+
     this->emptyBlock        = new LocationBlock();
     string path             = request.headerGet("path");
     this->_serverBlockRef   = serverBlock;
@@ -186,12 +187,12 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
     stringList limitExcept = this->_locationBlockRef->getLimitExcept();
 
     // Check if the request method is allowed
-    if (std::find(limitExcept.begin(), limitExcept.end(), request.getMethod()) == limitExcept.end()) {
+    if (std::find(limitExcept.begin(), limitExcept.end(), this->request.getMethod()) == limitExcept.end()) {
         this->initErrorHttpResponse(405);
         return;
     }
 
-    string method = request.getMethod();
+    string method = this->request.getMethod();
 
     // Check if a redirect is required
     std::pair<int, string> redirectInfo = this->getBlock()->getReturn();
@@ -210,17 +211,17 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
 
     if (method == "GET") {
         LogStream::pending() << "Handling GET" << std::endl;
-        this->handleGET(request, serverBlock);
+        this->handleGET(serverBlock);
     }
 
     else if (method == "POST") {
         LogStream::pending() << "Handling POST" << std::endl;
-        this->handlePOST(request);
+        this->handlePOST();
     }
 
     else if (method == "DELETE") {
         LogStream::pending() << "Handling DELETE" << std::endl;
-        LogStream::log("DELETE") << request.getRawRequest() << std::endl;
+        LogStream::log("DELETE") << this->request.getRawRequest() << std::endl;
         this->handleDELETE(path);
     }
 
@@ -249,7 +250,6 @@ string HttpResponse::createStatusPageStr(string errorPagePath, int statusCode) c
 }
 
 string HttpResponse::reroutePath(string urlPath) {
-
     string reroutedPath = joinPaths(this->_serverBlockRef->getRoot(), urlPath);
 
     if (this->isLocation)
@@ -257,10 +257,11 @@ string HttpResponse::reroutePath(string urlPath) {
 
     return reroutedPath;
 }
+
 string HttpResponse::createAutoIndexHtml(string path, string root) {
 
-    std::cout << "PATH:: " << path << std::endl;
-    std::cout << "ROOT:: " << root << std::endl;
+    // std::cout << "PATH:: " << path << std::endl;
+    // std::cout << "ROOT:: " << root << std::endl;
 
     std::stringstream output;
     output << "<html><head><title>Index of " << path << "</title>"
@@ -288,7 +289,7 @@ string HttpResponse::createAutoIndexHtml(string path, string root) {
     for (stringList::iterator it = breadcrumbList.begin(); it != breadcrumbList.end(); it++) {
         std::stringstream ss;
         for (stringList::iterator it2 = breadcrumbList.begin(); it2 != (it + 1); it2++)
-            ss << *it2 << ((it2 + 1 != (it + 1)) ? "/" : "");
+            ss << *it2 << ((it2 != it) ? "/" : "");
         breadcrumbHtml << "<a href=\"" << ss.str() << "\">" << *it << "</a>";
         breadcrumbHtml << ((it + 1 != breadcrumbList.end()) ? " / " : " ");
     }
@@ -303,31 +304,31 @@ string HttpResponse::createAutoIndexHtml(string path, string root) {
             if (*it == "." || *it == "..")
                 continue;
 
-            std::string rowId = "row" + to_string(rowCounter++);
-            std::string fullPath = joinPaths(path, *it);
-            std::string relativePath = joinPaths(root, *it); // Use relative path for DELETE
-            std::string fileSize = isDirectory(fullPath) ? "-" : to_string(getFileSize(fullPath));
-            std::string hrefPath = relativePath; // Full URL for display
+            string rowId = "row" + to_string(rowCounter++);
+            string fullPath = joinPaths(path, *it);
+            string relativePath = joinPaths(root, *it); // Use relative path for DELETE
+            string fileSize = isDirectory(fullPath) ? "-" : to_string(getFileSize(fullPath));
+            string hrefPath = relativePath; // Full URL for display
 
             output << "<tr id=\"" << rowId << "\"><td>";
 
-            if (isDirectory(fullPath)) {
+            if (isDirectory(fullPath))
                 output << "<a class=\"folder\" href=\"" << hrefPath << "\">" << *it << "</a>";
-            } else {
+            else
                 output << "<a href=\"" << hrefPath << "\">" << *it << "</a>";
-            }
 
             output << "</td><td>" << fileSize << " bytes</td>";
 
-            if (!isDirectory(fullPath)) {
+            if (!isDirectory(fullPath))
                 output << "<td><button onclick=\"deleteFile('" << hrefPath << "', '" << rowId << "')\">Delete</button></td>";
-            } else {
+            else
                 output << "<td></td>";
-            }
 
             output << "</tr>";
         }
-    } else {
+    } 
+    
+    else {
         output << "<tr><td colspan=\"3\">Unable to open directory</td></tr>";
     }
 
@@ -448,10 +449,10 @@ void HttpResponse::initErrorHttpResponse(int statusCode, string error, string de
 
 void HttpResponse::initCGIResponse(string cgiPath, HttpRequest request) {
 
+    CGIHandler cgiHandler = CGIHandler();
     LogStream::pending() << "Initializing CGI: \"" << cgiPath << "\"" << std::endl;
 
-    cgiPath = getAbsolutePath(cgiPath);
-    if (!isPathExist(cgiPath)) {
+    if (!isPathExist(makeAbsPath(cgiPath))) {
         LogStream::error() << "path doesn't exist: " << cgiPath << std::endl;
         this->initErrorHttpResponse(500);
         return;
@@ -459,17 +460,14 @@ void HttpResponse::initCGIResponse(string cgiPath, HttpRequest request) {
 
     string pathToHandle = request.headerGet("path_info");
 
-    CGIHandler cgiHandler = CGIHandler();
-    string absolutePath = getAbsolutePath(pathToHandle);
-
-    request.headerSet("absolute_path", absolutePath);
-
-    int exit_status = 0;
-    string response_content = cgiHandler.handleCgi(cgiPath, request, exit_status, *this->getBlock());
-   
-    this->finalResponseMsg = response_content;
+    int exit_status;
+    this->_absolutePath = makeAbsPath(pathToHandle);
+    this->finalResponseMsg = cgiHandler.handleCgi(cgiPath, request, exit_status, *this->getBlock(), *this);
 }
 
+string HttpResponse::getAbsolutePath() const {
+    return this->_absolutePath;
+}
 
 
 /* OTHERS */

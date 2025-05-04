@@ -37,9 +37,9 @@ bool isPathExist(const string& resourcePath) {
     return (stat(resourcePath.c_str(), &buffer) == 0);
 }
 
-string getAbsolutePath(string filepath) {
+string makeAbsPath(string filepath) {
     string fullPath = getcwd(NULL, 0);
-    fullPath += "/" + filepath;
+    fullPath = joinPaths(fullPath, filepath);
     return fullPath;
 }
 

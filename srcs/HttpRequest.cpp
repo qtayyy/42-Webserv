@@ -1,53 +1,30 @@
 #include "HttpRequest.hpp"
 
-void HttpRequest::appendFormBlock(stringDict formBlock) {
-    formBlocks.push_back(formBlock);
-}
+/* CONSTRUCTORS/DESTRUCTORS */
 
-stringDict *HttpRequest::getFormBlock(int index) {
-    return &formBlocks[index];
-}
+HttpRequest::HttpRequest() { }
+HttpRequest::~HttpRequest() { }
 
-void HttpRequest::setBody(string body) {
-    this->body = body;
-}
 
-string &HttpRequest::getBody() {
-    return body;
-}
+/* GETTERS/SETTERS */
 
-void HttpRequest::headerSet(string key, string value) {
-    headerParameters[key] = value;
-    // std::cout << "SETTING " << key << "to " << headerParameters[key] << std::endl;
-}
+void   HttpRequest::setBody(string body)                { this->body = body; }
+string &HttpRequest::getBody()                          { return body; }
 
-void HttpRequest::setMethod(string method) {
-    this->method = method;
-}
+string HttpRequest::headerGet(string key)               { return headerParameters[key]; }
+void   HttpRequest::headerSet(string key, string value) { headerParameters[key] = value; }
 
-string HttpRequest::getMethod() {
-    return method;
-}
+string HttpRequest::getMethod() const                   { return method; }
+void   HttpRequest::setMethod(string method)            { this->method = method; }
 
-string HttpRequest::headerGet(string key) {
-    return headerParameters[key];
-}
+string HttpRequest::getRawRequest() const               { return rawRequest; }
+void   HttpRequest::setRawRequest(string rawRequest)    { this->rawRequest = rawRequest; }
 
-HttpRequest::HttpRequest() {
-    // Constructor implementation
-}
+void   HttpRequest::setQueryString(string queryString)  { this->queryString = queryString; }
+string HttpRequest::getQueryString() const              { return queryString; }
 
-HttpRequest::~HttpRequest() {
-    // Destructor implementation
-}
-
-void HttpRequest::setRawRequest(string rawRequest) {
-    this->rawRequest = rawRequest;
-}
-
-string HttpRequest::getRawRequest() const {
-    return rawRequest;
-}
+void   HttpRequest::setPath(string path)                { this->_path = path; }
+string HttpRequest::getPath() const                     { return _path; }
 
 
 string HttpRequest::preview() { 
@@ -63,18 +40,16 @@ string HttpRequest::preview() {
     // Calculate the maximum key length for alignment
     size_t maxKeyLength = 0;
     for (it = headerParameters.begin(); it != end; ++it) {
-        if (it->first.length() > maxKeyLength) {
+        if (it->first.length() > maxKeyLength)
             maxKeyLength = it->first.length();
-        }
     }
 
-    for (it = headerParameters.begin(); it != end; ++it) {
+    for (it = headerParameters.begin(); it != end; ++it)
         infoStream << std::setw(maxKeyLength) << std::left << it->first << " | " << it->second << std::endl;
-    }
 
     infoStream << "__________________________|" << std::endl;
-    infoStream << "body size (bytes): " << this->body.size() << std::endl;
-    infoStream << "raw request size (bytes): " << this->rawRequest.size() << std::endl;
+    infoStream << "body size (bytes): "         << this->body.size() << std::endl;
+    infoStream << "raw request size (bytes): "  << this->rawRequest.size() << std::endl;
 
     return infoStream.str();
 }

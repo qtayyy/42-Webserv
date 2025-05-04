@@ -16,6 +16,7 @@ class HttpResponse {
 private:
     static const stringDict contentTypeMap;
     static stringDict createContentTypeMap();
+    static const string css;
 
     string        rawContent;
     int           contentLength;
@@ -32,26 +33,31 @@ private:
     string        method;            // HTTP method (GET, POST, etc.)
     std::time_t   timestamp;    // Error occurrence time
     
+    string        _absolutePath;
+
     LocationBlock *emptyBlock;
     ServerBlock   *_serverBlockRef;
     Block         *_locationBlockRef;
 
-    string containsIndexFile(string path);
+    string         containsIndexFile(string path);
     LocationBlock *resolveLocationBlock(const string &path, ServerBlock *serverBlock);
-    void initRedirectResponse(string &redirectUrl, int statusCode);
-    string applyAlias(string &path);
+    void          initRedirectResponse(string &redirectUrl, int statusCode);
+    string        applyAlias(string &path);
     std::pair<string, string> GetMsg(int statusCode) const;
     std::pair<string, string> CodeToMessage(int statusCode, string message="", string description="") const;
     std::vector<LocationBlock>::iterator getRelevantLocationBlock(ServerBlock *serverBlock, string path);
-    string createStatusPageStr(string errorPagePath, int statusCode) const;
-    void displayError() const;
+    string        createStatusPageStr(string errorPagePath, int statusCode) const;
+    void          displayError() const;
+    HttpRequest &request;
 
-    static const string css;
 
 public:
-    //HttpResponse(string content, string contentType, int statusCode);
-    HttpResponse(HttpRequest &request, ServerBlock &ServerBlock);
+    /* CONSTRUCTOR/DESTRUCTOR */
 
+    HttpResponse(HttpRequest &request, ServerBlock *ServerBlock);
+
+
+    /* GETTERS/SETTER */
     string getRawContent() const;
     int    getContentLength() const;
     int    getStatusCode() const;
@@ -62,40 +68,33 @@ public:
     string getDetails() const;
     string getRequestUrl() const;
     string getMethod() const;
+    string getAbsolutePath() const;
     string getTimestamp() const;
 
-    bool isCGI(const string &resourcePath);
-
-    string decideCGIToUse(string resourcePath);
-    static string getContentType(const string& resourcePath);
-    string reroutePath(string urlPath);
-    string createAutoIndexHtml(string path, string root);
-    static HttpResponse createHttpResponse(HttpRequest &request);
-
-    void initHttpResponse(string content, string resourceType, int statusCode);
     string composeHttpResponse(
         const string& body,
         int statusCode,
         const string& msg,
         ... );
-    void initErrorHttpResponse(int statusCode, string error = "", string description = "");
 
-    void initCGIResponse(string cgiPath, HttpRequest request);
-
-    void handleGET(HttpRequest &request, ServerBlock *serverBlock);
-    void handlePOST(HttpRequest &request);
     LocationBlock *getBlock();
+    bool isCGI(const string &resourcePath);
+    string decideCGIToUse(string resourcePath);
+    string reroutePath(string urlPath);
+    string createAutoIndexHtml(string path, string root);
+    static string getContentType(const string& resourcePath);
 
-    void NewFunction(HttpRequest &request);
 
+    /* METHOD HANDLERS */
+    void handleGET(ServerBlock *serverBlock);
+    void handlePOST();
     void handleDELETE(string path);
 
-    HttpResponse(HttpRequest &request, ServerBlock *ServerBlock);
 
-    HttpResponse(int code, const string& message, const string& detail, const string& url, const string& reqMethod);
-    HttpResponse(int code);
-
-
+    /* RESPONSE INITIALIZERS */
+    void initHttpResponse(string content, string resourceType, int statusCode);
+    void initErrorHttpResponse(int statusCode, string error = "", string description = "");
+    void initCGIResponse(string cgiPath, HttpRequest request);
 };
 
-#endif // HTTP_RESPONSE_HPP
+#endif 

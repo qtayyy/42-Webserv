@@ -1,22 +1,23 @@
 #include "CGI.hpp"
 #include "HttpException.hpp"
 
-void setEnvironmentVariables(stringDict envVars) {
+/* CONSTRUCTOR/DESTRUCTOR */
 
+CGIHandler::CGIHandler() {}
+CGIHandler::~CGIHandler() {}
+
+void setEnvironmentVariables(stringDict envVars) {
     for (stringDict::const_iterator it = envVars.begin(); it != envVars.end(); ++it) {
         setenv(it->first.c_str(), it->second.c_str(), 1);
         std::cout << std::left << YELLOW << std::setw(20) << "\t" + it->first << RESET << it->second << std::endl;
     }
 }
 
-CGIHandler::CGIHandler() {
 
-}
+/* GETTER/SETTER */
 
-CGIHandler::~CGIHandler() {
-
-}
-
+void   CGIHandler::setEnv(string key, string value) { envVars[key] = value; }
+string CGIHandler::getEnv(string key)               { return envVars[key]; }
 
 void CGIHandler:: runCGIExecutable(string &cgiScriptPath, string &requestedFilepath) {
     if (endsWith(cgiScriptPath, ".py")) {
@@ -28,7 +29,14 @@ void CGIHandler:: runCGIExecutable(string &cgiScriptPath, string &requestedFilep
     }
 }
 
-string CGIHandler::handleCgi(string& cgiScriptPath, HttpRequest &request, int &exitStatus, LocationBlock &locationBlock) {
+string CGIHandler::handleCgi(
+        string        &cgiScriptPath, 
+        HttpRequest   &request, 
+        int           &exitStatus, 
+        LocationBlock &locationBlock,
+        HttpResponse  &response
+    ) {
+
     int inputPipe[2];  // Pipe for sending request body (stdin for CGI)
     int outputPipe[2]; // Pipe for capturing CGI output (stdout from CGI)
 
@@ -36,27 +44,25 @@ string CGIHandler::handleCgi(string& cgiScriptPath, HttpRequest &request, int &e
         throw std::runtime_error("pipe failed: " + string(strerror(errno)));
 
     string data              = request.getBody();
-    string requestedFilepath = request.headerGet("absolute_path");
+    string requestedFilepath = response.getAbsolutePath();
 
     // Set environment variables
 
+    string fullCGIPath = makeAbsPath(cgiScriptPath);
+
     this->setEnv("REQUEST_METHOD",  request.getMethod());
-    this->setEnv("QUERY_STRING",    request.headerGet("query_string"));
-    this->setEnv("SERVER_NAME",     "localhost"); //fixme
+    this->setEnv("QUERY_STRING",    request.getQueryString());
     this->setEnv("SERVER_PORT",     "8080"); //fixme
-    this->setEnv("PATH_INFO",       request.headerGet("absolute_path"));
-    this->setEnv("PATH_TRANSLATED", request.headerGet("absolute_path"));
-    this->setEnv("REQUEST_URI", request.headerGet("absolute_path"));
-    this->setEnv("SCRIPT_NAME",     "/cgi-bin/upload.py");
+    this->setEnv("PATH_INFO",       fullCGIPath);
+    this->setEnv("PATH_TRANSLATED", fullCGIPath);
+    this->setEnv("REQUEST_URI",     fullCGIPath);
+    this->setEnv("SCRIPT_NAME",     cgiScriptPath);
     this->setEnv("CONTENT_LENGTH",  to_string(data.length()));
     this->setEnv("CONTENT_TYPE",    request.headerGet("Content-Type"));
     this->setEnv("SERVER_PROTOCOL", "HTTP/1.1");
 
-
     setEnvironmentVariables(this->envVars);
-    std::cout << "PATHGH INFO "<< std::endl;
-    system("./ubuntu_cgi_tester");
-    std::cout << std::endl;
+    // system("./ubuntu_cgi_tester");
 
     LogStream::pending() << "Running CGI..." << std::endl;
     LogStream::log()     << "Input PIPE: "    << inputPipe[0] << ", " << inputPipe[1] << " | Output PIPE: " << outputPipe[0] << ", " << outputPipe[1] << std::endl;
@@ -66,8 +72,8 @@ string CGIHandler::handleCgi(string& cgiScriptPath, HttpRequest &request, int &e
     signal(SIGPIPE, SIG_IGN); // Ignore SIGPIPE to prevent crashes when writing to a closed pipe
 
     pid_t pid = fork();
-
-    if (pid < 0) throw std::runtime_error("fork failed: " + string(strerror(errno)));
+    if (pid < 0)
+        throw std::runtime_error("fork failed: " + string(strerror(errno)));
 
     if (pid == 0) {
         // **CHILD PROCESS** (Executes CGI)
@@ -75,47 +81,44 @@ string CGIHandler::handleCgi(string& cgiScriptPath, HttpRequest &request, int &e
         close(outputPipe[0]); // Close unused read end of output pipe
 
         // Redirect CGI stdin to inputPipe[0] (reading request body)
-        if (dup2(inputPipe[0], STDIN_FILENO) == -1) {
-            perror("Failed to redirect stdin for CGI");
-            exit(1);
+        if (dup2(inputPipe[0], STDIN_FILENO) == -1 || dup2(outputPipe[1], STDOUT_FILENO) == -1) {
+            exit(1); perror("Failed to redirect stdin/stdout for CGI");
         }
-        if (dup2(outputPipe[1], STDOUT_FILENO) == -1) {
-            perror("Failed to redirect stdout for CGI");
-            exit(1);
-        }
+        
         close(inputPipe[0]);
         close(outputPipe[1]);
         string rootPath = locationBlock.getRoot();
 
-        runCGIExecutable(cgiScriptPath, rootPath);
+        runCGIExecutable(fullCGIPath, rootPath);
         
-        perror(("execl failed: " + cgiScriptPath).c_str());
+        perror(("execl failed: " + fullCGIPath).c_str());
         exit(1);
     }
     else {
-        // **PARENT PROCESS** (Sends input to CGI)
+        // PARENT PROCESS (Sends input to CGI)
         close(inputPipe[0]);  // Close unused read end of input pipe
         close(outputPipe[1]); // Close unused write end of output pipe
 
-        // **Write request body to CGI stdin**
+        // Write request body to CGI stdin
         ssize_t bytesWritten = 0;
         ssize_t length = data.length();
+
         while (bytesWritten < length) {
             ssize_t result = write(inputPipe[1], data.c_str() + bytesWritten, length - bytesWritten);
             if (result == -1) {
                 if (errno == EPIPE) {
-                    std::cerr << RED << "Broken pipe: CGI process terminated prematurely." << RESET << std::endl;
+                    LogStream::error() << "Broken pipe: CGI process terminated prematurely." << std::endl;
                     break;
                 }
                 close(inputPipe[1]);
                 throw std::runtime_error("Failed to write to CGI stdin: " + string(strerror(errno)));
             }
             bytesWritten += result;
-            LogStream::success() << "Wrote " << result << " bytes to CGI stdin" << std::endl;
         }
+        LogStream::success() << "Wrote " << bytesWritten << " bytes to CGI stdin" << std::endl;
         close(inputPipe[1]);  // Close write end to signal EOF
 
-        // **Read CGI response from stdout**
+        // Read CGI response from stdout
         std::vector<char> responseBuffer;
         char              buffer[1024];
         ssize_t           bytesRead;
@@ -133,7 +136,7 @@ string CGIHandler::handleCgi(string& cgiScriptPath, HttpRequest &request, int &e
 
         string finalMsg(responseBuffer.begin(), responseBuffer.end());
         LogStream::log(string("logs/cgi/") + "CGI_OUTPUT [" + currentDateTime() + "] " + generateRandomID(10) + ".log", std::ios::out | std::ios::trunc)  << finalMsg << std::endl;
-        LogStream::success() << "CGI completed. " << totalBytes << " bytes received from " << basename(cgiScriptPath.c_str()) << std::endl;
+        LogStream::success() << "CGI completed. " << totalBytes << " bytes received from " << basename(fullCGIPath.c_str()) << std::endl;
         
         close(outputPipe[0]);  // Close read end after reading
 
@@ -143,7 +146,7 @@ string CGIHandler::handleCgi(string& cgiScriptPath, HttpRequest &request, int &e
         if (WIFEXITED(status)) {
             int exitCode = WEXITSTATUS(status);
             if (exitCode != 0)
-                std::cerr << "CGI script exited with non-zero status: " << exitCode << std::endl;
+                LogStream::error() << "CGI script exited with non-zero status: " << exitCode << std::endl;
         }
 
         exitStatus = WEXITSTATUS(status);
@@ -151,12 +154,3 @@ string CGIHandler::handleCgi(string& cgiScriptPath, HttpRequest &request, int &e
     }
     return "";
 }
-
-void CGIHandler::setEnv(string key, string value) {
-    envVars[key] = value;
-}
-
-string CGIHandler::getEnv(string key) {
-    return envVars[key];
-}
-

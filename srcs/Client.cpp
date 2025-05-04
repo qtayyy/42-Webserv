@@ -12,15 +12,13 @@
 
 #include "Client.hpp"
 
-Client::Client(int fd) : socket_fd(fd), request_buf("") {
-}
+/* CONSTRUCTORS/DESTRUCTORS */
 
-Client::~Client() {
-}
+Client::Client(int fd) : socket_fd(fd), request_buf("") {}
+Client::~Client() {}
 
-std::string& Client::getRecvBuffer() {
-    return request_buf;
-}
+
+string& Client::getRecvBuffer() { return request_buf; }
 
 bool Client::isRequestReady() const {
     return request_ready;
@@ -44,57 +42,56 @@ void Client::receiveRequest(ssize_t read_buf, char *buffer) {
             perror("RECV");
         }
     }
-    request_buf = std::string(buffer, read_buf); // <- CORRECT way
+    request_buf = string(buffer, read_buf); // <- CORRECT way
 }
 
 
 //parses the first line into the 3 parts(methods, path, query)
 //this first part is to get the method(GET, POST)
-void Client::parseRequestLine(const std::string& requestLine) {
+void Client::parseRequestLine(const string& requestLine) {
     size_t methodEnd = requestLine.find(" ");
-    if (methodEnd == std::string::npos) {
+    if (methodEnd == string::npos) {
         std::cerr << "Invalid request line" << std::endl;
         return;
     }
     
-    std::string method = requestLine.substr(0, methodEnd);
+    string method = requestLine.substr(0, methodEnd);
     request.setMethod(method);
     // this second part is to get the path (with or without ? [query string])
     size_t pathStart = methodEnd + 1;
     size_t pathEnd = requestLine.find(" ", pathStart);
-    if (pathEnd == std::string::npos) {
+    if (pathEnd == string::npos) {
         std::cerr << "Invalid request line" << std::endl;
         return;
     }
 	//stores full path whether it be with query string or not 
-    std::string fullPath = requestLine.substr(pathStart, pathEnd - pathStart);
+    string fullPath = requestLine.substr(pathStart, pathEnd - pathStart);
     
     // split path and query string if there is 
     size_t queryStart = fullPath.find("?");
-    std::string path = fullPath;
-    std::string queryString = "";
-    if (queryStart != std::string::npos) {
+    string path = fullPath;
+    string queryString = "";
+    if (queryStart != string::npos) {
         path = fullPath.substr(0, queryStart);
         queryString = fullPath.substr(queryStart + 1);
     }
 
     // Store path information in key value pair(map)
     request.headerSet("path", path);
-    request.headerSet("queryString", queryString);
-    request.headerSet("absolute_path", path);
+    request.setQueryString(queryString);
     request.preview();
 }
 
-void Client::parseHeaders(const std::string& headers) {
-    std::string headersCopy = headers; 
+void Client::parseHeaders(const string& headers) {
+    string headersCopy = headers; 
     size_t pos = 0;
-    while ((pos = headersCopy.find("\r\n")) != std::string::npos) {
-        std::string headerLine = headersCopy.substr(0, pos);
+    while ((pos = headersCopy.find("\r\n")) != string::npos) {
+        string headerLine = headersCopy.substr(0, pos);
         headersCopy = headersCopy.substr(pos + 2);
         size_t colonPos = headerLine.find(": ");
-        if (colonPos != std::string::npos) {
-            std::string key = headerLine.substr(0, colonPos);
-            std::string value = headerLine.substr(colonPos + 2);
+        if (colonPos != string::npos) {
+            string key = headerLine.substr(0, colonPos);
+            string value = headerLine.substr(colonPos + 2);
             request.headerSet(key, value);
         }
     }
@@ -103,9 +100,9 @@ void Client::parseHeaders(const std::string& headers) {
 //parses the chunked body
 void Client::parseChunkedBody() {
     size_t headerEnd;
-    std::string fullBody;
+    string fullBody;
     headerEnd = request_buf.find("\r\n\r\n");
-    if (headerEnd == std::string::npos) {
+    if (headerEnd == string::npos) {
         std::cerr << "Invalid chunked request format" << std::endl;
         return;
     }
@@ -117,11 +114,11 @@ void Client::parseChunkedBody() {
     size_t lineEnd;
     while (chunkSize != 0) {
         lineEnd = request_buf.find("\r\n", pos);
-        if (lineEnd == std::string::npos) {
+        if (lineEnd == string::npos) {
             std::cerr << "Invalid chunk format" << std::endl;
             return;
         }
-		std::string hexSize;
+		string hexSize;
         hexSize = request_buf.substr(pos, lineEnd - pos);
         chunkSize = parseChunkSize(hexSize);
         pos = lineEnd + 2;
@@ -137,17 +134,17 @@ void Client::parseChunkedBody() {
     request.setBody(fullBody);
 }
 
-size_t Client::parseChunkSize(const std::string& hexChunk) {
+size_t Client::parseChunkSize(const string& hexChunk) {
     // Remove any chunk extensions
     size_t semicolonPos = hexChunk.find(';');
-    std::string cleanHex = hexChunk;
-    if (semicolonPos != std::string::npos) {
+    string cleanHex = hexChunk;
+    if (semicolonPos != string::npos) {
         cleanHex = hexChunk.substr(0, semicolonPos);
     }
     return hexToDec(cleanHex);
 }
 
-size_t Client::hexToDec(const std::string& hex) {
+size_t Client::hexToDec(const string& hex) {
     size_t result = 0;
     for (size_t i = 0; i < hex.length(); i++) {
         result *= 16;
@@ -168,7 +165,7 @@ size_t Client::hexToDec(const std::string& hex) {
 //parses the body and stores it
 void Client::parseBody(size_t headerEnd) {
     if (headerEnd + 4 < request_buf.length()) {
-        std::string body = request_buf.substr(headerEnd + 4);
+        string body = request_buf.substr(headerEnd + 4);
         request.setBody(body);
     }
 }
@@ -176,23 +173,23 @@ void Client::parseBody(size_t headerEnd) {
 void Client::parseRequest() {
     // Find end of first line
     size_t firstLineEnd = request_buf.find("\r\n");
-    if (firstLineEnd == std::string::npos) {
+    if (firstLineEnd == string::npos) {
         std::cerr << "Invalid request format" << std::endl;
         return;
     }
 
     // Parse request line
-    std::string requestLine = request_buf.substr(0, firstLineEnd);
+    string requestLine = request_buf.substr(0, firstLineEnd);
     parseRequestLine(requestLine);
 
     // Parse headers
     size_t headerStart = firstLineEnd + 2;
     size_t headerEnd = request_buf.find("\r\n\r\n", headerStart);
-    if (headerEnd == std::string::npos) {
+    if (headerEnd == string::npos) {
         std::cerr << "No headers found" << std::endl;
         return;
     }
-    std::string headers = request_buf.substr(headerStart, headerEnd - headerStart);
+    string headers = request_buf.substr(headerStart, headerEnd - headerStart);
     parseHeaders(headers);
 	
 	// Check if there is chunked transfer encoding
@@ -207,7 +204,7 @@ void Client::parseRequest() {
 
 
 void Client::handleRequest(ssize_t read_buf, char *buffer) {
-    request_buf = std::string(buffer, read_buf); // <- Again, use this
+    request_buf = string(buffer, read_buf); // <- Again, use this
     parseRequest();
     request.preview();
 

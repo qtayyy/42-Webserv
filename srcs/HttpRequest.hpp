@@ -3,47 +3,48 @@
 
 #include "../includes/Webserv.hpp"
 
-enum HttpMethod 
-{
-    GET,
-    POST,
-    PUT,
-    DELETE,
-    HEAD,
-    NONE  
-};
-
-
 class HttpRequest {
 private:
-    string method;
+    string     method;
     string     body;
     stringDict headerParameters;
-    std::vector<stringDict> formBlocks;
-    string rawRequest;
-    std::string raw;
+    string     rawRequest;
+    string     raw;
+    string     queryString;
+    string     absolutePath;
+    string     _path;
 
 public:
+    
+    /* CONSTRUCTOR/DESTRUCTOR */
+    
+    HttpRequest();
+    ~HttpRequest();
+
     void        appendFormBlock(stringDict formBlock);
     stringDict *getFormBlock(int index);
     void        setBody(string body);
     string      &getBody();
 
+    /* GETTER/SETTERS */
 
-    void setMethod(string method);
-    string getMethod();
+    void   setMethod(string method);
+    string getMethod() const;
+    
+    void   setQueryString(string queryString);
+    string getQueryString() const;
+    
+    void   setPath(string path);
+    string getPath() const;
 
-    void        headerSet(string key, string value);
+    void   headerSet(string key, string value);
     string headerGet(string key);
 
     void   setRawRequest(string rawRequest);
     string getRawRequest() const;
 
-    HttpRequest();
-    ~HttpRequest();
-
-    string getMethod() const;
     string preview();
+    
 };
 
 #endif

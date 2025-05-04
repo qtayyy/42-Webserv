@@ -9,6 +9,8 @@
 
 #include "Utils.hpp"
 
+class HttpResponse;
+
 class CGIHandler {
 private:
     stringDict envVars;
@@ -19,7 +21,15 @@ public:
     string waitForCGIResponse(int *pipefd, pid_t pid, int &exitStatus);
     void exec(int *pipefd, const string& cgiScriptPath, const string& queryString, const string& requestedFilepath);
     void runCGIExecutable(string &path, string &requestedFilepath);
-    string handleCgi(string &cgiScriptPath, HttpRequest &request, int &exitStatus, LocationBlock &serverBlock);
+    
+    string handleCgi(
+        string        &cgiScriptPath, 
+        HttpRequest   &request, 
+        int           &exitStatus, 
+        LocationBlock &serverBlock, 
+        HttpResponse  &response
+    );
+    
     void setEnv(string key, string value);
     string getEnv(string key);
 };
