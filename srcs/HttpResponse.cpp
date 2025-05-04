@@ -162,7 +162,7 @@ void HttpResponse::handleDELETE(string path) {
 /* CONSTRUCTOR */
 
 HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
-    std::cout << YELLOW << "\nConstructing response..." << std::endl;
+    LogStream::pending() << "Constructing response" << std::endl; 
     
     this->emptyBlock        = new LocationBlock();
     string path             = request.headerGet("path");
@@ -171,16 +171,14 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
 
 
     if (this->_locationBlockRef == NULL) {
-        std::cout << YELLOW << path << " Does not match any location. Defaulting..." << RESET << std::endl;
         this->_locationBlockRef = serverBlock;
-        this->isLocation = false;
-        std::cout << BLUE;
+        this->isLocation        = false;
+        LogStream::success() << "Does not match any location. Defaulting" << std::endl; 
         printBorderedBox(_locationBlockRef->getInfo(), "Using block");
-        std::cout << RESET;
     }
     else {
         this->isLocation = true;
-        std::cout << "Location matches location block: " << this->getBlock()->getUri() << std::endl;
+        LogStream::success() << "Location matches location block: " << this->getBlock()->getUri() << std::endl;
         printBorderedBox(this->getBlock()->getInfo(), "Using block");
     }
     
@@ -189,7 +187,6 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
 
     // Check if the request method is allowed
     if (std::find(limitExcept.begin(), limitExcept.end(), request.getMethod()) == limitExcept.end()) {
-        std::cout << "ALLOWED?" << "" << std::endl;
         this->initErrorHttpResponse(405);
         return;
     }
@@ -199,7 +196,7 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
     // Check if a redirect is required
     std::pair<int, string> redirectInfo = this->getBlock()->getReturn();
     if (!redirectInfo.second.empty()) {
-        std::cout << "redirecting to :" << redirectInfo.second << std::endl;
+        LogStream::pending() << "redirecting to :" << redirectInfo.second << std::endl;
         this->initRedirectResponse(redirectInfo.second, redirectInfo.first);
         return;
     }
@@ -211,20 +208,18 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) {
 
     /* HANDLE METHODS */
 
-    std::cout << "SELECTING METHOD" << "" << std::endl;
-
     if (method == "GET") {
-        std::cout << "Handling GET..." << std::endl;
+        LogStream::pending() << "Handling GET" << std::endl;
         this->handleGET(request, serverBlock);
     }
 
     else if (method == "POST") {
-        std::cout << "Handling POST..." << std::endl;
+        LogStream::pending() << "Handling POST" << std::endl;
         this->handlePOST(request);
     }
 
     else if (method == "DELETE") {
-        std::cout << "Handling DELETE..." << std::endl;
+        LogStream::pending() << "Handling DELETE" << std::endl;
         LogStream::log("DELETE") << request.getRawRequest() << std::endl;
         this->handleDELETE(path);
     }
@@ -453,11 +448,11 @@ void HttpResponse::initErrorHttpResponse(int statusCode, string error, string de
 
 void HttpResponse::initCGIResponse(string cgiPath, HttpRequest request) {
 
-    std::cout << YELLOW << "Initializing CGI: \"" << cgiPath << "\"" RESET << std::endl;
+    LogStream::pending() << "Initializing CGI: \"" << cgiPath << "\"" << std::endl;
 
     cgiPath = getAbsolutePath(cgiPath);
     if (!isPathExist(cgiPath)) {
-        std::cout << "path doesn't exist: " << cgiPath << std::endl;
+        LogStream::error() << "path doesn't exist: " << cgiPath << std::endl;
         this->initErrorHttpResponse(500);
         return;
     }

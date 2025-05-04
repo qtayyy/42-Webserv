@@ -10,15 +10,17 @@ class LogStream {
         const char* colorCode;
         std::ofstream fileStream; // File stream for file output
         std::ostream* defaultStream; // Default stream (e.g., std::cout or std::cerr)
+        std::string ending;
     
-        LogStream(std::ostream& os, const char* color)
-            : out(&os), colorCode(color), defaultStream(&os) {}
+        LogStream(std::ostream& os, const char* color, std::string const &ending="")
+            : out(&os), colorCode(color), defaultStream(&os), ending(ending) {}
     
         void flush() {
             if (out) {
                 *out << colorCode << buffer.str();
                 if (out == &std::cout || out == &std::cerr) {
                     *out << "\033[0m";
+                    *out << ending;
                 }
                 *out << std::endl;
             }
@@ -52,81 +54,59 @@ class LogStream {
         }
     
         LogStream& operator<<(std::ostream& (*manip)(std::ostream&)) {
-            if (manip == static_cast<std::ostream& (*)(std::ostream&)>(std::endl)) {
+            if (manip == static_cast<std::ostream& (*)(std::ostream&)>(std::endl))
                 flush();
-            } 
-            else {
+            else
                 buffer << manip;
-            }
             return *this;
         }
     
-        static int setstream(LogStream& logger, const std::string& filepath, std::ios_base::openmode mode) {
-            logger.fileStream.close();
-            logger.fileStream.open(filepath.c_str(), mode);
-            if (logger.fileStream.is_open()) {
-                logger.out = &logger.fileStream;
-                return 0;
-            }
-            else {
-                logger.out = &std::cerr;
-                return -1;
-            }
+        LogStream &setstream(const std::string& filepath, std::ios_base::openmode mode) {
+            this->fileStream.close();
+            this->fileStream.open(filepath.c_str(), mode);
+            if (this->fileStream.is_open())
+                this->out = &this->fileStream;
+            else
+                this->out = &std::cerr;
+            return *this;
         }
     
-        void resetstream() {
+        LogStream &resetstream() {
             fileStream.close();
             out = defaultStream;
+            return *this;
         }
     
         typedef std::ios_base::openmode openmode;
     
         static LogStream& log(std::string outputFile = "", openmode mode = std::ios::out) {
             static LogStream instance(std::cout, ""); // default to cout with no color
-        
-            if (outputFile.empty()) {
-                instance.resetstream(); // reset to std::cout
-            } else {
-                setstream(instance, outputFile, mode); // redirect to file
-            }
-        
-            return instance;
+            return outputFile.empty() ? instance.resetstream() : instance.setstream(outputFile, mode);
         }
         
         static LogStream& info(std::string outputFile = "", openmode mode = std::ios::out) {
-            static LogStream instance(std::cout, "\033[34m"); // Blue
-        
-            if (outputFile.empty()) {
-                instance.resetstream();
-            } else {
-                setstream(instance, outputFile, mode);
-            }
-        
-            return instance;
+            static LogStream instance(std::cout, BLUE); // Blue
+            return outputFile.empty() ? instance.resetstream() : instance.setstream(outputFile, mode);
+        }
+
+        static LogStream& pending(std::string outputFile = "", openmode mode = std::ios::out) {
+            static LogStream instance(std::cout, YELLOW, "..."); // Beige
+            return outputFile.empty() ? instance.resetstream() : instance.setstream(outputFile, mode);
         }
         
         static LogStream& warning(std::string outputFile = "", openmode mode = std::ios::out) {
-            static LogStream instance(std::cout, "\033[33m"); // Yellow
-        
-            if (outputFile.empty()) {
-                instance.resetstream();
-            } else {
-                setstream(instance, outputFile, mode);
-            }
-        
-            return instance;
+            static LogStream instance(std::cout, MAGENTA); // Yellow
+            return outputFile.empty() ? instance.resetstream() : instance.setstream(outputFile, mode);
         }
         
+        static LogStream& success(std::string outputFile = "", openmode mode = std::ios::out) {
+            static LogStream instance(std::cout, GREEN); // Yellow
+            return outputFile.empty() ? instance.resetstream() : instance.setstream(outputFile, mode);
+        }
+
         static LogStream& error(std::string outputFile = "", openmode mode = std::ios::out) {
-            static LogStream instance(std::cerr, "\033[31m"); // Red
-        
-            if (outputFile.empty()) {
-                instance.resetstream();
-            } else {
-                setstream(instance, outputFile, mode);
-            }
-        
-            return instance;
+            static LogStream instance(std::cerr, RED); // Red
+            return outputFile.empty() ? instance.resetstream() : instance.setstream(outputFile, mode);
         }
         
     };

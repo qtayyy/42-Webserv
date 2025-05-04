@@ -36,29 +36,29 @@ Cluster::~Cluster(void)
  */
 void	Cluster::parse(void)
 {
-	std::vector<std::string>	tokens;
+	std::vector<string>	tokens;
 	try
 	{
 		tokens = tokenizeConfig(this->_configPath);
 		parseConfig(tokens);
 		mapIPPortToServer();
-		std::cout << GREEN "Config file parsing complete.\n" RESET;
+		LogStream::success() << "Config file parsing complete.\n";
 	}
 	catch(const std::exception& e)
 	{
-		std::cerr << e.what() << '\n';
+		LogStream::error() << e.what() << '\n';
 	}
 }
 
 // HELPER FUNCTION FOR CLUSTER::PARSE()
-std::vector<std::string>	Cluster::tokenizeConfig(std::string &configPath)
+std::vector<string>	Cluster::tokenizeConfig(string &configPath)
 {
 	std::ifstream configFile(configPath.c_str());
 
 	if (!configFile.is_open())
 		throw ClusterException(RED + configPath + ": No such file or directory" RESET);
-	std::string	line;
-	std::vector<std::string>	tokens;
+	string	line;
+	std::vector<string>	tokens;
 	while (std::getline(configFile, line))
 	{
 		line = strTrim(line, " \t");
@@ -69,7 +69,7 @@ std::vector<std::string>	Cluster::tokenizeConfig(std::string &configPath)
 		size_t	start = 0, end;
 		while (start < line.size())
 		{
-			if ((end = line.find_first_of(" \t;", start)) == std::string::npos)
+			if ((end = line.find_first_of(" \t;", start)) == string::npos)
 			{
 				tokens.push_back(line.substr(start));
 				break ;
@@ -90,7 +90,7 @@ void	Cluster::mapIPPortToServer(void)
 {
 	std::vector<std::pair<uint32_t, int> >	listens;
 	std::stringstream	ss;
-	std::string	IPPort;
+	string	IPPort;
 	for (size_t i = 0; i < _servers.size(); i++)
 	{
 		listens = _servers[i].getListen();
@@ -106,7 +106,7 @@ void	Cluster::mapIPPortToServer(void)
 }
 
 // HELPER FUNCTION FOR CLUSTER::PARSE()
-void	Cluster::parseConfig(std::vector<std::string> tokens)
+void	Cluster::parseConfig(std::vector<string> tokens)
 {
 	for (int i = 0; i < (int)tokens.size(); i++)
 	{
@@ -131,16 +131,16 @@ void	Cluster::init(void)
 {
 	int		listener;
 	size_t	i = 0;
-	std::string	IPPort;
-	std::string	IP;
-	std::string Port;
+	string	IPPort;
+	string	IP;
+	string Port;
 	size_t	colonPos;
 
-	for (std::map<std::string, std::vector<ServerBlock *> >::iterator it = _IPPortToServer.begin(); it != _IPPortToServer.end(); it++)
+	for (std::map<string, std::vector<ServerBlock *> >::iterator it = _IPPortToServer.begin(); it != _IPPortToServer.end(); it++)
 	{
 		IPPort = it->first;
 		colonPos = IPPort.find(":");
-		if (colonPos != std::string::npos)
+		if (colonPos != string::npos)
 		{
 			IP = IPPort.substr(0, colonPos);
 			Port = IPPort.substr(colonPos + 1);
@@ -157,11 +157,11 @@ void	Cluster::init(void)
 	}
 	if (_numOfFds == 0)
 		throw ClusterException(RED "Could not set up cluster" RESET);
-	std::cout << GREEN "Webserv set up complete. Ready to accept connections.\n" RESET;
+	LogStream::success() << "Webserv set up complete. Ready to accept connections." << std::endl;
 }
 
 // HELPER FUNCTION FOR CLUSTER::INIT()
-int		Cluster::createListenerSocket(std::string IP, std::string Port)
+int		Cluster::createListenerSocket(string IP, string Port)
 {
 	int	listener;
 	int yes = 1;
@@ -174,7 +174,7 @@ int		Cluster::createListenerSocket(std::string IP, std::string Port)
 	// std::cout << "intended: " << IP << ":" << Port << "\n";
 	if ((status = getaddrinfo(IP.c_str(), Port.c_str(), &hints, &addr_list)) != 0)
 	{
-		std::cerr << RED "getaddrinfo error: " << gai_strerror(status) << RESET << std::endl;
+		LogStream::error() << "getaddrinfo error: " << gai_strerror(status) << std::endl;
 		return (-1);
 	}
 	for (ptr = addr_list; ptr != NULL; ptr = ptr->ai_next)
@@ -186,7 +186,7 @@ int		Cluster::createListenerSocket(std::string IP, std::string Port)
 			setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) < 0 ||
 			bind(listener, ptr->ai_addr, ptr->ai_addrlen) < 0)
 		{
-			std::cerr << RED "sth went wrong\n" RESET;
+			LogStream::error() << "sth went wrong\n";
 			close(listener);
 			continue ;
 		}
@@ -194,86 +194,28 @@ int		Cluster::createListenerSocket(std::string IP, std::string Port)
 	}
 	if (ptr == NULL)
 	{
-		std::cerr << RED "socket, fcntl, setsockopt or bind error" RESET<< std::endl;
+		LogStream::error() << "socket, fcntl, setsockopt or bind error" << std::endl;
 		return (-1);
 	}
 	struct sockaddr_in	actual_addr;
 	socklen_t	addr_len = sizeof(actual_addr);
 	getsockname(listener, (struct sockaddr *)&actual_addr, &addr_len);
-	std::cout << YELLOW "Bound to port: " << ntohs(actual_addr.sin_port) << std::endl << RESET;
+	LogStream::info() << "Bound to port: " << ntohs(actual_addr.sin_port) << std::endl;
 	freeaddrinfo(addr_list);
 	if (listen(listener, 100) == -1)
 	{
-		std::cerr << RED "listen error" RESET << std::endl;
+		LogStream::error() << "listen error" << std::endl;
 		close(listener);
 		return (-1);
 	}
 	return (listener);
 }
 
-HttpRequest mockRequest(string path) {
-    HttpRequest request;
-
-    request.headerSet("path", path);
-    request.headerSet("query_string", "name=John&age=30");
-    request.headerSet("path_info", "test");
-	request.setMethod("GET");
-
-    return request;
-}
-
-HttpRequest mockUploadPOSTRequest() {
-    HttpRequest request;
-
-	request.setRawRequest(readFileContent("test_post_request"));
-	request.setBody(readFileContent("test_post_request"));
-
-    request.headerSet("path", "/logs/");
-    request.headerSet("path_info", "");
-    request.headerSet("query_string", "name=John&age=30");
-	request.setMethod("POST");
-    request.headerSet("content_type", "multipart/form-data; boundary=boundary");
-
-    return request;
-}
-
-HttpRequest mockUploadGETRequest() {
-    HttpRequest request;
-
-    request.headerSet("path", "/upload/upload.py");
-    request.headerSet("path_info", "/volatile/large.pdf");
-    request.headerSet("query_string", "name=John&age=30");
-	request.setMethod("GET");
-
-    return request;
-}
-
-HttpRequest mockDeleteRequest() {
-    HttpRequest request;
-
-    request.headerSet("path", "/volatile/large.jpeg");
-    request.headerSet("path_info", "webserv.pdf");
-    request.headerSet("query_string", "name=John&age=30");
-	request.setMethod("DELETE");
-
-    return request;
-}
-
 void Cluster::removeFd(int i) {
 	close(_pollFds[i].fd);
 	_clients.erase(_pollFds[i].fd);
 	_pollFds[i] = _pollFds[--_numOfFds];
-	std::cout << GREEN << "Closed " << "[" << _pollFds[i].fd << "]" << RESET << std::endl;
-}
-
-void printIndented(const std::string& input, int indent) {
-    std::istringstream stream(input);
-    std::string line;
-    std::string indentStr(indent, ' ');
-
-    while (std::getline(stream, line)) {
-        std::cout << indentStr << line << std::endl;
-    }
+	LogStream::success() << "Closed " << "[" << _pollFds[i].fd << "]" << std::endl;
 }
 
 // ============================== RUN ALL SERVERS =============================
@@ -284,7 +226,7 @@ void printIndented(const std::string& input, int indent) {
  * 			(I/O operations).
  */
 
-// std::string fileContent = readFileContent("test");
+// string fileContent = readFileContent("test");
 // char *test = (char *)(fileContent.c_str());
 // Client(4).handleRequest(fileContent.size(), test);
 
@@ -302,7 +244,7 @@ std::ofstream cumulative_log("cumulative_request.log", std::ios::trunc);
 
 while (true) {
 
-std::cout << "listening " << formatTime("%I:%M%p %S") << std::endl;
+LogStream::log() << "listening on " << _numOfFds << " sockets | " << formatTime("%I:%M%p %S") << std::endl;
 if ((ready = poll(_pollFds, _numOfFds, timeout)) == -1) {
 	perror("poll");
 	throw ClusterException("");
@@ -311,26 +253,28 @@ if ((ready = poll(_pollFds, _numOfFds, timeout)) == -1) {
 for (int i = 0; i < _numOfFds; i++) {
 	if (_pollFds[i].revents & (POLLIN | POLLHUP)) { // If an fd is ready for reading
 		if (_listenerToServer.find(_pollFds[i].fd) != _listenerToServer.end()) {
-			std::cout << YELLOW << "Handling new client " << _pollFds[i].fd << RESET << std::endl;
+			LogStream::pending() << "Handling new client " << _pollFds[i].fd << std::endl;
 			handleNewClient(_pollFds[i].fd);
 		} else {
 			char buffer[BUFFER_SIZE];
 			ssize_t byteRecv;
-			std::string& requestBuffer = this->_clients[_pollFds[i].fd]->getRecvBuffer();
+			string& requestBuffer = this->_clients[_pollFds[i].fd]->getRecvBuffer();
 	
-			std::cout << YELLOW << "Reading from [" << _pollFds[i].fd << "]..." << RESET << std::endl;
+			LogStream::pending() << "Reading from [" << _pollFds[i].fd << "]..." << std::endl;
 	
 			while (true) {
 				byteRecv = recv(_pollFds[i].fd, buffer, BUFFER_SIZE - 1, 0);
 				if (byteRecv <= 0) {
-					if (byteRecv == 0) {
-						std::cout << RED << "Client disconnected [" << _pollFds[i].fd << "]" << RESET << std::endl;
-					} else if (errno == EAGAIN || errno == EWOULDBLOCK) {
-						std::cout << YELLOW << "No data available yet, will try again next iteration [" << _pollFds[i].fd << "]..." << RESET << std::endl;
+					if (byteRecv == 0)
+						LogStream::error() << "Client disconnected [" << _pollFds[i].fd << "]" << std::endl;
+					
+					else if (errno == EAGAIN || errno == EWOULDBLOCK) {
+						LogStream::error() << "No data available yet, will try again next iteration [" << _pollFds[i].fd << "]..." << std::endl;
 						break;
-					} else {
-						std::cerr << RED << "Recv error: " << strerror(errno) << RESET << std::endl;
-					}
+					} 
+					
+					else
+						LogStream::error() << "Recv error: " << strerror(errno) << std::endl;
 					removeFd(i--);
 					break;
 				}
@@ -340,27 +284,23 @@ for (int i = 0; i < _numOfFds; i++) {
 	
 				// Check if the full request is received
 				size_t headerEnd = requestBuffer.find("\r\n\r\n");
-				if (headerEnd != std::string::npos) {
+				if (headerEnd != string::npos) {
 					size_t contentLength = 0;
-					if (requestBuffer.find("Content-Length:") != std::string::npos) {
-						size_t start = requestBuffer.find("Content-Length:") + 15;
-						size_t end = requestBuffer.find("\r\n", start);
+					if (requestBuffer.find("Content-Length:") != string::npos) {
+						size_t start  = requestBuffer.find("Content-Length:") + 15;
+						size_t end	  = requestBuffer.find("\r\n", start);
 						contentLength = std::strtod(requestBuffer.substr(start, end - start).c_str(), NULL);
 					}
 	
 					// Check if the entire body is received
 					if (requestBuffer.size() >= headerEnd + 4 + contentLength) {
-						std::cout << GREEN << "Full request received from [" << _pollFds[i].fd << "]" << RESET << std::endl;
+						LogStream::success() << "Full request received from [" << _pollFds[i].fd << "] with " << requestBuffer.size() << " bytes" << RESET << std::endl;
 						this->_clients[_pollFds[i].fd]->handleRequest(requestBuffer.size(), (char *)(requestBuffer.c_str()));
-
-						LogStream::log() << GREEN << "RECV SIZE: " << byteRecv << std::endl;
-						LogStream::log() << GREEN << "BODY SIZE: " << this->_clients[_pollFds[i].fd]->getRequest().getBody().size() << std::endl;
-
 						_pollFds[i].events = POLLOUT;
 						break;
-					} else {
-						std::cout << YELLOW << "Waiting for more data from [" << _pollFds[i].fd << "]..." << RESET << std::endl;
 					}
+					else
+						LogStream::pending() << "Waiting for more data from [" << _pollFds[i].fd << "]" << std::endl;
 				}
 			}
 		}
@@ -368,38 +308,36 @@ for (int i = 0; i < _numOfFds; i++) {
 
 	if (_pollFds[i].revents & POLLOUT) { // If an fd is ready for writing
 		HttpRequest request = this->_clients[_pollFds[i].fd]->getRequest();
-		// request = mockRequest("/dir2/file2.txt");
 		printBorderedBox(request.preview(), "Request parsed: ");
 		
-		std::cout << YELLOW << "handling request..." << std::endl;
-		HttpResponse response = HttpResponse(request, &_servers[0]);
-		string finalMsg = response.getFinalResponseMsg();
+		LogStream::pending() << "Handling request" << std::endl;
+
+		HttpResponse response  = HttpResponse(request, &_servers[0]);
+		string finalMsg		   = response.getFinalResponseMsg();
 		
 		ssize_t 	totalBytes = finalMsg.size();
 		ssize_t 	bytesSent  = 0;
 		ssize_t 	bytesLeft  = totalBytes;
 		const char* msgPtr 	   = finalMsg.c_str();
 		
-		std::cout << YELLOW << "Sending " << totalBytes << " Bytes to client [" << _pollFds[i].fd << "]..." << RESET << std::endl;
-		std::cout << GREEN << "Response message generated" << std::endl;
+		LogStream::pending() << "Sending " << totalBytes << " Bytes to client [" << _pollFds[i].fd << "]" << std::endl;
+		LogStream::pending() << "Response message generated" << std::endl;
 
 		while (bytesLeft > 0) {
-
 			LogStream::log(string("logs/responses/") + "RESPONSE [" + currentDateTime() + "] " + generateRandomID(10) + ".log") << finalMsg << std::endl;
-
 			ssize_t sent = send(_pollFds[i].fd, msgPtr + bytesSent, bytesLeft, 0);
-			std::cout << GREEN << "Sent " << sent << " bytes" << RESET << std::endl;
 			if (sent == -1) {
-				int error = 0;
-				socklen_t len = sizeof(error);
+				int		  error = 0;
+				socklen_t len	= sizeof(error);
 				
 				if (getsockopt(_pollFds[i].fd, SOL_SOCKET, SO_ERROR, &error, &len) == 0) {
 					if (error == EAGAIN || error == EWOULDBLOCK) {
-						usleep(10); continue;
+						usleep(10);
+						continue;
 					}
 					
 					else {
-						std::cerr << "send error: " << strerror(error) << std::endl;
+						LogStream::error() << "send error: " << strerror(error) << std::endl;
 						removeFd(i--);
 						break;
 					}
@@ -410,18 +348,19 @@ for (int i = 0; i < _numOfFds; i++) {
 					break;
 				}
 			}
+			LogStream::success() << "Sent " << sent << " bytes" << std::endl;
 			bytesSent += sent;
 			bytesLeft -= sent;
 		}
 
 		// Check if the connection should be kept alive
 		if (request.headerGet("Connection") == "keep-alive") {
-			std::cout << YELLOW << "Keeping connection alive for client [" << _pollFds[i].fd << "]..." << RESET << std::endl;
+			LogStream::pending() << "Keeping connection alive for client [" << _pollFds[i].fd << "]..." << std::endl;
 			_pollFds[i].events = POLLIN; // Set back to POLLIN for further requests
 		}
 		
 		else {
-			std::cout << RED << "Closing connection for client [" << _pollFds[i].fd << "]" << RESET << std::endl;
+			LogStream::pending() << "Closing connection for client [" << _pollFds[i].fd << "]" << std::endl;
 			removeFd(i--); // Close the connection
 		}
 	}
@@ -442,7 +381,7 @@ void	Cluster::handleNewClient(int listenerFd)
 	{
 		this->_clients[newClient] = new Client(newClient); // Ethan's `rt (prob need to pass info about config - ServerBlock)
 		_pollFds[_numOfFds].fd = newClient;
-		std::cout << GREEN "New client connection received: [" << _pollFds[_numOfFds].fd << "]\n" RESET; 
+		LogStream::success() << "New client connection received: [" << _pollFds[_numOfFds].fd << "]" << std::endl; 
 		_pollFds[_numOfFds++].events = POLLIN;
 	}	
 }
@@ -452,17 +391,67 @@ void	Cluster::handleNewClient(int listenerFd)
 /**
  * @brief	Trims leading and trailing characters as specified by delims.
  */
-std::string	strTrim(std::string str, std::string delims)
+string	strTrim(string str, string delims)
 {
 	size_t start = str.find_first_not_of(delims);
-	if (start != std::string::npos)
+	if (start != string::npos)
 		str = str.substr(start);
 	else
 		str = "";
     size_t end = str.find_last_not_of(delims);
-	if (end != std::string::npos)
+	if (end != string::npos)
 		str = str.substr(0, end + 1);
 	else
 		str = "";
 	return (str);
 }
+
+
+// HttpRequest mockRequest(string path) {
+//     HttpRequest request;
+
+//     request.headerSet("path", path);
+//     request.headerSet("query_string", "name=John&age=30");
+//     request.headerSet("path_info", "test");
+// 	request.setMethod("GET");
+
+//     return request;
+// }
+
+// HttpRequest mockUploadPOSTRequest() {
+//     HttpRequest request;
+
+// 	request.setRawRequest(readFileContent("test_post_request"));
+// 	request.setBody(readFileContent("test_post_request"));
+
+//     request.headerSet("path", "/logs/");
+//     request.headerSet("path_info", "");
+//     request.headerSet("query_string", "name=John&age=30");
+// 	request.setMethod("POST");
+//     request.headerSet("content_type", "multipart/form-data; boundary=boundary");
+
+//     return request;
+// }
+
+// HttpRequest mockUploadGETRequest() {
+//     HttpRequest request;
+
+//     request.headerSet("path", "/upload/upload.py");
+//     request.headerSet("path_info", "/volatile/large.pdf");
+//     request.headerSet("query_string", "name=John&age=30");
+// 	request.setMethod("GET");
+
+//     return request;
+// }
+
+// HttpRequest mockDeleteRequest() {
+//     HttpRequest request;
+
+//     request.headerSet("path", "/volatile/large.jpeg");
+//     request.headerSet("path_info", "webserv.pdf");
+//     request.headerSet("query_string", "name=John&age=30");
+// 	request.setMethod("DELETE");
+
+//     return request;
+// }
+
