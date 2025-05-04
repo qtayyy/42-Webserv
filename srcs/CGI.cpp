@@ -20,13 +20,10 @@ void   CGIHandler::setEnv(string key, string value) { envVars[key] = value; }
 string CGIHandler::getEnv(string key)               { return envVars[key]; }
 
 void CGIHandler:: runCGIExecutable(string &cgiScriptPath, string &requestedFilepath) {
-    if (endsWith(cgiScriptPath, ".py")) {
+    if (endsWith(cgiScriptPath, ".py"))
         execl("/usr/bin/python3", "python3", cgiScriptPath.c_str(), requestedFilepath.c_str(), NULL);
-    }
-
-    else {
+    else
         execl(cgiScriptPath.c_str(), cgiScriptPath.c_str(), requestedFilepath.c_str(), NULL);
-    }
 }
 
 string CGIHandler::handleCgi(
@@ -37,14 +34,15 @@ string CGIHandler::handleCgi(
         HttpResponse  &response
     ) {
 
+    (void)response;
+
     int inputPipe[2];  // Pipe for sending request body (stdin for CGI)
     int outputPipe[2]; // Pipe for capturing CGI output (stdout from CGI)
 
     if (pipe(inputPipe) == -1 || pipe(outputPipe) == -1) 
         throw std::runtime_error("pipe failed: " + string(strerror(errno)));
 
-    string data              = request.getBody();
-    string requestedFilepath = response.getAbsolutePath();
+    string data = request.getBody();
 
     // Set environment variables
 

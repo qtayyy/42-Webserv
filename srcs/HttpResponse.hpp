@@ -18,28 +18,20 @@ private:
     static stringDict createContentTypeMap();
     static const string css;
 
-    string        rawContent;
-    int           contentLength;
-    int           statusCode;
-    string        message;
-    string        contentType;
-    string        finalResponseMsg;
-    bool          isLocation;
+    string        _rawContent;
+    int           _contentLength;
+    int           _statusCode;
+    string        _message;
+    string        _contentType;
+    string        _finalResponseMsg;
+    bool          _isLocation;
+    string        _method;
     
-    int           httpStatusCode;       // HTTP status code (e.g., 404, 500)
-    string        errorMessage;      // Short error message
-    string        details;           // Detailed explanation
-    string        requestUrl;        // URL that caused the error
-    string        method;            // HTTP method (GET, POST, etc.)
-    std::time_t   timestamp;    // Error occurrence time
-    
-    string        _absolutePath;
-
-    LocationBlock *emptyBlock;
+    LocationBlock *_emptyBlock;
     ServerBlock   *_serverBlockRef;
     Block         *_locationBlockRef;
 
-    string         containsIndexFile(string path);
+    string         _dirHasIndexFile(string path);
     LocationBlock *resolveLocationBlock(const string &path, ServerBlock *serverBlock);
     void          initRedirectResponse(string &redirectUrl, int statusCode);
     string        applyAlias(string &path);
@@ -60,13 +52,9 @@ public:
     /* GETTERS/SETTER */
     string getRawContent() const;
     int    getContentLength() const;
-    int    getStatusCode() const;
     string getMessage() const;
     string getContentType() const;
     string getFinalResponseMsg() const;
-    string getErrorMsg() const;
-    string getDetails() const;
-    string getRequestUrl() const;
     string getMethod() const;
     string getAbsolutePath() const;
     string getTimestamp() const;

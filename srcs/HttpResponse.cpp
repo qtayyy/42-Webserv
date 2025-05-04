@@ -53,7 +53,7 @@ const string HttpResponse::css =
 /* CONSTRUCTORS */
 
 LocationBlock *HttpResponse::getBlock() {
-    if (this->isLocation) {
+    if (this->_isLocation) {
         return dynamic_cast<LocationBlock*>(this->_locationBlockRef);
     } else {
         return LocationBlock::emptyBlock;
@@ -87,7 +87,7 @@ void HttpResponse::handleGET(ServerBlock *serverBlock) {
         // if the path is a directory
         if (isDirectory(reroutedPath)) {
             std::cout << "Directory detected" << std::endl;
-            string indexFile = containsIndexFile(reroutedPath);
+            string indexFile = _dirHasIndexFile(reroutedPath);
             
             // if index file is found, serve it
             if (!indexFile.empty()) {
@@ -165,7 +165,7 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock)
     : request(request) {
     LogStream::pending() << "Constructing response" << std::endl; 
 
-    this->emptyBlock        = new LocationBlock();
+    this->_emptyBlock        = new LocationBlock();
     string path             = request.headerGet("path");
     this->_serverBlockRef   = serverBlock;
     this->_locationBlockRef = resolveLocationBlock(path, serverBlock);
@@ -173,12 +173,12 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock)
 
     if (this->_locationBlockRef == NULL) {
         this->_locationBlockRef = serverBlock;
-        this->isLocation        = false;
+        this->_isLocation        = false;
         LogStream::success() << "Does not match any location. Defaulting" << std::endl; 
         printBorderedBox(_locationBlockRef->getInfo(), "Using block");
     }
     else {
-        this->isLocation = true;
+        this->_isLocation = true;
         LogStream::success() << "Location matches location block: " << this->getBlock()->getUri() << std::endl;
         printBorderedBox(this->getBlock()->getInfo(), "Using block");
     }
@@ -252,7 +252,7 @@ string HttpResponse::createStatusPageStr(string errorPagePath, int statusCode) c
 string HttpResponse::reroutePath(string urlPath) {
     string reroutedPath = joinPaths(this->_serverBlockRef->getRoot(), urlPath);
 
-    if (this->isLocation)
+    if (this->_isLocation)
         reroutedPath = joinPaths(this->getBlock()->getRoot(), urlPath);
 
     return reroutedPath;
@@ -341,11 +341,9 @@ string HttpResponse::createAutoIndexHtml(string path, string root) {
 
 /* GETTERS */
 
-string HttpResponse::getFinalResponseMsg() const { return finalResponseMsg; }
-int    HttpResponse::getStatusCode()       const { return httpStatusCode; }
-string HttpResponse::getRequestUrl()       const { return requestUrl; }
-string HttpResponse::getMethod()           const { return method; }
-int    HttpResponse::getContentLength()    const { return contentLength; }
+string HttpResponse::getFinalResponseMsg() const { return _finalResponseMsg; }
+string HttpResponse::getMethod()           const { return _method; }
+int    HttpResponse::getContentLength()    const { return _contentLength; }
 
 
 
@@ -385,12 +383,12 @@ string HttpResponse::composeHttpResponse(
 /* INITIALIZERS */
 
 void HttpResponse::initHttpResponse(string body, string resourceType, int statusCode) {
-    this->rawContent       = body;
-    this->contentType      = resourceType;
-    this->statusCode       = statusCode;
-    this->message          = CodeToMessage(statusCode).second;
+    this->_rawContent       = body;
+    this->_contentType      = resourceType;
+    this->_statusCode       = statusCode;
+    this->_message          = CodeToMessage(statusCode).second;
     // this->finalResponseMsg = composeResponse(body, resourceType, to_string(statusCode), message);
-    this->finalResponseMsg = composeHttpResponse(body, statusCode, message, 
+    this->_finalResponseMsg = composeHttpResponse(body, statusCode, _message, 
                                 "Content-Length",  to_string(body.size()).c_str(),
                                 "Connection",      "close",
                                 "Content-Type",    resourceType.c_str(),
@@ -400,12 +398,12 @@ void HttpResponse::initHttpResponse(string body, string resourceType, int status
 
 
 void HttpResponse::initRedirectResponse(string & redirectUrl, int statusCode) {
-    this->rawContent    = "";
-    this->contentType   = CONTENT_TYPE_HTML;
-    this->statusCode    = statusCode;
-    this->message       = CodeToMessage(statusCode).second;
+    this->_rawContent    = "";
+    this->_contentType   = CONTENT_TYPE_HTML;
+    this->_statusCode    = statusCode;
+    this->_message       = CodeToMessage(statusCode).second;
     
-    this->finalResponseMsg = composeHttpResponse("", statusCode, message,
+    this->_finalResponseMsg = composeHttpResponse("", statusCode, _message,
         "Location",        redirectUrl.c_str(),
         "Content-Length",  "0",
         "Content-Type",    CONTENT_TYPE_HTML,
@@ -459,15 +457,11 @@ void HttpResponse::initCGIResponse(string cgiPath, HttpRequest request) {
     }
 
     string pathToHandle = request.headerGet("path_info");
-
     int exit_status;
-    this->_absolutePath = makeAbsPath(pathToHandle);
-    this->finalResponseMsg = cgiHandler.handleCgi(cgiPath, request, exit_status, *this->getBlock(), *this);
+    this->_finalResponseMsg = cgiHandler.handleCgi(cgiPath, request, exit_status, *this->getBlock(), *this);
 }
 
-string HttpResponse::getAbsolutePath() const {
-    return this->_absolutePath;
-}
+
 
 
 /* OTHERS */
@@ -482,12 +476,11 @@ string HttpResponse::getContentType(const string& resourcePath) {
     return "text/plain";
 }
 
-string HttpResponse::containsIndexFile(string path) {
+string HttpResponse::_dirHasIndexFile(string path) {
     const std::vector<string>& indices = this->_serverBlockRef->getIndex();
     for (std::vector<string>::const_iterator it = indices.begin(); it != indices.end(); ++it) {
-        if (isPathExist(path + "/" + *it)) {
+        if (isPathExist(path + "/" + *it))
             return path + "/" + *it;
-        }
     }
 
     return "";
