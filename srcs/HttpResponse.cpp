@@ -65,9 +65,9 @@ LocationBlock *HttpResponse::getBlock() {
 /* REQUEST HANDLERS */
 
 void HttpResponse::handleGET(ServerBlock *serverBlock) {
-    string path = request.headerGet("path");
+    this->path = request.headerGet("path");
 
-    path = applyAlias(path);
+    this->path = applyAlias(this->path);
 
     if (!this->getBlock()->getCgiPass().empty()) {
         this->initCGIResponse(this->getBlock()->getCgiPass(), request);
@@ -75,7 +75,7 @@ void HttpResponse::handleGET(ServerBlock *serverBlock) {
     }
 
     try {
-        string reroutedPath = urlDecode(reroutePath(path));
+        string reroutedPath = urlDecode(reroutePath(this->path));
 
         std::cout << "REROUTED PATH: " << path << std::endl;
 
@@ -120,7 +120,7 @@ void HttpResponse::handleGET(ServerBlock *serverBlock) {
     } 
 
     catch (const HttpException& e) {
-        std::cout << RED << "error: " << e.what() << RESET << e.getStatusCode() << std::endl;
+        LogStream::error() << "error: " << e.getStatusCode() << " " << e.what() << std::endl;
         this->initErrorHttpResponse(e.getStatusCode());
     }
 }
@@ -412,27 +412,23 @@ void HttpResponse::initRedirectResponse(string & redirectUrl, int statusCode) {
 
 
 void HttpResponse::initErrorHttpResponse(int statusCode, string error, string description) {
-    if (!this->_locationBlockRef->getErrorPage().empty() && 
-        this->_locationBlockRef->getErrorPage().find(statusCode) != this->_locationBlockRef->getErrorPage().end()) {
+    std::map<int, string> errorPages = this->_locationBlockRef->getErrorPage();
+
+    if (!errorPages.empty() && errorPages.find(statusCode) != errorPages.end()) {
+        string errorPage = joinPaths(this->getBlock()->getRoot(), errorPage);
         try {
-            string errorPage = this->_locationBlockRef->getErrorPage()[statusCode];
-            std::cout << "error page: " << errorPage << "'" << std::endl;
             this->initHttpResponse(readFileContent(errorPage), CONTENT_TYPE_HTML, statusCode);
             return ;
         }
-        catch (const HttpException& e) {
-            statusCode = 500;
-            std::cout << "exception" << e.getStatusCode() << std::endl;
+        catch (const HttpException& e) { 
+            LogStream::info() << "Cannot find " << errorPages[statusCode] << " in " << errorPage << ". Fallback to default error page" << std::endl;
         }
     }
 
     std::pair<string, string> details = CodeToMessage(statusCode);
     
-    string errorMsg = details.first;
-    string errorDescription = details.second;
-    
-    if (error != "")       errorMsg = error;
-    if (description != "") errorDescription = description;
+    string errorMsg         = error.empty() ? details.first : error;
+    string errorDescription = description.empty() ? details.second : description;
     
     std::stringstream output;
     output  << "<html><head><title>" << errorMsg << "</title>"
@@ -440,7 +436,6 @@ void HttpResponse::initErrorHttpResponse(int statusCode, string error, string de
             << "<h1 class=\"error\">" << errorMsg << "</h1>"
             << "<p>" << errorDescription << "</p>"
             << "</body></html>";
-
     this->initHttpResponse(output.str(), CONTENT_TYPE_HTML, statusCode);
 }
 

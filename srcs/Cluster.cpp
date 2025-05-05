@@ -198,7 +198,7 @@ int		Cluster::createListenerSocket(string IP, string Port)
 		return (-1);
 	}
 	struct sockaddr_in	actual_addr;
-	socklen_t	addr_len = sizeof(actual_addr);
+	socklen_t			addr_len = sizeof(actual_addr);
 	getsockname(listener, (struct sockaddr *)&actual_addr, &addr_len);
 	LogStream::info() << "Bound to port: " << ntohs(actual_addr.sin_port) << std::endl;
 	freeaddrinfo(addr_list);
@@ -255,7 +255,9 @@ for (int i = 0; i < _numOfFds; i++) {
 		if (_listenerToServer.find(_pollFds[i].fd) != _listenerToServer.end()) {
 			LogStream::pending() << "Handling new client " << _pollFds[i].fd << std::endl;
 			handleNewClient(_pollFds[i].fd);
-		} else {
+		} 
+		
+		else {
 			char buffer[BUFFER_SIZE];
 			ssize_t byteRecv;
 			string& requestBuffer = this->_clients[_pollFds[i].fd]->getRecvBuffer();

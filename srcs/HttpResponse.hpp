@@ -26,7 +26,8 @@ private:
     string        _finalResponseMsg;
     bool          _isLocation;
     string        _method;
-    
+    string        path;
+
     LocationBlock *_emptyBlock;
     ServerBlock   *_serverBlockRef;
     Block         *_locationBlockRef;
