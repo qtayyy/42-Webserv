@@ -65,9 +65,9 @@ LocationBlock *HttpResponse::getBlock() {
 /* REQUEST HANDLERS */
 
 void HttpResponse::handleGET(ServerBlock *serverBlock) {
-    this->path = request.headerGet("path");
+    string path = request.headerGet("path");
 
-    this->path = applyAlias(this->path);
+    path = applyAlias(path);
 
     if (!this->getBlock()->getCgiPass().empty()) {
         this->initCGIResponse(this->getBlock()->getCgiPass(), request);
@@ -75,8 +75,8 @@ void HttpResponse::handleGET(ServerBlock *serverBlock) {
     }
 
     try {
-        string reroutedPath = urlDecode(reroutePath(this->path));
-
+        string reroutedPath = urlDecode(reroutePath(path));
+        this->_reroutedPath = reroutedPath;
         std::cout << "REROUTED PATH: " << path << std::endl;
 
 
@@ -258,6 +258,8 @@ string HttpResponse::reroutePath(string urlPath) {
     return reroutedPath;
 }
 
+
+
 string HttpResponse::createAutoIndexHtml(string path, string root) {
 
     // std::cout << "PATH:: " << path << std::endl;
@@ -415,7 +417,7 @@ void HttpResponse::initErrorHttpResponse(int statusCode, string error, string de
     std::map<int, string> errorPages = this->_locationBlockRef->getErrorPage();
 
     if (!errorPages.empty() && errorPages.find(statusCode) != errorPages.end()) {
-        string errorPage = joinPaths(this->getBlock()->getRoot(), errorPage);
+        string errorPage = joinPaths(getDirname(this->_reroutedPath), errorPages.find(statusCode)->second);
         try {
             this->initHttpResponse(readFileContent(errorPage), CONTENT_TYPE_HTML, statusCode);
             return ;

@@ -160,6 +160,21 @@ std::vector<string> listFiles(const string &path) {
     return files;
 }
 
+string getBasename(const string& fullPath) {
+    size_t pos = fullPath.find_last_of("/\\");
+    if (pos != string::npos) {
+        return fullPath.substr(pos + 1);
+    }
+    return fullPath;
+}
+
+string getDirname(const string& fullPath) {
+    size_t pos = fullPath.find_last_of("/\\");
+    if (pos != string::npos) {
+        return fullPath.substr(0, pos);
+    }
+    return ".";
+}
 
 
 int getTerminalWidth() {

@@ -33,6 +33,9 @@ string formatTime(const string& format);
 string urlEncode(const string& value);
 string urlDecode(const string& value);
     
+string getBasename(const string& fullPath);
+string getDirname(const string& fullPath);
+
 string joinPaths(const string& base, const string& sub);
 string currentDateTime();
 #endif
