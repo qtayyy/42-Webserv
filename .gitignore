@@ -37,3 +37,5 @@
 logs/cgi/
 logs/requests/
 logs/responses/
+
+public/volatile/
