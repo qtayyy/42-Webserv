@@ -1,5 +1,7 @@
 #!/bin/bash
 
+clear
+
 # Remove all files from the volatile folder
 rm -rf public/volatile/*
 

@@ -1,7 +1,7 @@
 == Info:   Trying 127.0.0.1:8080...
 == Info: Connected to localhost (127.0.0.1) port 8080 (#0)
 => Send header, 82 bytes (0x52)
-0000: GET /dir3 HTTP/1.1
+0000: GET /logs HTTP/1.1
 0014: Host: localhost:8080
 002a: User-Agent: curl/7.81.0
 0043: Accept: */*

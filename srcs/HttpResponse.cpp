@@ -80,7 +80,7 @@ void HttpResponse::handleGET(ServerBlock *serverBlock) {
     try {
         string reroutedPath = urlDecode(reroutePath(path));
         this->_reroutedPath = reroutedPath;
-        std::cout << "REROUTED PATH: " << path << std::endl;
+        std::cout << "REROUTED PATH: " << _reroutedPath << std::endl;
 
         if (!isPathExist(reroutedPath)) {
             throw HttpException(404, reroutedPath);
@@ -263,13 +263,12 @@ string HttpResponse::createStatusPageStr(string errorPagePath, int statusCode) c
 string HttpResponse::reroutePath(string urlPath) {
     string reroutedPath = joinPaths(this->_serverBlockRef->getRoot(), urlPath);
 
-    std::cout << "PATH" << urlPath << std::endl;    
-    reroutedPath = joinPaths(this->getBlock()->getRoot(), urlPath);
-
-    // if (this->_isLocation)
+    if (this->_isLocation)
+        reroutedPath = joinPaths(this->getBlock()->getRoot(), urlPath);
 
     return reroutedPath;
 }
+
 
 
 

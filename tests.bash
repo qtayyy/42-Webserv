@@ -16,12 +16,19 @@ call_curl_and_save() {
     local request_file="$output_dir/${file_index}_${sanitized_url}_request.txt"
 
     mkdir -p "$output_dir"  # Ensure the directory exists
-    response=$(curl -s -i -D "$request_file" "$url")  # Save headers to request file and suppress progress
-    echo "$response" > "$output_file"  # Save the response to the file
+    response=$(curl -s -i --trace-ascii "$request_file" -o "$output_file" "$url")  # Save raw request trace to request file, body to output file
 
-    echo "Response saved to: $output_file"
-    echo "Request headers saved to: $request_file"
-    echo "$response"
+    echo "Response body saved to: $output_file"
+    echo "Raw request trace saved to: $request_file"
+
+    # Check the HTTP status code from the response
+    http_status=$(grep -oP '(?<=HTTP/1\.[01] )\d{3}' "$output_file" | head -n 1)
+
+    if [[ $http_status -ge 200 && $http_status -lt 300 ]]; then
+        echo -e "\e[32mSuccess: HTTP $http_status\e[0m"  # Print in green for success
+    else
+        echo -e "\e[31mFailure: HTTP $http_status\e[0m"  # Print in red for failure
+    fi
 
     ((file_index++))  # Increment the file index
 }

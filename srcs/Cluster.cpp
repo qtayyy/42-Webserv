@@ -212,10 +212,17 @@ int		Cluster::createListenerSocket(string IP, string Port)
 }
 
 void Cluster::removeFd(int i) {
-	close(_pollFds[i].fd);
-	_clients.erase(_pollFds[i].fd);
-	_pollFds[i] = _pollFds[--_numOfFds];
-	LogStream::success() << "Closed " << "[" << _pollFds[i].fd << "]" << std::endl;
+	int fd = _pollFds[i].fd;
+
+	close(fd);
+	_clients.erase(fd);
+
+	if (i != _numOfFds - 1) {
+		_pollFds[i] = _pollFds[_numOfFds - 1]; // Move last fd to current slot
+	}
+	_numOfFds--;
+
+	LogStream::success() << "Closed connection [" << fd << "]" << std::endl;
 }
 
 // ============================== RUN ALL SERVERS =============================
@@ -277,7 +284,8 @@ for (int i = 0; i < _numOfFds; i++) {
 					
 					else
 						LogStream::error() << "Recv error: " << strerror(errno) << std::endl;
-					removeFd(i--);
+					removeFd(i);
+					i--;
 					break;
 				}
 	
@@ -298,6 +306,7 @@ for (int i = 0; i < _numOfFds; i++) {
 					if (requestBuffer.size() >= headerEnd + 4 + contentLength) {
 						LogStream::success() << "Full request received from [" << _pollFds[i].fd << "] with " << requestBuffer.size() << " bytes" << RESET << std::endl;
 						this->_clients[_pollFds[i].fd]->handleRequest(requestBuffer.size(), (char *)(requestBuffer.c_str()));
+						this->_clients[_pollFds[i].fd]->getRecvBuffer().clear();
 						_pollFds[i].events = POLLOUT;
 						break;
 					}
@@ -340,13 +349,15 @@ for (int i = 0; i < _numOfFds; i++) {
 					
 					else {
 						LogStream::error() << "send error: " << strerror(error) << std::endl;
-						removeFd(i--);
+						removeFd(i);
+						i --;
 						break;
 					}
 				} 
 				else {
 					perror("getsockopt");
-					removeFd(i--);
+					removeFd(i);
+					i --;
 					break;
 				}
 			}
@@ -359,11 +370,10 @@ for (int i = 0; i < _numOfFds; i++) {
 		if (request.headerGet("Connection") == "keep-alive") {
 			LogStream::pending() << "Keeping connection alive for client [" << _pollFds[i].fd << "]..." << std::endl;
 			_pollFds[i].events = POLLIN; // Set back to POLLIN for further requests
-		}
-		
-		else {
+		} else {
 			LogStream::pending() << "Closing connection for client [" << _pollFds[i].fd << "]" << std::endl;
-			removeFd(i--); // Close the connection
+			removeFd(i); // Properly close and clean up the socket
+			i--; // Adjust index after removing the file descriptor
 		}
 	}
 }
