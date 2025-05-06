@@ -68,7 +68,9 @@ void HttpResponse::handleGET(ServerBlock *serverBlock) {
     string path = request.headerGet("path");
     (void)serverBlock;
 
+    std::cout << "ALIAs" << path << std::endl;
     path = applyAlias(path);
+    std::cout << "ALIAs" << path << std::endl;
 
     if (!this->getBlock()->getCgiPass().empty()) {
         this->initCGIResponse(this->getBlock()->getCgiPass(), request);
@@ -95,7 +97,6 @@ void HttpResponse::handleGET(ServerBlock *serverBlock) {
             indices = getBlock()->getIndex();
             for (stringList::const_iterator it = indices.begin(); it != indices.end(); ++it) {
                 string potentialIndexFile = joinPaths(reroutedPath, *it);
-                std::cout << "PATH: " << potentialIndexFile << std::endl;
                 try {
                     std::cout << "Serving index file: " << potentialIndexFile << std::endl;
                     this->initHttpResponse(readFileContent(potentialIndexFile), getContentType(potentialIndexFile), 200);
@@ -104,7 +105,6 @@ void HttpResponse::handleGET(ServerBlock *serverBlock) {
                 
                 catch (const HttpException& e) {
                     std::cout << "Error serving index file: " << e.getStatusCode() << " " << e.what() << std::endl;
-                    throw HttpException(403);
                 }
             }
             
@@ -263,8 +263,10 @@ string HttpResponse::createStatusPageStr(string errorPagePath, int statusCode) c
 string HttpResponse::reroutePath(string urlPath) {
     string reroutedPath = joinPaths(this->_serverBlockRef->getRoot(), urlPath);
 
-    if (this->_isLocation)
-        reroutedPath = joinPaths(this->getBlock()->getRoot(), urlPath);
+    std::cout << "PATH" << urlPath << std::endl;    
+    reroutedPath = joinPaths(this->getBlock()->getRoot(), urlPath);
+
+    // if (this->_isLocation)
 
     return reroutedPath;
 }
@@ -363,7 +365,7 @@ int    HttpResponse::getContentLength()    const { return _contentLength; }
 
 string HttpResponse::composeHttpResponse(
     const string& body,
-    int statusCode,
+    int           statusCode,
     const string& msg,
     ... ) 
 {
@@ -514,15 +516,31 @@ LocationBlock* HttpResponse::resolveLocationBlock(const string& path, ServerBloc
 
 
 string HttpResponse::applyAlias(string& path) {
-    std::vector<LocationBlock> *locations = this->_serverBlockRef->getLocation();
-    for (std::vector<LocationBlock>::iterator it = locations->begin(); it != locations->end(); ++it) {
-        string alias = it->getAlias();
-        if (!alias.empty() && startsWith(path, it->getUri())) {
-            string newPath = alias + path.substr(it->getUri().length());
+    if (!this->_isLocation) {
+        return path;
+    }
+
+    string alias = this->getBlock()->getAlias();
+    string uri = this->getBlock()->getUri();
+
+    if (!alias.empty() && startsWith(path, uri)) {
+        string suffix = path.length() > uri.length() ? path.substr(uri.length()) : "";
+        string newPath = alias;
+
+        // Ensure we don't end up with double slashes or missing slashes
+        if (!alias.empty() && alias[alias.size() - 1] != '/' && !suffix.empty() && suffix[0] != '/')
+            newPath += '/';
+
+        newPath += suffix;
+
+        // Check if it's a directory
+        if (isPathExist(newPath) && isDirectory(newPath)) {
             return newPath;
         }
+
+        return newPath;
     }
-    
+
     return path;
 }
 
