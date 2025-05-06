@@ -66,6 +66,7 @@ LocationBlock *HttpResponse::getBlock() {
 
 void HttpResponse::handleGET(ServerBlock *serverBlock) {
     string path = request.headerGet("path");
+    (void)serverBlock;
 
     path = applyAlias(path);
 
@@ -79,27 +80,36 @@ void HttpResponse::handleGET(ServerBlock *serverBlock) {
         this->_reroutedPath = reroutedPath;
         std::cout << "REROUTED PATH: " << path << std::endl;
 
-
         if (!isPathExist(reroutedPath)) {
             throw HttpException(404, reroutedPath);
         }
 
         // if the path is a directory
-        if (isDirectory(reroutedPath)) {
+        if (isDirectory(reroutedPath)) { //fixme problem here. Doesn't detect an alias as directory
             std::cout << "Directory detected" << std::endl;
-            string indexFile = _dirHasIndexFile(reroutedPath);
+            string indexFile = _dirHasIndexFile(reroutedPath); // fixme issue here also
             
+            stringList indices;
+
             // if index file is found, serve it
-            if (!indexFile.empty()) {
+            indices = getBlock()->getIndex();
+            for (stringList::const_iterator it = indices.begin(); it != indices.end(); ++it) {
+                string potentialIndexFile = joinPaths(reroutedPath, *it);
+                std::cout << "PATH: " << potentialIndexFile << std::endl;
                 try {
-                    this->initHttpResponse(readFileContent(indexFile), CONTENT_TYPE_HTML, 200);
-                } catch (const HttpException& e) { }
+                    std::cout << "Serving index file: " << potentialIndexFile << std::endl;
+                    this->initHttpResponse(readFileContent(potentialIndexFile), getContentType(potentialIndexFile), 200);
+                    return ;
+                } 
                 
-                return;
+                catch (const HttpException& e) {
+                    std::cout << "Error serving index file: " << e.getStatusCode() << " " << e.what() << std::endl;
+                    throw HttpException(403);
+                }
             }
             
             // if autoindex is enabled, serve the autoindex page
-            else if (serverBlock->getAutoindex()) {
+            if (getBlock()->getAutoindex()) {
                 std::cout << "Generating auto index... " << reroutedPath<< std::endl;
                 string autoIndex = createAutoIndexHtml(reroutedPath, path);
                 this->initHttpResponse(autoIndex, CONTENT_TYPE_HTML, 200);
@@ -107,6 +117,7 @@ void HttpResponse::handleGET(ServerBlock *serverBlock) {
             
             // if autoindex is disabled, return 403
             else {
+                std::cout << "403" << "" << std::endl;
                 throw HttpException(403);
             }
         }
@@ -474,7 +485,8 @@ string HttpResponse::getContentType(const string& resourcePath) {
 }
 
 string HttpResponse::_dirHasIndexFile(string path) {
-    const std::vector<string>& indices = this->_serverBlockRef->getIndex();
+    const std::vector<string>& indices = _serverBlockRef->getIndex();
+    
     for (std::vector<string>::const_iterator it = indices.begin(); it != indices.end(); ++it) {
         if (isPathExist(path + "/" + *it))
             return path + "/" + *it;

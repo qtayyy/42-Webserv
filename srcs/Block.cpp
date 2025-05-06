@@ -108,8 +108,9 @@ void	Block::setClientMaxBodySize(std::vector<std::string> args)
  */
 void	Block::setIndex(std::vector<std::string> args)
 {
-	if (args.empty())
-		this->_index.push_back("index.html");
+	if (args.empty()) {
+		// this->_index.push_back("index.html"); #fixme ERROR HERE? Not supposed to have default index
+	}
 	else
 	{
 		if (!this->_index.empty())
