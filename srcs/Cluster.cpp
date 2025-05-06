@@ -228,19 +228,34 @@ void Cluster::removeFd(int i) {
 // ============================== RUN ALL SERVERS =============================
 
 
+#include <poll.h>
+#include <iostream>
+#include <string>
+
+void printFdEvents(const struct pollfd& pfd) {
+	std::cout << "FD [" << pfd.fd << "] events: ";
+	if (pfd.revents == 0) {
+		std::cout << "None" << std::endl;
+		return;
+	}
+
+	std::cout << pfd.revents << " ";
+	if (pfd.revents & POLLIN)     std::cout << "POLLIN ";
+	if (pfd.revents & POLLPRI)    std::cout << "POLLPRI ";
+	if (pfd.revents & POLLOUT)    std::cout << "POLLOUT ";
+	if (pfd.revents & POLLERR)    std::cout << "POLLERR ";
+	if (pfd.revents & POLLHUP)    std::cout << "POLLHUP ";
+	if (pfd.revents & POLLNVAL)   std::cout << "POLLNVAL ";
+	if (pfd.revents & POLLRDHUP)  std::cout << "POLLRDHUP "; // If using epoll with Linux extension
+
+	std::cout << std::endl;
+}
+
+
 /**
  * @brief	Monitors each socket for incoming connections, request or reponses
  * 			(I/O operations).
  */
-
-// string fileContent = readFileContent("test");
-// char *test = (char *)(fileContent.c_str());
-// Client(4).handleRequest(fileContent.size(), test);
-
-// exit(0);
-
-
-
 void Cluster::run(void) {
 	int ready;
 	int timeout = 500; // 500 ms timeout
@@ -262,6 +277,8 @@ for (int i = 0; i < _numOfFds; i++) {
 		if (_listenerToServer.find(_pollFds[i].fd) != _listenerToServer.end()) {
 			LogStream::pending() << "Handling new client " << _pollFds[i].fd << std::endl;
 			handleNewClient(_pollFds[i].fd);
+			std::cout << "EVENTS"  << std::endl;
+			printFdEvents(_pollFds[i]);
 		} 
 		
 		else {
@@ -308,6 +325,7 @@ for (int i = 0; i < _numOfFds; i++) {
 						this->_clients[_pollFds[i].fd]->handleRequest(requestBuffer.size(), (char *)(requestBuffer.c_str()));
 						this->_clients[_pollFds[i].fd]->getRecvBuffer().clear();
 						_pollFds[i].events = POLLOUT;
+						LogStream::log() << "[DEBUG] POLLOUT triggered for fd [" << _pollFds[i].fd << "]" << std::endl;
 						break;
 					}
 					else
@@ -318,7 +336,13 @@ for (int i = 0; i < _numOfFds; i++) {
 	}
 
 	if (_pollFds[i].revents & POLLOUT) { // If an fd is ready for writing
+		
+		printFdEvents(_pollFds[i]);
 		HttpRequest request = this->_clients[_pollFds[i].fd]->getRequest();
+		if (request.getRawRequest().empty()) {
+			LogStream::error() << "No request to send for [" << _pollFds[i].fd << "]" << std::endl;
+			continue;
+		}
 		printBorderedBox(request.preview(), "Request parsed: ");
 		
 		LogStream::pending() << "Handling request" << std::endl;
@@ -393,6 +417,9 @@ void	Cluster::handleNewClient(int listenerFd)
 	{
 		this->_clients[newClient] = new Client(newClient); // Ethan's `rt (prob need to pass info about config - ServerBlock)
 		_pollFds[_numOfFds].fd = newClient;
+		_pollFds[_numOfFds].events = POLLIN; // Explicitly set to POLLIN
+		// _pollFds[_numOfFds].revents = POLLIN; //fixme HERE?
+		LogStream::log() << "[DEBUG] New client added with fd [" << newClient << "] and events set to POLLIN" << std::endl;
 		LogStream::success() << "New client connection received: [" << _pollFds[_numOfFds].fd << "]" << std::endl; 
 		_pollFds[_numOfFds++].events = POLLIN;
 	}	

@@ -7,30 +7,142 @@
 0045: Accept: */*
 0052: 
 == Info: Mark bundle as not supporting multiuse
-<= Recv header, 98 bytes (0x62)
-0000: HTTP/1.1 405 The request method is known by the server but has b
-0040: een disabled and cannot be used.
+<= Recv header, 17 bytes (0x11)
+0000: HTTP/1.1 200 OK
+<= Recv header, 40 bytes (0x28)
+0000: Content-Type: Content-Type: text/plain
+<= Recv header, 22 bytes (0x16)
+0000: Content-Length: 8080
 <= Recv header, 19 bytes (0x13)
 0000: Connection: close
-<= Recv header, 21 bytes (0x15)
-0000: Content-Length: 855
-<= Recv header, 25 bytes (0x19)
-0000: Content-Type: text/html
 <= Recv header, 2 bytes (0x2)
 0000: 
-<= Recv data, 855 bytes (0x357)
-0000: <html><head><title>Method Not Allowed</title><style>       body 
-0040: {           font-family: Arial, sans-serif;           background
-0080: -color: #f4f4f4;           margin: 0;           padding: 20px;  
-00c0:      }       h1 {           color: #4CAF50;       }       table 
-0100: {           width: 100%;           border-collapse: collapse;   
-0140:         border-radius: 10px;           overflow: hidden;        
-0180:    padding: 10px;       }       th, td {           text-align: l
-01c0: eft;           background: #fff;           padding: 10px;       
-0200: }       a {           color: #1E90FF;       }       .folder {   
-0240:         color:rgb(0, 255, 251);       }       .error {          
-0280:  color: red;           font-weight: bold;       }</style></head>
-02c0: <body><h1 class="error">Method Not Allowed</h1><p>The request me
-0300: thod is known by the server but has been disabled and cannot be 
-0340: used.</p></body></html>
+<= Recv data, 8080 bytes (0x1f90)
+0000: #!/usr/bin/python..import cgi.import os.import sys.from urllib.p
+0040: arse import unquote.import cgitb.from textwrap import dedent.imp
+0080: ort traceback.from datetime import datetime.FILE = "cgi_log"..# 
+00c0: Clear the cgi_log file.with open(FILE, 'w') as log_file:.    log
+0100: _file.truncate(0)..def write_to(msg, filepath:str=FILE):.    wit
+0140: h open(filepath, 'a') as f:.        current_time = datetime.now(
+0180: ).strftime("%Y-%m-%d %H:%M:%S").        f.write(f"[{current_time
+01c0: }] {msg}\n")..write_to("cgi called");.for k, v in os.environ.ite
+0200: ms():.    write_to(f"ENV {k}={v}")..write_to("Received data: {}"
+0240: )..CONTENT_TYPES = {.    ".html": "text/html",.    ".css": "text
+0280: /css",.    ".js": "text/javascript",.    ".jpg": "image/jpeg",. 
+02c0:    ".jpeg": "image/jpeg",.    ".png": "image/png",.    ".pdf": "
+0300: application/pdf",.}..#sometimes upload fails, reason being that 
+0340: the content recieved by cgi is empty. Reffer to "cgi_log"..def r
+0380: esponse():.    debug_response = dedent(""".    HTTP/1.1 200 OK. 
+03c0:    Content-Type: text/plain.    Content-Length: 13..    Hello, W
+0400: orld!.    """)..    sys.stdout.write(debug_response).    sys.std
+0440: out.flush()..cgitb.enable()..# Initialize FieldStorage.try:.    
+0480: form = cgi.FieldStorage().except Exception as e:.    error_messa
+04c0: ge = traceback.format_exc().    write_to(f"Error: {error_message
+0500: }").    sys.exit(1)...try:.    received_data = {key: form.getval
+0540: ue(key) for key in form.keys()}.    write_to(f"Received data: {r
+0580: eceived_data}").except Exception as e:.    error_message = trace
+05c0: back.format_exc().    write_to(f"Error logging received data: {e
+0600: rror_message}")...# Get request method and route.request_method 
+0640: = os.environ.get("REQUEST_METHOD", "").upper().route = unquote(o
+0680: s.environ.get("PATH_TRANSLATED", ""))..style = '''.body {.    fo
+06c0: nt-family: Arial, sans-serif;.    background-color: #f4f4f4;.   
+0700:  margin: 0;.    padding: 20px;.}.h1 {.    color: #4CAF50;.}.tabl
+0740: e {.    width: 100%;.    border-collapse: collapse;.    border-r
+0780: adius: 10px;.    overflow: hidden;.    padding: 10px;.}.th, td {
+07c0: .    text-align: left;.    background: #fff;.    padding: 10px 5
+0800: px;.}.a {.    color: #1E90FF;.}..folder {.    color:rgb(0, 255, 
+0840: 251);.}..error {.    color: red;.    font-weight: bold;.}..succe
+0880: ss {.    color: green;.    font-weight: bold;.}.'''..raw_success
+08c0: _page = (.    f"<html>".    f"<head><style>{style}</style></head
+0900: >".    f"<body>".    f"<h2 class='success'>File Upload Successfu
+0940: l</h2>".    f"<p>File <strong>%filename</strong> uploaded succes
+0980: sfully to <strong>%route</strong>.</p>".    f"%additional_info".
+09c0:     f"</body>".    f"</html>".)...def generate_error_page(title,
+0a00:  message):.    raw_fail_page = dedent(f'''.    <html>.    <head>
+0a40: .        <style>.            {style}.            h2 {{.         
+0a80:        color: red;.            }}.        </style>.    </head>. 
+0ac0:    <body>.        <h2>{title}</h2>.        <p>{message}</p>.    
+0b00: </body>.    </html>.    ''').    return generate_response_string
+0b40: (.        content=raw_fail_page,.        status_code=404,.      
+0b80:   status_message="Not Found",.        content_type="text/html". 
+0bc0:    )..def generate_response_string(.    content: str,.    status
+0c00: _code: int = 404,.    status_message: str = "Not Found",.    con
+0c40: tent_length: int = None,.    content_type: str = "text/html",.  
+0c80:   **kwargs):.    .    content = content.strip()  # Remove uninte
+0cc0: nded whitespace or newlines.    additional_headers = "".join(f"{
+0d00: key}: {value}\r\n" for key, value in kwargs.items()).    return 
+0d40: (.    f"HTTP/1.1 {status_code} {status_message}\r\n".    f"Conte
+0d80: nt-Type: {content_type}\r\n".    f"Content-Length: {len(content)
+0dc0:  if content_length is None else content_length}\r\n".    f"{addi
+0e00: tional_headers}".    f"\r\n".    f"{content}".    )...def print_
+0e40: and_write_to(msg, file_path:str=FILE):.    print(msg).    with o
+0e80: pen(file_path, 'a') as f:.        f.write(msg).    return file_p
+0ec0: ath..def generate_env_representation():.    return dedent(""".  
+0f00:   <div style="overflow-x:auto;">.        <table border='1' style
+0f40: ="width: 100%; table-layout: fixed;">.            <tr><th style=
+0f80: "width: 20%;">Key</th><th>Value</th></tr>.            {}.       
+0fc0:  </table>.    </div>.    """).format("".join(.        f"<tr><td 
+1000: style='word-wrap: break-word; width: 20%;'>{key}</td><td style='
+1040: word-wrap: break-word;'>{value}</td></tr>".        for key, valu
+1080: e in os.environ.items().    ))..additional_args = {.    "Pragma"
+10c0: : "no-cache",.    "Connection": "close",.    "Cache-Control": "n
+1100: o-store, no-cache, must-revalidate, max-age=0",.}..# Handle POST
+1140:  request.if request_method == "POST":.    write_to("POST").    t
+1180: ry:.        if "file" in form:.            file_item = form["fil
+11c0: e"].            if file_item.file:.                file_path = o
+1200: s.path.join(sys.argv[1], file_item.filename).                if 
+1240: (os.path.exists(file_path)):.                    write_to(f"Erro
+1280: r writing file: path exists").                    error_response
+12c0:  = generate_error_page("400 Bad Request", f"<b>\"{file_item.file
+1300: name}\"</b> already exists in <b>\"{os.path.dirname(file_path)}\
+1340: "</b>.").                    sys.stdout.write(error_response).  
+1380:                   sys.stdout.flush().                    sys.exi
+13c0: t(1).                try:.                    with open(file_pat
+1400: h, 'wb') as f:.                        f.write(file_item.file.re
+1440: ad()).                except Exception as e:.                   
+1480:  error_message = traceback.format_exc().                    writ
+14c0: e_to(f"Error writing file: {error_message}").                   
+1500:  error_response = generate_error_page("500 Internal Server Error
+1540: ", "An error occurred while saving the file.").                 
+1580:    sys.stdout.write(error_response).                    sys.stdo
+15c0: ut.flush().                    sys.exit(1).                file_
+1600: size = os.path.getsize(file_path)..                response_body
+1640:  = raw_success_page.replace("%additional_info", dedent(f""".    
+1680:             """)).replace("%filename", file_item.filename).repla
+16c0: ce("%route", file_path).strip()..                response = gene
+1700: rate_response_string(.                    content        = respo
+1740: nse_body,.                    status_code    = 303,.            
+1780:         status_message = "See Other",.                    conten
+17c0: t_type   = "text/html",.                    **additional_args.  
+1800:               ).                sys.stdout.write(response).     
+1840:            sys.stdout.flush()..            else:.               
+1880:  error_response = generate_error_page("400 Bad Request", "No fil
+18c0: e content.").                sys.stdout.write(error_response).  
+1900:               sys.stdout.flush().        else:.            error
+1940: _response = generate_error_page("400 Bad Request", "No file was 
+1980: uploaded.").            sys.stdout.write(error_response).       
+19c0:      sys.stdout.flush().    except Exception as e:.        error
+1a00: _message = traceback.format_exc().        write_to(f"Error: {err
+1a40: or_message}").        error_response = generate_error_page("500 
+1a80: Internal Server Error", "An error occurred while processing the 
+1ac0: request.").        sys.stdout.write(error_response).        sys.
+1b00: stdout.flush()..# Handle GET request.elif request_method == "GET
+1b40: ":.    write_to("GET").    pdf_path = route..    extension = os.
+1b80: path.splitext(pdf_path)[1].    content_type = CONTENT_TYPES.get(
+1bc0: extension, "Content-Type: text/plain")..    error_page = generat
+1c00: e_error_page("404 Not Found", "The requested file was not found.
+1c40: ")..    if not os.path.exists(pdf_path):.        not_found = gen
+1c80: erate_response_string(error_page).        sys.stdout.buffer.writ
+1cc0: e(not_found.encode()).        sys.stdout.buffer.flush().        
+1d00: sys.exit()..    with open(pdf_path, 'rb') as file:.        file_
+1d40: content = file.read()..    headers = (.        "HTTP/1.1 200 OK\
+1d80: r\n".        "Content-Type: {}\r\n".        "Content-Length: {}\
+1dc0: r\n".        "Connection: close\r\n".        "\r\n".    ).format
+1e00: (content_type, len(file_content)).encode()..    sys.stdout.buffe
+1e40: r.write(headers).    sys.stdout.buffer.write(file_content).    s
+1e80: ys.stdout.buffer.flush()....else:.    print("HTTP/1.1 405 Method
+1ec0:  Not Allowed").    print("Content-Type: text/html").    print("\
+1f00: r").    print("Method not allowed.").    write_to("UNSUPPORTED M
+1f40: ETHOD").# todo post method handled incorrectly, doesnt consider 
+1f80: set upload route
 == Info: Closing connection 0
