@@ -301,8 +301,7 @@ for (int i = 0; i < _numOfFds; i++) {
 					
 					else
 						LogStream::error() << "Recv error: " << strerror(errno) << std::endl;
-					removeFd(i);
-					i--;
+					removeFd(i--);
 					break;
 				}
 	
@@ -373,15 +372,13 @@ for (int i = 0; i < _numOfFds; i++) {
 					
 					else {
 						LogStream::error() << "send error: " << strerror(error) << std::endl;
-						removeFd(i);
-						i --;
+						removeFd(i--);
 						break;
 					}
 				} 
 				else {
 					perror("getsockopt");
-					removeFd(i);
-					i --;
+					removeFd(i--);
 					break;
 				}
 			}
@@ -396,8 +393,7 @@ for (int i = 0; i < _numOfFds; i++) {
 			_pollFds[i].events = POLLIN; // Set back to POLLIN for further requests
 		} else {
 			LogStream::pending() << "Closing connection for client [" << _pollFds[i].fd << "]" << std::endl;
-			removeFd(i); // Properly close and clean up the socket
-			i--; // Adjust index after removing the file descriptor
+			removeFd(i--); // Properly close and clean up the socket
 		}
 	}
 }

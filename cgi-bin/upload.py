@@ -61,7 +61,16 @@ except Exception as e:
 
 
 try:
-    received_data = {key: form.getvalue(key) for key in form.keys()}
+    received_data = {}
+    for key in form.keys():
+        field_item = form[key]
+
+        if field_item.filename:  # It's a file
+            file_content = field_item.file.read()  # This is bytes
+            received_data[key] = f"<{len(file_content)} bytes received>"
+        else:  # It's a regular field
+            received_data[key] = field_item.value
+
     write_to(f"Received data: {received_data}")
 except Exception as e:
     error_message = traceback.format_exc()
@@ -211,7 +220,7 @@ if request_method == "POST":
                 except Exception as e:
                     error_message = traceback.format_exc()
                     write_to(f"Error writing file: {error_message}")
-                    error_response = generate_error_page("500 Internal Server Error", "An error occurred while saving the file.")
+                    error_response = generate_error_page("500 Internal Server Error", f"An error occurred while saving the file. {error_message}")
                     sys.stdout.write(error_response)
                     sys.stdout.flush()
                     sys.exit(1)
@@ -241,7 +250,7 @@ if request_method == "POST":
     except Exception as e:
         error_message = traceback.format_exc()
         write_to(f"Error: {error_message}")
-        error_response = generate_error_page("500 Internal Server Error", "An error occurred while processing the request.")
+        error_response = generate_error_page("500 Internal Server Error", f"An error occurred while processing the request. {error_message}")
         sys.stdout.write(error_response)
         sys.stdout.flush()
 

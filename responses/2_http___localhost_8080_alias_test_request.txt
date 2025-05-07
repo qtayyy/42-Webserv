@@ -1,47 +1,6 @@
 == Info:   Trying 127.0.0.1:8080...
-== Info: Connected to localhost (127.0.0.1) port 8080 (#0)
-=> Send header, 88 bytes (0x58)
-0000: GET /alias_test HTTP/1.1
-001a: Host: localhost:8080
-0030: User-Agent: curl/7.81.0
-0049: Accept: */*
-0056: 
-== Info: Mark bundle as not supporting multiuse
-<= Recv header, 22 bytes (0x16)
-0000: HTTP/1.1 200 Success
-<= Recv header, 19 bytes (0x13)
-0000: Connection: close
-<= Recv header, 22 bytes (0x16)
-0000: Content-Length: 1633
-<= Recv header, 25 bytes (0x19)
-0000: Content-Type: text/html
-<= Recv header, 2 bytes (0x2)
-0000: 
-<= Recv data, 1633 bytes (0x661)
-0000: <html><head><title>Index of public/dir1/folder</title><style>   
-0040:     body {           font-family: Arial, sans-serif;           b
-0080: ackground-color: #f4f4f4;           margin: 0;           padding
-00c0: : 20px;       }       h1 {           color: #4CAF50;       }    
-0100:    table {           width: 100%;           border-collapse: col
-0140: lapse;           border-radius: 10px;           overflow: hidden
-0180: ;           padding: 10px;       }       th, td {           text
-01c0: -align: left;           background: #fff;           padding: 10p
-0200: x;       }       a {           color: #1E90FF;       }       .fo
-0240: lder {           color:rgb(0, 255, 251);       }       .error { 
-0280:           color: red;           font-weight: bold;       }</styl
-02c0: e><script>async function deleteFile(filePath, rowId) {  if (!con
-0300: firm('Delete this file?')) return;  try {    const response = aw
-0340: ait fetch(filePath, { method: 'DELETE' });    if (response.ok) {
-0380:       document.getElementById(rowId).remove();    } else {      
-03c0: alert('Failed to delete: ' + response.status);    }  } catch (er
-0400: r) {    alert('Error: ' + err);  }}</script></head><body><h1>Ind
-0440: ex of <a href="/">~</a><a href=""></a> / <a href="/dir1">dir1</a
-0480: > / <a href="/dir1/folder">folder</a> </h1><table><tr><th>Name</
-04c0: th><th>Size</th><th>Action</th></tr><tr id="row0"><td><a href="/
-0500: dir1/folder/error2.html">error2.html</a></td><td>142 bytes</td><
-0540: td><button onclick="deleteFile('/dir1/folder/error2.html', 'row0
-0580: ')">Delete</button></td></tr><tr id="row1"><td><a href="/dir1/fo
-05c0: lder/test.csv">test.csv</a></td><td>7 bytes</td><td><button oncl
-0600: ick="deleteFile('/dir1/folder/test.csv', 'row1')">Delete</button
-0640: ></td></tr></table></body></html>
+== Info: connect to 127.0.0.1 port 8080 failed: Connection refused
+== Info:   Trying ::1:8080...
+== Info: connect to ::1 port 8080 failed: Connection refused
+== Info: Failed to connect to localhost port 8080 after 0 ms: Connection refused
 == Info: Closing connection 0
