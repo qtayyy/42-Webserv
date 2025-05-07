@@ -9,10 +9,12 @@ mkdir -p "$output_dir"  # Create the output directory if it doesn't exist
 rm -rf "$output_dir"/*  # Remove all files from the output directory
 mkdir -p "$output_dir"  # Ensure the directory exists
 
-DIMMED="\e[2m"
+rm -rf public/upload/*
+
+ITALIC="\e[3m"
 RESET="\e[0m"
 
-echo -e "PWD:\t${DIMMED}$(pwd)${RESET}"
+echo -e "PWD:\t${ITALIC}$(pwd)${RESET}"
 
 # Function to call curl and save the response
 call_curl_and_save() {
@@ -25,10 +27,10 @@ call_curl_and_save() {
 
     eval curl -s -i --trace-ascii "$request_file" -o "$output_file" $curl_command  # Use eval to execute the curl command properly
 
-    echo -e "\tExecuting: ${DIMMED}curl -s -i --trace-ascii \"$request_file\" -o \"$output_file\" $curl_command${RESET}"
+    echo -e "\tExecuting:\t${ITALIC}curl -s -i --trace-ascii \"$request_file\" -o \"$output_file\" $curl_command${RESET}"
 
-    echo -e "\tResponse saved:\t${DIMMED}$output_file${RESET}"
-    echo -e "\tTrace saved:\t${DIMMED}$request_file${RESET}"
+    echo -e "\tResponse saved:\t${ITALIC}$output_file${RESET}"
+    echo -e "\tTrace saved:\t${ITALIC}$request_file${RESET}"
 
     # Check the HTTP status code from the response
     http_status=$(grep -oP '(?<=HTTP/1\.[01] )\d{3}' "$output_file" | head -n 1)

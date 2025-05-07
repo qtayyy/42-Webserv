@@ -8,6 +8,7 @@ import cgitb
 from textwrap import dedent
 import traceback
 from datetime import datetime
+
 FILE = "cgi_log"
 
 # Clear the cgi_log file
@@ -35,54 +36,14 @@ CONTENT_TYPES = {
     ".pdf": "application/pdf",
 }
 
-#sometimes upload fails, reason being that the content recieved by cgi is empty. Reffer to "cgi_log"
-
-def response():
-    debug_response = dedent("""
-    HTTP/1.1 200 OK
-    Content-Type: text/plain
-    Content-Length: 13
-
-    Hello, World!
-    """)
-
-    sys.stdout.write(debug_response)
-    sys.stdout.flush()
-
 cgitb.enable()
 
-# Ensure CONTENT_TYPE is set in the environment
-write_to(f"CONTENT_TYPE: {os.environ.get('CONTENT_TYPE')}")
-
-# Initialize FieldStorage
-raw_data = sys.stdin.buffer.read()  # Read as bytes
-write_to(f"Raw data: {raw_data}")
-import io
-
 try:
-    # Pass raw_data as a BytesIO stream to FieldStorage
-    form = cgi.FieldStorage(fp=io.BytesIO(raw_data), environ=os.environ, keep_blank_values=True)
+    form = cgi.FieldStorage()
 except Exception as e:
     error_message = traceback.format_exc()
     write_to(f"Error: {error_message}")
     sys.exit(1)
-
-try:    
-    received_data = {}
-    for key in form.keys():
-        field_item = form[key]
-
-        if field_item.filename:  # It's a file
-            file_content = field_item.file.read()  # This is bytes
-            received_data[key] = f"<{len(file_content)} bytes received>"
-        else:  # It's a regular field
-            received_data[key] = field_item.value
-
-    write_to(f"Received data!: {received_data}")
-except Exception as e:
-    error_message = traceback.format_exc()
-    write_to(f"Error logging received data: {error_message}")
-
 
 # Get request method and route
 request_method = os.environ.get("REQUEST_METHOD", "").upper()
@@ -126,19 +87,23 @@ a {
 }
 '''
 
+
 raw_success_page = (
     f"<html>"
     f"<head><style>{style}</style></head>"
     f"<body>"
     f"<h2 class='success'>File Upload Successful</h2>"
     f"<p>File <strong>%filename</strong> uploaded successfully to <strong>%route</strong>.</p>"
-    f"%additional_info"
     f"</body>"
     f"</html>"
 )
 
 
-def generate_error_page(title, message):
+def generate_error_page(
+        title, 
+        message, 
+        error_code=400,
+        error_message="Bad Request"):
     raw_fail_page = dedent(f'''
     <html>
     <head>
@@ -156,29 +121,30 @@ def generate_error_page(title, message):
     </html>
     ''')
     return generate_response_string(
-        content=raw_fail_page,
-        status_code=404,
-        status_message="Not Found",
-        content_type="text/html"
+        content        = raw_fail_page,
+        status_code    = error_code,
+        status_message = error_message,
+        content_type   = "text/html"
     )
 
 def generate_response_string(
-    content: str,
-    status_code: int = 404,
-    status_message: str = "Not Found",
-    content_length: int = None,
-    content_type: str = "text/html",
-    **kwargs):
+        content: str,
+        status_code: int    = 404,
+        status_message: str = "Not Found",
+        content_length: int = None,
+        content_type: str   = "text/html",
+        **kwargs
+    ):
     
     content = content.strip()  # Remove unintended whitespace or newlines
     additional_headers = "".join(f"{key}: {value}\r\n" for key, value in kwargs.items())
     return (
-    f"HTTP/1.1 {status_code} {status_message}\r\n"
-    f"Content-Type: {content_type}\r\n"
-    f"Content-Length: {len(content) if content_length is None else content_length}\r\n"
-    f"{additional_headers}"
-    f"\r\n"
-    f"{content}"
+        f"HTTP/1.1 {status_code} {status_message}\r\n"
+        f"Content-Type: {content_type}\r\n"
+        f"Content-Length: {len(content) if content_length is None else content_length}\r\n"
+        f"{additional_headers}"
+        f"\r\n"
+        f"{content}"
     )
 
 
@@ -187,6 +153,7 @@ def print_and_write_to(msg, file_path:str=FILE):
     with open(file_path, 'a') as f:
         f.write(msg)
     return file_path
+
 
 def generate_env_representation():
     return dedent("""
@@ -201,83 +168,79 @@ def generate_env_representation():
         for key, value in os.environ.items()
     ))
 
+
 additional_args = {
     "Pragma": "no-cache",
     "Connection": "close",
     "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
 }
 
-# Handle POST request
+
+def bold(text):
+    return f"<b>{text}</b>"
+
+
+def exit_error(generic_msg, error_message, error_code=400):
+    error_response = generate_error_page(f"{error_code} {generic_msg}", error_message, error_code, error_message)
+    sys.stdout.write(error_response)
+    sys.stdout.flush()
+    sys.exit(1)
+
+
 if request_method == "POST":
     write_to("POST")
+    if os.environ.get("CONTENT_LENGTH", "") == "0":
+        exit_error("Bad Request", "No data received.", 400)
+
     try:
-        if "file" in form:
-            file_item = form["file"]
-            if file_item.file:
-                file_path = os.path.join(sys.argv[1], file_item.filename)
-                if (os.path.exists(file_path)):
-                    write_to(f"Error writing file: path exists")
-                    error_response = generate_error_page("400 Bad Request", f"<b>\"{file_item.filename}\"</b> already exists in <b>\"{os.path.dirname(file_path)}\"</b>.")
-                    sys.stdout.write(error_response)
-                    sys.stdout.flush()
-                    sys.exit(1)
-                try:
-                    with open(file_path, 'wb') as f:
-                        f.write(file_item.file.read())
-                except Exception as e:
-                    error_message = traceback.format_exc()
-                    write_to(f"Error writing file: {error_message}")
-                    error_response = generate_error_page("500 Internal Server Error", f"An error occurred while saving the file. {error_message}")
-                    sys.stdout.write(error_response)
-                    sys.stdout.flush()
-                    sys.exit(1)
-                file_size = os.path.getsize(file_path)
+        if not "file" in form:
+            exit_error("Bad Request", "No file was uploaded.", 400)
+        
+        file_item = form["file"]
+        if file_item.file is None: 
+            exit_error("Bad Request", "No file content.", 400)
+        
+        file_path = os.path.join(sys.argv[1], file_item.filename)
+        if os.path.exists(file_path): 
+            exit_error('Bad Request', f'"{bold(file_item.filename)}" already exists in "{bold(os.path.dirname(file_path))}"', 400)
+        
+        try:
+            with open(file_path, 'wb') as f:
+                f.write(file_item.file.read())
+        except Exception as e:
+            error_message = traceback.format_exc()
+            exit_error("Internal Server Error", error_message, 500)
+        
+        response_body = raw_success_page.\
+            replace("%filename", file_item.filename).\
+            replace("%route", file_path).\
+            strip()
 
-                response_body = raw_success_page.replace("%additional_info", dedent(f"""
-                """)).replace("%filename", file_item.filename).replace("%route", file_path).strip()
-
-                response = generate_response_string(
-                    content        = response_body,
-                    status_code    = 303,
-                    status_message = "See Other",
-                    content_type   = "text/html",
-                    **additional_args
-                )
-                sys.stdout.write(response)
-                sys.stdout.flush()
-
-            else:
-                error_response = generate_error_page("400 Bad Request", "No file content.")
-                sys.stdout.write(error_response)
-                sys.stdout.flush()
-        else:
-            error_response = generate_error_page("400 Bad Request", "No file was uploaded.")
-            sys.stdout.write(error_response)
-            sys.stdout.flush()
+        response = generate_response_string(
+            content        = response_body,
+            status_code    = 303,
+            status_message = "See Other",
+            content_type   = "text/html",
+            **additional_args
+        )
+        sys.stdout.write(response)
+        sys.stdout.flush()
+    
     except Exception as e:
         error_message = traceback.format_exc()
-        write_to(f"Error: {error_message}")
-        error_response = generate_error_page("500 Internal Server Error", f"An error occurred while processing the request. {error_message}")
-        sys.stdout.write(error_response)
-        sys.stdout.flush()
+        exit_error("Internal Server Error", error_message, 500)
 
-# Handle GET request
+
 elif request_method == "GET":
     write_to("GET")
-    pdf_path = route
 
-    extension = os.path.splitext(pdf_path)[1]
+    extension = os.path.splitext(route)[1]
     content_type = CONTENT_TYPES.get(extension, "Content-Type: text/plain")
 
-    error_page = generate_error_page("404 Not Found", "The requested file was not found.")
+    if not os.path.exists(route):
+        exit_error("The requested file was not found.", "404 Not Found", 404)
 
-    if not os.path.exists(pdf_path):
-        not_found = generate_response_string(error_page)
-        sys.stdout.buffer.write(not_found.encode())
-        sys.stdout.buffer.flush()
-        sys.exit()
-
-    with open(pdf_path, 'rb') as file:
+    with open(route, 'rb') as file:
         file_content = file.read()
 
     headers = (
@@ -292,12 +255,6 @@ elif request_method == "GET":
     sys.stdout.buffer.write(file_content)
     sys.stdout.buffer.flush()
 
-
-
 else:
-    print("HTTP/1.1 405 Method Not Allowed")
-    print("Content-Type: text/html")
-    print("\r")
-    print("Method not allowed.")
-    write_to("UNSUPPORTED METHOD")
+    exit_error("Method not allowed.", "405 Method Not Allowed", 405)
 # todo post method handled incorrectly, doesnt consider set upload route

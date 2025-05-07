@@ -12,12 +12,12 @@
 <= Recv header, 19 bytes (0x13)
 0000: Connection: close
 <= Recv header, 22 bytes (0x16)
-0000: Content-Length: 3148
+0000: Content-Length: 3865
 <= Recv header, 25 bytes (0x19)
 0000: Content-Type: text/html
 <= Recv header, 2 bytes (0x2)
 0000: 
-<= Recv data, 3148 bytes (0xc4c)
+<= Recv data, 3865 bytes (0xf19)
 0000: <html><head><title>Index of public/</title><style>       body { 
 0040:           font-family: Arial, sans-serif;           background-c
 0080: olor: #f4f4f4;           margin: 0;           padding: 20px;    
@@ -43,29 +43,40 @@
 0580: elete</button></td></tr><tr id="row2"><td><a href="/test.css">te
 05c0: st.css</a></td><td>292 bytes</td><td><button onclick="deleteFile
 0600: ('/test.css', 'row2')">Delete</button></td></tr><tr id="row3"><t
-0640: d><a href="/error.html">error.html</a></td><td>267 bytes</td><td
-0680: ><button onclick="deleteFile('/error.html', 'row3')">Delete</but
-06c0: ton></td></tr><tr id="row4"><td><a href="/no_perms">no_perms</a>
-0700: </td><td>0 bytes</td><td><button onclick="deleteFile('/no_perms'
-0740: , 'row4')">Delete</button></td></tr><tr id="row5"><td><a class="
-0780: folder" href="/volatile">volatile</a></td><td>- bytes</td><td></
-07c0: td></tr><tr id="row6"><td><a href="/homepage.html">homepage.html
-0800: </a></td><td>1017 bytes</td><td><button onclick="deleteFile('/ho
-0840: mepage.html', 'row6')">Delete</button></td></tr><tr id="row7"><t
-0880: d><a href="/message.txt">message.txt</a></td><td>9687 bytes</td>
-08c0: <td><button onclick="deleteFile('/message.txt', 'row7')">Delete<
-0900: /button></td></tr><tr id="row8"><td><a class="folder" href="/upl
-0940: oad">upload</a></td><td>- bytes</td><td></td></tr><tr id="row9">
-0980: <td><a class="folder" href="/dir3">dir3</a></td><td>- bytes</td>
-09c0: <td></td></tr><tr id="row10"><td><a href="/hello.txt">hello.txt<
-0a00: /a></td><td>0 bytes</td><td><button onclick="deleteFile('/hello.
-0a40: txt', 'row10')">Delete</button></td></tr><tr id="row11"><td><a h
-0a80: ref="/xaecic49p4ze1.mp4">xaecic49p4ze1.mp4</a></td><td>1084723 b
-0ac0: ytes</td><td><button onclick="deleteFile('/xaecic49p4ze1.mp4', '
-0b00: row11')">Delete</button></td></tr><tr id="row12"><td><a href="/v
-0b40: zuszmoss7ze1.mp4">vzuszmoss7ze1.mp4</a></td><td>83190 bytes</td>
-0b80: <td><button onclick="deleteFile('/vzuszmoss7ze1.mp4', 'row12')">
-0bc0: Delete</button></td></tr><tr id="row13"><td><a class="folder" hr
-0c00: ef="/dir1">dir1</a></td><td>- bytes</td><td></td></tr></table></
-0c40: body></html>
+0640: d><a href="/tiny.txt">tiny.txt</a></td><td>0 bytes</td><td><butt
+0680: on onclick="deleteFile('/tiny.txt', 'row3')">Delete</button></td
+06c0: ></tr><tr id="row4"><td><a href="/large.pdf">large.pdf</a></td><
+0700: td>3647755 bytes</td><td><button onclick="deleteFile('/large.pdf
+0740: ', 'row4')">Delete</button></td></tr><tr id="row5"><td><a href="
+0780: /large.txt">large.txt</a></td><td>27702 bytes</td><td><button on
+07c0: click="deleteFile('/large.txt', 'row5')">Delete</button></td></t
+0800: r><tr id="row6"><td><a href="/error.html">error.html</a></td><td
+0840: >267 bytes</td><td><button onclick="deleteFile('/error.html', 'r
+0880: ow6')">Delete</button></td></tr><tr id="row7"><td><a href="/no_p
+08c0: erms">no_perms</a></td><td>0 bytes</td><td><button onclick="dele
+0900: teFile('/no_perms', 'row7')">Delete</button></td></tr><tr id="ro
+0940: w8"><td><a class="folder" href="/volatile">volatile</a></td><td>
+0980: - bytes</td><td></td></tr><tr id="row9"><td><a href="/homepage.h
+09c0: tml">homepage.html</a></td><td>1017 bytes</td><td><button onclic
+0a00: k="deleteFile('/homepage.html', 'row9')">Delete</button></td></t
+0a40: r><tr id="row10"><td><a href="/message.txt">message.txt</a></td>
+0a80: <td>9687 bytes</td><td><button onclick="deleteFile('/message.txt
+0ac0: ', 'row10')">Delete</button></td></tr><tr id="row11"><td><a clas
+0b00: s="folder" href="/upload">upload</a></td><td>- bytes</td><td></t
+0b40: d></tr><tr id="row12"><td><a class="folder" href="/dir3">dir3</a
+0b80: ></td><td>- bytes</td><td></td></tr><tr id="row13"><td><a href="
+0bc0: /hello.txt">hello.txt</a></td><td>0 bytes</td><td><button onclic
+0c00: k="deleteFile('/hello.txt', 'row13')">Delete</button></td></tr><
+0c40: tr id="row14"><td><a href="/xaecic49p4ze1.mp4">xaecic49p4ze1.mp4
+0c80: </a></td><td>1084723 bytes</td><td><button onclick="deleteFile('
+0cc0: /xaecic49p4ze1.mp4', 'row14')">Delete</button></td></tr><tr id="
+0d00: row15"><td><a href="/vzuszmoss7ze1.mp4">vzuszmoss7ze1.mp4</a></t
+0d40: d><td>83190 bytes</td><td><button onclick="deleteFile('/vzuszmos
+0d80: s7ze1.mp4', 'row15')">Delete</button></td></tr><tr id="row16"><t
+0dc0: d><a class="folder" href="/dir1">dir1</a></td><td>- bytes</td><t
+0e00: d></td></tr><tr id="row17"><td><a href="/blursed-reaction-v0-54p
+0e40: hl7a8dwye1.webp">blursed-reaction-v0-54phl7a8dwye1.webp</a></td>
+0e80: <td>137076 bytes</td><td><button onclick="deleteFile('/blursed-r
+0ec0: eaction-v0-54phl7a8dwye1.webp', 'row17')">Delete</button></td></
+0f00: tr></table></body></html>
 == Info: Closing connection 0

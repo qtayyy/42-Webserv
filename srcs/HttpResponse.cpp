@@ -72,6 +72,8 @@ void HttpResponse::handleGET(ServerBlock *serverBlock) {
     path = applyAlias(path);
     std::cout << "ALIAs" << path << std::endl;
 
+    //fixme /custom_error turns into /volatile, but then reroutes to public/volatile/te
+    //fixme check if alias applies. If so, don't reroute using root
     if (!this->getBlock()->getCgiPass().empty()) {
         this->initCGIResponse(this->getBlock()->getCgiPass(), request);
         return;

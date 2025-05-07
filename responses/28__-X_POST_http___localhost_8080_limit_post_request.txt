@@ -7,15 +7,15 @@
 004a: Accept: */*
 0057: 
 == Info: Mark bundle as not supporting multiuse
-<= Recv header, 24 bytes (0x18)
-0000: HTTP/1.1 404 Not Found
+<= Recv header, 32 bytes (0x20)
+0000: HTTP/1.1 400 No data received.
 <= Recv header, 25 bytes (0x19)
 0000: Content-Type: text/html
-<= Recv header, 22 bytes (0x16)
-0000: Content-Length: 1056
+<= Recv header, 21 bytes (0x15)
+0000: Content-Length: 733
 <= Recv header, 2 bytes (0x2)
 0000: 
-<= Recv data, 1056 bytes (0x420)
+<= Recv data, 733 bytes (0x2dd)
 0000: <html>.    <head>.        <style>..body {.    font-family: Arial
 0040: , sans-serif;.    background-color: #f4f4f4;.    margin: 0;.    
 0080: padding: 20px;.}.h1 {.    color: #4CAF50;.}.table {.    width: 1
@@ -26,11 +26,6 @@
 01c0: .    color: red;.    font-weight: bold;.}..success {.    color: 
 0200: green;.    font-weight: bold;.}..            h2 {.              
 0240:   color: red;.            }.        </style>.    </head>.    <bo
-0280: dy>.        <h2>500 Internal Server Error</h2>.        <p>An err
-02c0: or occurred while processing the request. Traceback (most recent
-0300:  call last):.  File "/home/cooper/coreProgram/webserv_proper/web
-0340: serv1/cgi-bin/upload.py", line 214, in <module>.    if "file" in
-0380:  form:.  File "/usr/lib/python3.10/cgi.py", line 576, in __conta
-03c0: ins__.    raise TypeError("not indexable").TypeError: not indexa
-0400: ble.</p>.    </body>.    </html>
+0280: dy>.        <h2>400 Bad Request</h2>.        <p>No data received
+02c0: .</p>.    </body>.    </html>
 == Info: Connection #0 to host localhost left intact
