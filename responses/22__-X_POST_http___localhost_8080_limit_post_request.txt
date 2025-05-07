@@ -1,6 +1,36 @@
 == Info:   Trying 127.0.0.1:8080...
-== Info: connect to 127.0.0.1 port 8080 failed: Connection refused
-== Info:   Trying ::1:8080...
-== Info: connect to ::1 port 8080 failed: Connection refused
-== Info: Failed to connect to localhost port 8080 after 0 ms: Connection refused
-== Info: Closing connection 0
+== Info: Connected to localhost (127.0.0.1) port 8080 (#0)
+=> Send header, 89 bytes (0x59)
+0000: POST /limit_post HTTP/1.1
+001b: Host: localhost:8080
+0031: User-Agent: curl/7.81.0
+004a: Accept: */*
+0057: 
+== Info: Mark bundle as not supporting multiuse
+<= Recv header, 24 bytes (0x18)
+0000: HTTP/1.1 404 Not Found
+<= Recv header, 25 bytes (0x19)
+0000: Content-Type: text/html
+<= Recv header, 22 bytes (0x16)
+0000: Content-Length: 1056
+<= Recv header, 2 bytes (0x2)
+0000: 
+<= Recv data, 1056 bytes (0x420)
+0000: <html>.    <head>.        <style>..body {.    font-family: Arial
+0040: , sans-serif;.    background-color: #f4f4f4;.    margin: 0;.    
+0080: padding: 20px;.}.h1 {.    color: #4CAF50;.}.table {.    width: 1
+00c0: 00%;.    border-collapse: collapse;.    border-radius: 10px;.   
+0100:  overflow: hidden;.    padding: 10px;.}.th, td {.    text-align:
+0140:  left;.    background: #fff;.    padding: 10px 5px;.}.a {.    co
+0180: lor: #1E90FF;.}..folder {.    color:rgb(0, 255, 251);.}..error {
+01c0: .    color: red;.    font-weight: bold;.}..success {.    color: 
+0200: green;.    font-weight: bold;.}..            h2 {.              
+0240:   color: red;.            }.        </style>.    </head>.    <bo
+0280: dy>.        <h2>500 Internal Server Error</h2>.        <p>An err
+02c0: or occurred while processing the request. Traceback (most recent
+0300:  call last):.  File "/home/cooper/coreProgram/webserv_proper/web
+0340: serv1/cgi-bin/upload.py", line 214, in <module>.    if "file" in
+0380:  form:.  File "/usr/lib/python3.10/cgi.py", line 576, in __conta
+03c0: ins__.    raise TypeError("not indexable").TypeError: not indexa
+0400: ble.</p>.    </body>.    </html>
+== Info: Connection #0 to host localhost left intact

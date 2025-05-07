@@ -51,16 +51,23 @@ def response():
 
 cgitb.enable()
 
+# Ensure CONTENT_TYPE is set in the environment
+write_to(f"CONTENT_TYPE: {os.environ.get('CONTENT_TYPE')}")
+
 # Initialize FieldStorage
+raw_data = sys.stdin.buffer.read()  # Read as bytes
+write_to(f"Raw data: {raw_data}")
+import io
+
 try:
-    form = cgi.FieldStorage()
+    # Pass raw_data as a BytesIO stream to FieldStorage
+    form = cgi.FieldStorage(fp=io.BytesIO(raw_data), environ=os.environ, keep_blank_values=True)
 except Exception as e:
     error_message = traceback.format_exc()
     write_to(f"Error: {error_message}")
     sys.exit(1)
 
-
-try:
+try:    
     received_data = {}
     for key in form.keys():
         field_item = form[key]
@@ -71,7 +78,7 @@ try:
         else:  # It's a regular field
             received_data[key] = field_item.value
 
-    write_to(f"Received data: {received_data}")
+    write_to(f"Received data!: {received_data}")
 except Exception as e:
     error_message = traceback.format_exc()
     write_to(f"Error logging received data: {error_message}")

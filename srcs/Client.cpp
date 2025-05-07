@@ -82,16 +82,23 @@ void Client::parseRequestLine(const string& requestLine) {
     request.preview();
 }
 
-void Client::parseHeaders(const string& headers) {
-    string headersCopy = headers; 
-    size_t pos = 0;
-    while ((pos = headersCopy.find("\r\n")) != string::npos) {
-        string headerLine = headersCopy.substr(0, pos);
-        headersCopy = headersCopy.substr(pos + 2);
-        size_t colonPos = headerLine.find(": ");
-        if (colonPos != string::npos) {
-            string key = headerLine.substr(0, colonPos);
-            string value = headerLine.substr(colonPos + 2);
+// todo potential solution???
+void Client::parseHeaders(const std::string& headers) {
+    std::istringstream stream(headers);
+    std::string line;
+
+    while (std::getline(stream, line)) {
+        // Remove trailing \r if present
+        if (!line.empty() && line[line.size() - 1] == '\r') {
+            line.erase(line.size() - 1);
+        }
+
+        size_t colonPos = line.find(':');
+        if (colonPos != std::string::npos) {
+            std::string key = line.substr(0, colonPos);
+            std::string value = line.substr(colonPos + 1);
+            // Trim leading whitespace
+            value.erase(0, value.find_first_not_of(" \t"));
             request.headerSet(key, value);
         }
     }

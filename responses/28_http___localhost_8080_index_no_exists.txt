@@ -1,0 +1,6 @@
+HTTP/1.1 403 The client does not have access rights to the content, i.e., they are unauthorized.
+Connection: close
+Content-Length: 837
+Content-Type: text/html
+
+<html><head><title>Forbidden</title><style>       body {           font-family: Arial, sans-serif;           background-color: #f4f4f4;           margin: 0;           padding: 20px;       }       h1 {           color: #4CAF50;       }       table {           width: 100%;           border-collapse: collapse;           border-radius: 10px;           overflow: hidden;           padding: 10px;       }       th, td {           text-align: left;           background: #fff;           padding: 10px;       }       a {           color: #1E90FF;       }       .folder {           color:rgb(0, 255, 251);       }       .error {           color: red;           font-weight: bold;       }</style></head><body><h1 class="error">Forbidden</h1><p>The client does not have access rights to the content, i.e., they are unauthorized.</p></body></html>

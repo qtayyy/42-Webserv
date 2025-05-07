@@ -1,6 +1,36 @@
 == Info:   Trying 127.0.0.1:8080...
-== Info: connect to 127.0.0.1 port 8080 failed: Connection refused
-== Info:   Trying ::1:8080...
-== Info: connect to ::1 port 8080 failed: Connection refused
-== Info: Failed to connect to localhost port 8080 after 0 ms: Connection refused
+== Info: Connected to localhost (127.0.0.1) port 8080 (#0)
+=> Send header, 88 bytes (0x58)
+0000: POST /limit_get HTTP/1.1
+001a: Host: localhost:8080
+0030: User-Agent: curl/7.81.0
+0049: Accept: */*
+0056: 
+== Info: Mark bundle as not supporting multiuse
+<= Recv header, 98 bytes (0x62)
+0000: HTTP/1.1 405 The request method is known by the server but has b
+0040: een disabled and cannot be used.
+<= Recv header, 19 bytes (0x13)
+0000: Connection: close
+<= Recv header, 21 bytes (0x15)
+0000: Content-Length: 855
+<= Recv header, 25 bytes (0x19)
+0000: Content-Type: text/html
+<= Recv header, 2 bytes (0x2)
+0000: 
+<= Recv data, 855 bytes (0x357)
+0000: <html><head><title>Method Not Allowed</title><style>       body 
+0040: {           font-family: Arial, sans-serif;           background
+0080: -color: #f4f4f4;           margin: 0;           padding: 20px;  
+00c0:      }       h1 {           color: #4CAF50;       }       table 
+0100: {           width: 100%;           border-collapse: collapse;   
+0140:         border-radius: 10px;           overflow: hidden;        
+0180:    padding: 10px;       }       th, td {           text-align: l
+01c0: eft;           background: #fff;           padding: 10px;       
+0200: }       a {           color: #1E90FF;       }       .folder {   
+0240:         color:rgb(0, 255, 251);       }       .error {          
+0280:  color: red;           font-weight: bold;       }</style></head>
+02c0: <body><h1 class="error">Method Not Allowed</h1><p>The request me
+0300: thod is known by the server but has been disabled and cannot be 
+0340: used.</p></body></html>
 == Info: Closing connection 0

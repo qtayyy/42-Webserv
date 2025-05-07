@@ -1,0 +1,60 @@
+HTTP/1.1 404 Not Found
+Content-Type: text/html
+Content-Length: 1056
+
+<html>
+    <head>
+        <style>
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+}
+h1 {
+    color: #4CAF50;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+    padding: 10px;
+}
+th, td {
+    text-align: left;
+    background: #fff;
+    padding: 10px 5px;
+}
+a {
+    color: #1E90FF;
+}
+.folder {
+    color:rgb(0, 255, 251);
+}
+.error {
+    color: red;
+    font-weight: bold;
+}
+.success {
+    color: green;
+    font-weight: bold;
+}
+
+            h2 {
+                color: red;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>500 Internal Server Error</h2>
+        <p>An error occurred while processing the request. Traceback (most recent call last):
+  File "/home/cooper/coreProgram/webserv_proper/webserv1/cgi-bin/upload.py", line 214, in <module>
+    if "file" in form:
+  File "/usr/lib/python3.10/cgi.py", line 576, in __contains__
+    raise TypeError("not indexable")
+TypeError: not indexable
+</p>
+    </body>
+    </html>

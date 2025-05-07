@@ -1,6 +1,34 @@
 == Info:   Trying 127.0.0.1:8080...
-== Info: connect to 127.0.0.1 port 8080 failed: Connection refused
-== Info:   Trying ::1:8080...
-== Info: connect to ::1 port 8080 failed: Connection refused
-== Info: Failed to connect to localhost port 8080 after 0 ms: Connection refused
+== Info: Connected to localhost (127.0.0.1) port 8080 (#0)
+=> Send header, 93 bytes (0x5d)
+0000: DELETE /limit_delete HTTP/1.1
+001f: Host: localhost:8080
+0035: User-Agent: curl/7.81.0
+004e: Accept: */*
+005b: 
+== Info: Mark bundle as not supporting multiuse
+<= Recv header, 62 bytes (0x3e)
+0000: HTTP/1.1 404 The server can not find the requested resource.
+<= Recv header, 19 bytes (0x13)
+0000: Connection: close
+<= Recv header, 21 bytes (0x15)
+0000: Content-Length: 801
+<= Recv header, 25 bytes (0x19)
+0000: Content-Type: text/html
+<= Recv header, 2 bytes (0x2)
+0000: 
+<= Recv data, 801 bytes (0x321)
+0000: <html><head><title>Not Found</title><style>       body {        
+0040:    font-family: Arial, sans-serif;           background-color: #
+0080: f4f4f4;           margin: 0;           padding: 20px;       }   
+00c0:     h1 {           color: #4CAF50;       }       table {        
+0100:    width: 100%;           border-collapse: collapse;           b
+0140: order-radius: 10px;           overflow: hidden;           paddin
+0180: g: 10px;       }       th, td {           text-align: left;     
+01c0:       background: #fff;           padding: 10px;       }       a
+0200:  {           color: #1E90FF;       }       .folder {           c
+0240: olor:rgb(0, 255, 251);       }       .error {           color: r
+0280: ed;           font-weight: bold;       }</style></head><body><h1
+02c0:  class="error">Not Found</h1><p>The server can not find the requ
+0300: ested resource.</p></body></html>
 == Info: Closing connection 0
