@@ -232,7 +232,47 @@ if request_method == "POST":
 
 
 elif request_method == "GET":
-    write_to("GET")
+    route = sys.argv[1]
+    if not route:
+        exit_error("Bad Request", "No file path provided in the request.", 400)
+
+    write_to(f"GET {route}")
+    current_path = os.getcwd()
+    write_to(f"current_path: {current_path}")
+    route = route.lstrip('/')  # Remove leading slash if present
+    full_path = os.path.join(current_path, route)
+    write_to(f"full_path: {full_path}")
+    if os.path.isdir(full_path):
+        write_to(f"Directory listing for {full_path}")
+        directory_listing = "<ul>"
+        for item in os.listdir(full_path):
+            item_path = os.path.join(route, item)
+            if os.path.isdir(item_path):
+                directory_listing += f"<li class='folder'><b>[DIR]</b> <a href='{item_path}'>{item}</a></li>"
+            else:
+                directory_listing += f"<li><a href='{item_path}'>{item}</a></li>"
+        directory_listing += "</ul>"
+
+        response_body = dedent(f"""
+        <html>
+        <head><style>{style}</style></head>
+        <body>
+            <h1>Directory Listing for {route}</h1>
+            {directory_listing}
+        </body>
+        </html>
+        """)
+
+        response = generate_response_string(
+            content=response_body,
+            status_code=200,
+            status_message="OK",
+            content_type="text/html",
+            **additional_args
+        )
+        sys.stdout.write(response)
+        sys.stdout.flush()
+        sys.exit(0)
 
     extension = os.path.splitext(route)[1]
     content_type = CONTENT_TYPES.get(extension, "Content-Type: text/plain")

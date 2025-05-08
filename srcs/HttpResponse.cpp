@@ -524,6 +524,11 @@ LocationBlock* HttpResponse::resolveLocationBlock(const string& path, ServerBloc
 }
 
 
+string HttpResponse::getReroutedPath() {
+    return _reroutedPath;
+}
+
+
 string HttpResponse::applyAlias(string& path) {
     if (!this->_isLocation) {
         return path;

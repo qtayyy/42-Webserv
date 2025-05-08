@@ -60,6 +60,7 @@ public:
     string getMethod() const;
     string getAbsolutePath() const;
     string getTimestamp() const;
+    string getReroutedPath();
 
     string composeHttpResponse(
         const string& body,

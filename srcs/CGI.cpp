@@ -51,7 +51,7 @@ string CGIHandler::handleCgi(
     this->setEnv("REQUEST_METHOD",  request.getMethod());
     this->setEnv("QUERY_STRING",    request.getQueryString());
     this->setEnv("SERVER_PORT",     "8080"); //fixme
-    this->setEnv("PATH_INFO",       fullCGIPath);
+    this->setEnv("PATH_INFO",       request.headerGet("path"));
     this->setEnv("PATH_TRANSLATED", fullCGIPath);
     this->setEnv("REQUEST_URI",     fullCGIPath);
     this->setEnv("SCRIPT_NAME",     cgiScriptPath);
@@ -86,8 +86,8 @@ string CGIHandler::handleCgi(
         close(inputPipe[0]);
         close(outputPipe[1]);
         string rootPath = locationBlock.getRoot();
-
-        runCGIExecutable(fullCGIPath, rootPath);
+        string reroutedPath = response.getReroutedPath();
+        runCGIExecutable(fullCGIPath, reroutedPath);
         
         perror(("execl failed: " + fullCGIPath).c_str());
         exit(1);

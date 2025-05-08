@@ -49,6 +49,7 @@ public:
     void   setRawRequest(string rawRequest);
     string getRawRequest() const;
 
+
     string preview();
     
 };

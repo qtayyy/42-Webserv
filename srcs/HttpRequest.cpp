@@ -31,6 +31,7 @@ void   HttpRequest::setPath(string path)                { this->_path = path; }
 string HttpRequest::getPath() const                     { return _path; }
 
 
+
 string HttpRequest::preview() { 
     std::ostringstream infoStream;
     infoStream << "-- request --" << std::endl;
