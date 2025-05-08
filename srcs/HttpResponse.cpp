@@ -65,12 +65,8 @@ LocationBlock *HttpResponse::getBlock() {
 /* REQUEST HANDLERS */
 
 void HttpResponse::handleGET(ServerBlock *serverBlock) {
-    string path = request.headerGet("path");
     (void)serverBlock;
 
-    std::cout << "ALIAs" << path << std::endl;
-    path = applyAlias(path);
-    std::cout << "ALIAs" << path << std::endl;
 
     //fixme /custom_error turns into /volatile, but then reroutes to public/volatile/te
     //fixme check if alias applies. If so, don't reroute using root
@@ -80,25 +76,18 @@ void HttpResponse::handleGET(ServerBlock *serverBlock) {
     }
 
     try {
-        string reroutedPath = urlDecode(reroutePath(path));
-        this->_reroutedPath = reroutedPath;
-        std::cout << "REROUTED PATH: " << _reroutedPath << std::endl;
 
-        if (!isPathExist(reroutedPath)) {
-            throw HttpException(404, reroutedPath);
-        }
-
-        // if the path is a directory
-        if (isDirectory(reroutedPath)) { //fixme problem here. Doesn't detect an alias as directory
+        // if the _path is a directory
+        if (isDirectory(_reroutedPath)) { //fixme problem here. Doesn't detect an alias as directory
             std::cout << "Directory detected" << std::endl;
-            string indexFile = _dirHasIndexFile(reroutedPath); // fixme issue here also
+            string indexFile = _dirHasIndexFile(_reroutedPath); // fixme issue here also
             
             stringList indices;
 
             // if index file is found, serve it
             indices = getBlock()->getIndex();
             for (stringList::const_iterator it = indices.begin(); it != indices.end(); ++it) {
-                string potentialIndexFile = joinPaths(reroutedPath, *it);
+                string potentialIndexFile = joinPaths(_reroutedPath, *it);
                 try {
                     std::cout << "Serving index file: " << potentialIndexFile << std::endl;
                     this->initHttpResponse(readFileContent(potentialIndexFile), getContentType(potentialIndexFile), 200);
@@ -112,8 +101,8 @@ void HttpResponse::handleGET(ServerBlock *serverBlock) {
             
             // if autoindex is enabled, serve the autoindex page
             if (getBlock()->getAutoindex()) {
-                std::cout << "Generating auto index... " << reroutedPath<< std::endl;
-                string autoIndex = createAutoIndexHtml(reroutedPath, path);
+                std::cout << "Generating auto index... " << _reroutedPath<< std::endl;
+                string autoIndex = createAutoIndexHtml(_reroutedPath, _path);
                 this->initHttpResponse(autoIndex, CONTENT_TYPE_HTML, 200);
             } 
             
@@ -126,9 +115,9 @@ void HttpResponse::handleGET(ServerBlock *serverBlock) {
         
         // if the path is a file
         else {
-            string content = readFileContent((reroutedPath));
+            string content = readFileContent((_reroutedPath));
 
-            this->initHttpResponse(content, getContentType(reroutedPath), 200);
+            this->initHttpResponse(content, getContentType(_reroutedPath), 200);
         }
     } 
 
@@ -184,6 +173,9 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock)
     this->_locationBlockRef = resolveLocationBlock(path, serverBlock);
 
 
+
+    /* RESOLVE LOCATION BLOCK */
+
     if (this->_locationBlockRef == NULL) {
         this->_locationBlockRef = serverBlock;
         this->_isLocation        = false;
@@ -197,6 +189,9 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock)
     }
     
 
+    
+    /* LIMIT EXCEPT */
+
     stringList limitExcept = this->_locationBlockRef->getLimitExcept();
 
     // Check if the request method is allowed
@@ -207,7 +202,10 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock)
 
     string method = this->request.getMethod();
 
-    // Check if a redirect is required
+
+    
+    /* REDIRECTION */
+
     std::pair<int, string> redirectInfo = this->getBlock()->getReturn();
     if (!redirectInfo.second.empty()) {
         LogStream::pending() << "redirecting to :" << redirectInfo.second << std::endl;
@@ -215,10 +213,20 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock)
         return;
     }
 
-    if (!isPathExist(this->getBlock()->getRoot())) {
+    if (!isPathExist(this->getBlock()->getRoot()))
         this->initErrorHttpResponse(404);
-    }
 
+    _path         = request.headerGet("path");
+    _path         = applyAlias(_path);
+    _reroutedPath = urlDecode(reroutePath(_path));
+
+    LogStream::log() << LogStream::log().setBordered(true) 
+                     << "Original path: " << request.headerGet("path") << "\n"
+                     << "Alias path: "    << _path << "\n"
+                     << "Rerouted path: " << _reroutedPath << std::endl;
+
+    // if (!isPathExist(_reroutedPath))
+    //     throw HttpException(404, _reroutedPath);
 
     /* HANDLE METHODS */
 
