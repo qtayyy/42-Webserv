@@ -21,7 +21,8 @@ rm -rf "$output_dir"/*  # Remove all files from the output directory
 mkdir -p "$output_dir"  # Ensure the directory exists
 
 # Open the log file and delete its contents
-> "$log_file"
+mkdir -p "$(dirname "$log_file")"  # Ensure the directory exists
+> "$log_file"  # Truncate the log file
 
 rm -rf public/upload/*
 
@@ -56,12 +57,12 @@ call_curl_and_save() {
     success_statuses=(200 201 202 204 303 302)
 
     if [[ " ${success_statuses[@]} " =~ " $http_status " ]]; then
-        echo -e "\e[32mReceived success status: HTTP $http_status - $http_status_message\e[0m"  # Print in green for success
+        echo -e "\nReceived success status: \e[32mHTTP $http_status - $http_status_message\e[0m"  # Print in green for success
     else
-        echo -e "\e[33mReceived error status: HTTP $http_status - $http_status_message\e[0m"  # Print in orange for failure
+        echo -e "\nReceived error status: \e[33mHTTP $http_status - $http_status_message\e[0m"  # Print in orange for failure
     fi
 
-    echo -e "\nsummary:"
+    echo -e "\nSummary:"
 
         if [[ -f "$log_file" ]]; then
             last_prefix=$(tail -n 1 "$log_file" | grep -oP '^\d+')
