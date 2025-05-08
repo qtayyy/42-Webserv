@@ -242,16 +242,34 @@ elif request_method == "GET":
     route = route.lstrip('/')  # Remove leading slash if present
     full_path = os.path.join(current_path, route)
     write_to(f"full_path: {full_path}")
+
     if os.path.isdir(full_path):
         write_to(f"Directory listing for {full_path}")
         directory_listing = "<ul>"
         for item in os.listdir(full_path):
             item_path = os.path.join(route, item)
+            write_to(f"Item: {item}")
             if os.path.isdir(item_path):
-                directory_listing += f"<li class='folder'><b>[DIR]</b> <a href='{item_path}'>{item}</a></li>"
+                directory_listing += (
+                    f"<li class='folder'><b>[DIR]</b> <a data-file='{item}/'>{item}</a></li>"
+                )
             else:
-                directory_listing += f"<li><a href='{item_path}'>{item}</a></li>"
+                directory_listing += (
+                    f"<li><a data-file='{item}'>{item}</a></li>"
+                )
         directory_listing += "</ul>"
+
+        # JavaScript to dynamically append href based on current URL
+        js_script = """
+        <script>
+        const basePath = window.location.pathname;
+        const normalizedPath = basePath.endsWith('/') ? basePath : basePath + '/';
+        document.querySelectorAll('a[data-file]').forEach(link => {
+            const fileName = link.getAttribute('data-file');
+            link.href = normalizedPath + fileName;
+        });
+        </script>
+        """
 
         response_body = dedent(f"""
         <html>
@@ -259,6 +277,7 @@ elif request_method == "GET":
         <body>
             <h1>Directory Listing for {route}</h1>
             {directory_listing}
+            {js_script}
         </body>
         </html>
         """)
@@ -273,6 +292,7 @@ elif request_method == "GET":
         sys.stdout.write(response)
         sys.stdout.flush()
         sys.exit(0)
+
 
     extension = os.path.splitext(route)[1]
     content_type = CONTENT_TYPES.get(extension, "Content-Type: text/plain")
