@@ -41,7 +41,7 @@ string currentDateTime();
 
 string sanitizeFilename(string str);
 
-string generateLogFileName(const string &folder, const string& prefix);
+string generateLogFileName(const string &folder, const string &category, const string& prefix);
 
 
 #endif

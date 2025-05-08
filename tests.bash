@@ -2,12 +2,26 @@
 
 conf_file="/home/cooper/coreProgram/webserv_proper/webserv1/conf/good/custom.conf"
 output_dir="responses"  # Global variable for output directory
+log_file="log_trace.log"
 file_index=1  # Initialize the file index
+RED="\e[31m"
+GREEN="\e[32m"
+BLUE="\e[34m"
+YELLOW="\e[33m"
+MAGENTA="\e[35m"
+CYAN="\e[36m"
+WHITE="\e[37m"
+RESET="\e[0m"
+
+
 
 mkdir -p "$output_dir"  # Create the output directory if it doesn't exist
 
 rm -rf "$output_dir"/*  # Remove all files from the output directory
 mkdir -p "$output_dir"  # Ensure the directory exists
+
+# Open the log file and delete its contents
+> "$log_file"
 
 rm -rf public/upload/*
 
@@ -19,7 +33,9 @@ echo -e "PWD:\t${ITALIC}$(pwd)${RESET}"
 # Function to call curl and save the response
 call_curl_and_save() {
     local curl_command="$1"
-    local sanitized_command=$(echo "$curl_command" | sed 's/[^a-zA-Z0-9._-]/_/g')  # Sanitize command for filename
+    
+    local sanitized_command=$(echo "$curl_command" | sed 's|.*http://||' | sed 's/[^a-zA-Z0-9._-]/_/g')  # Extract after "http://" and sanitize for filename
+    
     local output_file="$output_dir/${file_index}_${sanitized_command}.txt"
     local request_file="$output_dir/${file_index}_${sanitized_command}_request.txt"
     touch "$output_file"  # Create the output file if it doesn't exist
@@ -27,7 +43,7 @@ call_curl_and_save() {
 
     eval curl -s -i --trace-ascii "$request_file" -o "$output_file" $curl_command  # Use eval to execute the curl command properly
 
-    echo -e "\tExecuting:\t${ITALIC}curl -s -i --trace-ascii \"$request_file\" -o \"$output_file\" $curl_command${RESET}"
+    echo -e "Executing: ${ITALIC}curl -s -i --trace-ascii \"$request_file\" -o \"$output_file\" $curl_command${RESET}"
 
     echo -e "\tResponse saved:\t${ITALIC}$output_file${RESET}"
     echo -e "\tTrace saved:\t${ITALIC}$request_file${RESET}"
@@ -44,6 +60,22 @@ call_curl_and_save() {
     else
         echo -e "\e[33mReceived error status: HTTP $http_status - $http_status_message\e[0m"  # Print in orange for failure
     fi
+
+    echo -e "\nsummary:"
+
+        if [[ -f "$log_file" ]]; then
+            last_prefix=$(tail -n 1 "$log_file" | grep -oP '^\d+')
+
+            tac "$log_file" | while IFS= read -r line; do
+                current_prefix=$(echo "$line" | grep -oP '^\d+')
+                if [[ "$current_prefix" != "$last_prefix" ]]; then
+                    break
+                fi
+                echo -e "\t$line"
+            done
+        else
+            echo "Log file '$log_file' not found."
+        fi
 
     ((file_index++))  # Increment the file index
 }
@@ -89,3 +121,33 @@ done
 
 # Print the total number of curl calls
 echo -e "\nTotal curl calls: $curl_call_count"
+
+# echo -e "\n$CYAN---- SERVER LOGS SAVED $log_file ----"
+
+# # Open and read the log file line by line
+# if [[ -f "$log_file" ]]; then
+#     previous_prefix=""
+
+#     while IFS= read -r line; do
+#         # Extract the prefix number
+#         prefix_number=$(echo "$line" | grep -oP '^\d+')
+
+#         if [[ "$prefix_number" != "$previous_prefix" ]]; then
+#             # If the prefix number has changed, update the previous prefix
+#             previous_prefix="$prefix_number"
+#             echo ""
+#         fi
+
+#         # Determine the color based on the prefix number
+#         if ((prefix_number % 2 == 1)); then
+#             color=$CYAN
+#         else
+#             color=$BLUE
+#         fi
+
+#         # Print the line with the selected color
+#         echo -e "${color}${line}${RESET}"
+#     done < "$log_file"
+# else
+#     echo "Log file '$log_file' not found."
+# fi

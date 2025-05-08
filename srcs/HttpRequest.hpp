@@ -2,6 +2,7 @@
 #define HTTPREQUEST_HPP
 
 #include "../includes/Webserv.hpp"
+#include "Utils.hpp"
 
 class HttpRequest {
 private:
@@ -13,9 +14,11 @@ private:
     string     queryString;
     string     absolutePath;
     string     _path;
+    string     _uid;
 
 public:
     
+
     /* CONSTRUCTOR/DESTRUCTOR */
     
     HttpRequest();
@@ -25,6 +28,7 @@ public:
     stringDict *getFormBlock(int index);
     void        setBody(string body);
     string      &getBody();
+
 
     /* GETTER/SETTERS */
 
@@ -39,6 +43,8 @@ public:
 
     void   headerSet(string key, string value);
     string headerGet(string key);
+
+    string const &getUid() const;
 
     void   setRawRequest(string rawRequest);
     string getRawRequest() const;

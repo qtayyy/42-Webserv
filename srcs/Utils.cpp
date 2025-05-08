@@ -38,8 +38,12 @@ bool isPathExist(const string& resourcePath) {
 }
 
 string makeAbsPath(string filepath) {
-    string fullPath = getcwd(NULL, 0);
-    fullPath = joinPaths(fullPath, filepath);
+    char* cwd = getcwd(NULL, 0); // Allocates memory
+    if (!cwd) {
+        throw std::runtime_error("Failed to get current working directory");
+    }
+    string fullPath = joinPaths(cwd, filepath);
+    free(cwd); // Free the allocated memory
     return fullPath;
 }
 
@@ -317,7 +321,7 @@ string currentDateTime() {
     time_t now = time(NULL);
     tm* localTime = localtime(&now);
     char timeBuffer[100];
-    strftime(timeBuffer, sizeof(timeBuffer), "%I:%M%p %d-%m-%Y", localTime); // %I for 12-hour format, %p for AM/PM
+    strftime(timeBuffer, sizeof(timeBuffer), "%I:%M%p_%d-%m-%Y", localTime); // %I for 12-hour format, %p for AM/PM
     return timeBuffer;
 }
 
@@ -341,9 +345,17 @@ string sanitizeFilename(string str) {
     return sanitized;
 }
 
-string generateLogFileName(const string &folder, const string& prefix) {
-    string outputFolder = folder + (sanitizeFilename(string(prefix)) + " [" + currentDateTime() + "] " + generateRandomID(5) + ".log");
+string generateLogFileName(const string &folder, const string &category, const string& prefix) {
+    static int    counter = 0;
+    static string latestCategory = "";
+
+    if (category != latestCategory) {
+        latestCategory = category;
+        counter ++;
+    }
+
+    string outputFolder = folder + to_string(counter) + "_" + (sanitizeFilename(prefix) + "_" + generateRandomID(5) + ".log");
     
-    LogStream::log("log_trace.log", std::ios::app) << " [" + currentDateTime() + "] " << "Log file created: " << outputFolder << std::endl;
+    LogStream::log("log_trace.log", std::ios::app) << counter << ". " << getBasename(outputFolder) << " in " << outputFolder << std::endl;
     return outputFolder;
 }

@@ -58,7 +58,6 @@ string CGIHandler::handleCgi(
     this->setEnv("CONTENT_LENGTH",  to_string(data.length()));
     this->setEnv("CONTENT_TYPE",    request.headerGet("Content-Type")); //fixme here???
     this->setEnv("SERVER_PROTOCOL", "HTTP/1.1");
-    std::cout << request.preview() << std::endl;
 
     setEnvironmentVariables(this->envVars);
     // system("./ubuntu_cgi_tester");
@@ -134,7 +133,7 @@ string CGIHandler::handleCgi(
         }
 
         string finalMsg(responseBuffer.begin(), responseBuffer.end());
-        LogStream::log(string("logs/cgi/") + "CGI_OUTPUT [" + currentDateTime() + "] " + generateRandomID(10) + ".log", std::ios::out | std::ios::trunc)  << finalMsg << std::endl;
+        LogStream::log(generateLogFileName(string("logs/cgi/"), request.getUid(), "CGI_OUTPUT")) << finalMsg << std::endl;
         LogStream::success() << "CGI completed. " << totalBytes << " bytes received from " << basename(fullCGIPath.c_str()) << std::endl;
         
         close(outputPipe[0]);  // Close read end after reading

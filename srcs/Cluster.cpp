@@ -277,12 +277,10 @@ for (int i = 0; i < _numOfFds; i++) {
 		if (_listenerToServer.find(_pollFds[i].fd) != _listenerToServer.end()) {
 			LogStream::pending() << "Handling new client " << _pollFds[i].fd << std::endl;
 			handleNewClient(_pollFds[i].fd);
-			std::cout << "EVENTS"  << std::endl;
-			printFdEvents(_pollFds[i]);
 		} 
 		
 		else {
-			char buffer[BUFFER_SIZE];
+			char	buffer[BUFFER_SIZE];
 			ssize_t byteRecv;
 			string& requestBuffer = this->_clients[_pollFds[i].fd]->getRecvBuffer();
 	
@@ -322,9 +320,13 @@ for (int i = 0; i < _numOfFds; i++) {
 					if (requestBuffer.size() >= headerEnd + 4 + contentLength) {
 						LogStream::success() << "Full request received from [" << _pollFds[i].fd << "] with " << requestBuffer.size() << " bytes" << RESET << std::endl;
 						this->_clients[_pollFds[i].fd]->handleRequest(requestBuffer.size(), (char *)(requestBuffer.c_str()));
+						
+						HttpRequest &request = this->_clients[_pollFds[i].fd]->getRequest();
+						string outputFolder = generateLogFileName(REQUESTS_FOLDER, request.getUid(), request.getMethod() + "_request_" + request.headerGet("path"));
+						LogStream::log(outputFolder, std::ios::app) << request.getRawRequest() << std::endl;
+						
 						this->_clients[_pollFds[i].fd]->getRecvBuffer().clear();
 						_pollFds[i].events = POLLOUT;
-						LogStream::log() << "[DEBUG] POLLOUT triggered for fd [" << _pollFds[i].fd << "]" << std::endl;
 						break;
 					}
 					else
@@ -358,7 +360,7 @@ for (int i = 0; i < _numOfFds; i++) {
 		LogStream::pending() << "Response message generated" << std::endl;
 
 		while (bytesLeft > 0) {
-			LogStream::log(generateLogFileName(string("logs/responses/"), "RESPONSE")) << finalMsg << std::endl;
+			LogStream::log(generateLogFileName(string("logs/responses/"), request.getUid(), "RESPONSE")) << finalMsg << std::endl;
 			ssize_t sent = send(_pollFds[i].fd, msgPtr + bytesSent, bytesLeft, 0);
 			if (sent == -1) {
 				int		  error = 0;

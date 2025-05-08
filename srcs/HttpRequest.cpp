@@ -2,9 +2,13 @@
 
 /* CONSTRUCTORS/DESTRUCTORS */
 
-HttpRequest::HttpRequest() { }
+HttpRequest::HttpRequest() : _uid(generateRandomID(10)) { }
 HttpRequest::~HttpRequest() { }
 
+
+string const &HttpRequest::getUid() const {
+    return _uid;
+}
 
 /* GETTERS/SETTERS */
 

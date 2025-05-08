@@ -214,10 +214,6 @@ void Client::handleRequest(ssize_t read_buf, char *buffer) {
     request_buf = string(buffer, read_buf); // <- Again, use this
     parseRequest();
     request.preview();
-
-
-    string outputFolder = generateLogFileName(REQUESTS_FOLDER, request.getMethod() + "_request_" + request.headerGet("path"));
-    LogStream::log(outputFolder, std::ios::app) << request.getRawRequest() << std::endl;
 }
 
 
