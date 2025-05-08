@@ -7,18 +7,18 @@
 004d: Accept: */*
 005a: 
 == Info: Mark bundle as not supporting multiuse
-<= Recv header, 98 bytes (0x62)
+<= Recv header, 68 bytes (0x44)
 0000: HTTP/1.1 403 The client does not have access rights to the conte
-0040: nt, i.e., they are unauthorized.
+0040: nt
 <= Recv header, 19 bytes (0x13)
 0000: Connection: close
 <= Recv header, 21 bytes (0x15)
-0000: Content-Length: 837
+0000: Content-Length: 807
 <= Recv header, 25 bytes (0x19)
 0000: Content-Type: text/html
 <= Recv header, 2 bytes (0x2)
 0000: 
-<= Recv data, 837 bytes (0x345)
+<= Recv data, 807 bytes (0x327)
 0000: <html><head><title>Forbidden</title><style>       body {        
 0040:    font-family: Arial, sans-serif;           background-color: #
 0080: f4f4f4;           margin: 0;           padding: 20px;       }   
@@ -31,6 +31,5 @@
 0240: olor:rgb(0, 255, 251);       }       .error {           color: r
 0280: ed;           font-weight: bold;       }</style></head><body><h1
 02c0:  class="error">Forbidden</h1><p>The client does not have access 
-0300: rights to the content, i.e., they are unauthorized.</p></body></
-0340: html>
+0300: rights to the content</p></body></html>
 == Info: Closing connection 0

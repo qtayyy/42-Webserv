@@ -7,28 +7,36 @@
 004b: Accept: */*
 0058: 
 == Info: Mark bundle as not supporting multiuse
-<= Recv header, 62 bytes (0x3e)
-0000: HTTP/1.1 404 The server can not find the requested resource.
+<= Recv header, 22 bytes (0x16)
+0000: HTTP/1.1 200 Success
 <= Recv header, 19 bytes (0x13)
 0000: Connection: close
-<= Recv header, 21 bytes (0x15)
-0000: Content-Length: 801
+<= Recv header, 22 bytes (0x16)
+0000: Content-Length: 1318
 <= Recv header, 25 bytes (0x19)
 0000: Content-Type: text/html
 <= Recv header, 2 bytes (0x2)
 0000: 
-<= Recv data, 801 bytes (0x321)
-0000: <html><head><title>Not Found</title><style>       body {        
-0040:    font-family: Arial, sans-serif;           background-color: #
-0080: f4f4f4;           margin: 0;           padding: 20px;       }   
-00c0:     h1 {           color: #4CAF50;       }       table {        
-0100:    width: 100%;           border-collapse: collapse;           b
-0140: order-radius: 10px;           overflow: hidden;           paddin
-0180: g: 10px;       }       th, td {           text-align: left;     
-01c0:       background: #fff;           padding: 10px;       }       a
-0200:  {           color: #1E90FF;       }       .folder {           c
-0240: olor:rgb(0, 255, 251);       }       .error {           color: r
-0280: ed;           font-weight: bold;       }</style></head><body><h1
-02c0:  class="error">Not Found</h1><p>The server can not find the requ
-0300: ested resource.</p></body></html>
+<= Recv data, 1318 bytes (0x526)
+0000: <html><head><title>Index of public/volatile/dir_no_perms</title>
+0040: <style>       body {           font-family: Arial, sans-serif;  
+0080:          background-color: #f4f4f4;           margin: 0;        
+00c0:    padding: 20px;       }       h1 {           color: #4CAF50;  
+0100:      }       table {           width: 100%;           border-col
+0140: lapse: collapse;           border-radius: 10px;           overfl
+0180: ow: hidden;           padding: 10px;       }       th, td {     
+01c0:       text-align: left;           background: #fff;           pa
+0200: dding: 10px;       }       a {           color: #1E90FF;       }
+0240:        .folder {           color:rgb(0, 255, 251);       }      
+0280:  .error {           color: red;           font-weight: bold;    
+02c0:    }</style><script>async function deleteFile(filePath, rowId) {
+0300:   if (!confirm('Delete this file?')) return;  try {    const res
+0340: ponse = await fetch(filePath, { method: 'DELETE' });    if (resp
+0380: onse.ok) {      document.getElementById(rowId).remove();    } el
+03c0: se {      alert('Failed to delete: ' + response.status);    }  }
+0400:  catch (err) {    alert('Error: ' + err);  }}</script></head><bo
+0440: dy><h1>Index of <a href="/">~</a><a href=""></a> / <a href="/dir
+0480: _no_perms">dir_no_perms</a> </h1><table><tr><th>Name</th><th>Siz
+04c0: e</th><th>Action</th></tr><tr><td colspan="3">Unable to open dir
+0500: ectory</td></tr></table></body></html>
 == Info: Closing connection 0

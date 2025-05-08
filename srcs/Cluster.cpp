@@ -358,7 +358,7 @@ for (int i = 0; i < _numOfFds; i++) {
 		LogStream::pending() << "Response message generated" << std::endl;
 
 		while (bytesLeft > 0) {
-			LogStream::log(string("logs/responses/") + "RESPONSE [" + currentDateTime() + "] " + generateRandomID(10) + ".log") << finalMsg << std::endl;
+			LogStream::log(generateLogFileName(string("logs/responses/"), "RESPONSE")) << finalMsg << std::endl;
 			ssize_t sent = send(_pollFds[i].fd, msgPtr + bytesSent, bytesLeft, 0);
 			if (sent == -1) {
 				int		  error = 0;

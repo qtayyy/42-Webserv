@@ -15,7 +15,7 @@ DEST_DIR="public/volatile"
 cp -r "$SOURCE_DIR"/* "$DEST_DIR"
 
 # Remove all permissions for files containing "no_perms" in the destination folder
-find "$DEST_DIR" -type f -name "*no_perms*" -exec chmod -rwx {} +
+find "$DEST_DIR" -name "*no_perms*" -exec chmod -rwx {} +
 
 make
 

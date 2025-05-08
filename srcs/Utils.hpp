@@ -38,4 +38,10 @@ string getDirname(const string& fullPath);
 
 string joinPaths(const string& base, const string& sub);
 string currentDateTime();
+
+string sanitizeFilename(string str);
+
+string generateLogFileName(const string &folder, const string& prefix);
+
+
 #endif

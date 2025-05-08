@@ -36,7 +36,10 @@ call_curl_and_save() {
     http_status=$(grep -oP '(?<=HTTP/1\.[01] )\d{3}' "$output_file" | head -n 1)
     http_status_message=$(grep -oP '(?<=HTTP/1\.[01] \d{3} ).*' "$output_file" | head -n 1)
 
-    if [[ $http_status -ge 200 && $http_status -lt 300 ]]; then
+    # Define an array of success statuses
+    success_statuses=(200 201 202 204 303 302)
+
+    if [[ " ${success_statuses[@]} " =~ " $http_status " ]]; then
         echo -e "\e[32mReceived success status: HTTP $http_status - $http_status_message\e[0m"  # Print in green for success
     else
         echo -e "\e[33mReceived error status: HTTP $http_status - $http_status_message\e[0m"  # Print in orange for failure

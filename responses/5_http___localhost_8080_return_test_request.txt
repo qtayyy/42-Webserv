@@ -7,8 +7,9 @@
 004a: Accept: */*
 0057: 
 == Info: Mark bundle as not supporting multiuse
-<= Recv header, 34 bytes (0x22)
-0000: HTTP/1.1 302 Unknown error code.
+<= Recv header, 80 bytes (0x50)
+0000: HTTP/1.1 302 The requested resource resides temporarily under a 
+0040: different URI.
 <= Recv header, 19 bytes (0x13)
 0000: Content-Length: 0
 <= Recv header, 25 bytes (0x19)

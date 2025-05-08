@@ -558,10 +558,12 @@ std::pair<string, string> HttpResponse::GetMsg(int statusCode) const {
         case 200: return std::make_pair("OK", "Success");
         case 201: return std::make_pair("Created", "The request has been fulfilled and resulted in a new resource being created.");
         case 202: return std::make_pair("Accepted", "The request has been accepted for processing, but the processing has not been completed.");
+        case 302: return std::make_pair("Found", "The requested resource resides temporarily under a different URI.");
+        case 303: return std::make_pair("See Other", "The server is redirecting the client to a different resource, typically using a GET request.");
         case 400: return std::make_pair("Bad Request", "The server could not understand the request due to invalid syntax.");
         case 401: return std::make_pair("Unauthorized", "The client must authenticate itself to get the requested response.");
         case 405: return std::make_pair("Method Not Allowed", "The request method is known by the server but has been disabled and cannot be used.");
-        case 403: return std::make_pair("Forbidden", "The client does not have access rights to the content, i.e., they are unauthorized.");
+        case 403: return std::make_pair("Forbidden", "The client does not have access rights to the content");
         case 404: return std::make_pair("Not Found", "The server can not find the requested resource.");
         case 500: return std::make_pair("Internal Server Error", "Something went wrong on the server.");
         case 504: return std::make_pair("Gateway Timeout", "The server, while acting as a gateway or proxy, did not receive a timely response from an upstream server it needed to access in order to complete the request.");

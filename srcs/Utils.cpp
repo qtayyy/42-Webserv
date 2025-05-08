@@ -1,6 +1,6 @@
 #include "Utils.hpp"
 #include "HttpException.hpp"
-
+#include "Log.hpp"
 
 void createFileWithContents(const string& filePath, const string& contents) {
     std::ofstream outFile(filePath.c_str());
@@ -304,7 +304,7 @@ string generateRandomID(size_t length) {
     static const size_t charsetSize = sizeof(charset) - 1;
 
     string randomID;
-    srand(static_cast<unsigned int>(time(NULL)));
+    srand(static_cast<unsigned int>(clock()));
 
     for (size_t i = 0; i < length; ++i)
         randomID += charset[rand() % charsetSize];
@@ -328,4 +328,22 @@ string formatTime(const string& format) {
     char timeBuffer[256];
     strftime(timeBuffer, sizeof(timeBuffer), format.c_str(), localTime); // Use the provided format string
     return string(timeBuffer);
+}
+
+string sanitizeFilename(string str) {
+    string sanitized;
+    for (size_t i = 0; i < str.size(); ++i) {
+        char c = str[i];
+        if (isalnum(c) || c == '_' || c == '-' || c == '.' || c == ' ' || c == '[' || c == ']' || c == '(' || c == ')' || c == '{' || c == '}') {
+            sanitized += c;
+        }
+    }
+    return sanitized;
+}
+
+string generateLogFileName(const string &folder, const string& prefix) {
+    string outputFolder = folder + (sanitizeFilename(string(prefix)) + " [" + currentDateTime() + "] " + generateRandomID(5) + ".log");
+    
+    LogStream::log("log_trace.log", std::ios::app) << " [" + currentDateTime() + "] " << "Log file created: " << outputFolder << std::endl;
+    return outputFolder;
 }
