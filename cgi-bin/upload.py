@@ -200,7 +200,9 @@ if request_method == "POST":
         if file_item.file is None: 
             exit_error("Bad Request", "No file content.", 400)
         
-        file_path = os.path.join(sys.argv[1], file_item.filename)
+        file_path = os.path.join("/", os.getcwd().lstrip('/'), sys.argv[1].lstrip('/'), file_item.filename)
+        write_to(f"file_path: {file_path}")
+        write_to(f"argv[1]: {sys.argv[1]}")
         if os.path.exists(file_path): 
             exit_error('Bad Request', f'"{bold(file_item.filename)}" already exists in "{bold(os.path.dirname(file_path))}"', 400)
         
