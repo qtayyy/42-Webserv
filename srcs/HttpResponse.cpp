@@ -42,7 +42,7 @@ const string HttpResponse::css =
 "           color: #1E90FF;"
 "       }"
 "       .folder {"
-"           color:rgb(0, 255, 251);"
+"           color:rgb(0, 160, 158);"
 "       }"
 "       .error {"
 "           color: red;"
@@ -434,19 +434,22 @@ void HttpResponse::initHttpResponse(string body, string resourceType, int status
 
 
 
-void HttpResponse::initRedirectResponse(string & redirectUrl, int statusCode) {
+void HttpResponse::initRedirectResponse(string &redirectUrl, int statusCode) {
+
     this->_rawContent    = "";
     this->_contentType   = CONTENT_TYPE_HTML;
     this->_statusCode    = statusCode;
     this->_message       = CodeToMessage(statusCode).second;
-    
+
     this->_finalResponseMsg = composeHttpResponse("", statusCode, _message,
         "Location",        redirectUrl.c_str(),
         "Content-Length",  "0",
         "Content-Type",    CONTENT_TYPE_HTML,
+        "Cache-Control", "no-cache; no-store; must-revalidate",
+        "Pragma", "no-cache",
+        "Connection", "close",
         NULL);
 }
-
 
 void HttpResponse::initErrorHttpResponse(int statusCode, string error, string description) {
     std::map<int, string> errorPages = this->getBlock()->getErrorPage();

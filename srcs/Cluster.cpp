@@ -282,7 +282,7 @@ for (int i = 0; i < _numOfFds; i++) {
 			ssize_t byteRecv;
 			string& requestBuffer = this->_clients[_pollFds[i].fd]->getRecvBuffer();
 	
-			LogStream::pending() << "Reading from [" << _pollFds[i].fd << "]..." << std::endl;
+			LogStream::pending() << "Reading from [" << _pollFds[i].fd << "]" << std::endl;
 	
 			while (true) {
 				byteRecv = recv(_pollFds[i].fd, buffer, BUFFER_SIZE - 1, 0);
@@ -291,7 +291,7 @@ for (int i = 0; i < _numOfFds; i++) {
 						LogStream::error() << "Client disconnected [" << _pollFds[i].fd << "]" << std::endl;
 					
 					else if (errno == EAGAIN || errno == EWOULDBLOCK) {
-						LogStream::error() << "No data available yet, will try again next iteration [" << _pollFds[i].fd << "]..." << std::endl;
+						LogStream::error() << "No data available yet, will try again next iteration [" << _pollFds[i].fd << "]" << std::endl;
 						break;
 					} 
 					
@@ -388,8 +388,8 @@ for (int i = 0; i < _numOfFds; i++) {
 		}
 
 		// Check if the connection should be kept alive
-		if (request.headerGet("Connection") == "keep-alive") {
-			LogStream::pending() << "Keeping connection alive for client [" << _pollFds[i].fd << "]..." << std::endl;
+		if (request.headerGet("Connection") == "keep-alive" && response.getFinalResponseMsg().find("Connection: close") == string::npos) {
+			LogStream::pending() << "Keeping connection alive for client [" << _pollFds[i].fd << "]" << std::endl;
 			_pollFds[i].events = POLLIN; // Set back to POLLIN for further requests
 		} else {
 			LogStream::pending() << "Closing connection for client [" << _pollFds[i].fd << "]" << std::endl;

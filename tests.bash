@@ -1,9 +1,5 @@
 #!/bin/bash
 
-conf_file="/home/cooper/coreProgram/webserv_proper/webserv1/conf/good/custom.conf"
-output_dir="curl_responses"  # Global variable for output directory
-log_file="log_trace.log"
-file_index=1  # Initialize the file index
 RED="\e[31m"
 GREEN="\e[32m"
 BLUE="\e[34m"
@@ -12,6 +8,19 @@ MAGENTA="\e[35m"
 CYAN="\e[36m"
 WHITE="\e[37m"
 RESET="\e[0m"
+
+conf_file="/home/cooper/coreProgram/webserv_proper/webserv1/conf/good/custom.conf"
+output_dir="curl_responses"  # Global variable for output directory
+log_file="log_trace.log"
+file_index=1  # Initialize the file index
+
+
+# COPY FILES FROM SRC TO VOLATILE
+rm -rf public/volatile/*
+SOURCE_DIR="source_tests"
+DEST_DIR="public/volatile"
+cp -r "$SOURCE_DIR"/* "$DEST_DIR"
+find "$DEST_DIR" -name "*no_perms*" -exec chmod -rwx {} +
 
 # Print all lines of the conf file, ignoring lines containing "#>>"
 while IFS= read -r line; do
@@ -110,8 +119,8 @@ for ((i = 0; i < ${#lines[@]}; i++)); do
     line="${lines[i]}"
 
     # PRINT CURL COMMAND
-    if [[ $line =~ ^[[:space:]]*#\>\> ]]; then
-        while [[ $line =~ ^[[:space:]]*#\>\> ]]; do
+    if [[ $line =~ ^.*#\>\> ]]; then
+        while [[ $line =~ ^.*#\>\> ]]; do
             comment="${line#*#\>\>}"  # Extract everything after #>>
             echo -e "\n$((curl_call_count + 1)) --- \e[34m$comment\e[0m ---"  # Print the next line in blue
             call_curl_and_save "$comment" "$@"

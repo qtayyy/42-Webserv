@@ -1,7 +1,0 @@
-HTTP/1.1 204 No Content
-Content-Type: text/plain
-Content-Length: 0
-Pragma: no-cache
-Connection: close
-Cache-Control: no-store, no-cache, must-revalidate, max-age=0
-

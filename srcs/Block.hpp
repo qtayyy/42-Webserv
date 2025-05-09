@@ -15,6 +15,7 @@
 
 #include "../includes/Webserv.hpp"
 #include "Exception.hpp"
+#include "Log.hpp"
 
 /**
  * @brief	Abstract class for the ServerBlock and LocationBlock classes.

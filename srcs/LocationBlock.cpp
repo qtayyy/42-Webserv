@@ -74,7 +74,7 @@ int	LocationBlock::parseLocation(std::vector<std::string> tokens, int i)
 		this->_uri = tokens[++i];
 		if (tokens[++i] != "{")
 		{
-			std::cerr << RED "Missing location uri: " RESET;
+			LogStream::error() << "Missing location uri: " << std::endl;
 			return (-1);
 		}
 		i++;
@@ -99,7 +99,7 @@ int	LocationBlock::parseLocation(std::vector<std::string> tokens, int i)
 			args.push_back(tokens[i]);
 		else
 		{
-			std::cerr << RED"config error: unknown directive: '" << tokens[i] << "'" << "\n" RESET;
+			LogStream::error() <<"config error: unknown directive: '" << tokens[i] << "'" << std::endl;
 			return (-1);
 		}
 	}
@@ -122,7 +122,7 @@ void	LocationBlock::setUri(std::vector<std::string> args)
 {
 	if (args.size() != 1)
 	{
-		std::cerr << RED "location error: uri: invalid num of args\n" RESET; 
+		LogStream::error() << "location error: uri: invalid num of args" << std::endl; 
 		return ;
 	}
 	this->_uri = args[0];
@@ -137,7 +137,7 @@ void	LocationBlock::setAlias(std::vector<std::string> args)
 {
 	if (args.size() != 1)
 	{
-		std::cerr << RED "location error: alias: invalid num of args\n" RESET; 
+		LogStream::error() << "location error: alias: invalid num of args" << std::endl; 
 		return ;
 	}
 	this->_alias = args[0];
@@ -151,7 +151,7 @@ void	LocationBlock::setReturn(std::vector<std::string> args)
 {
 	if (args.size() != 2)
 	{
-		std::cerr << RED "location error: return: invalid num of args\n" RESET; 
+		LogStream::error() << "location error: return: invalid num of args" << std::endl; 
 		return ;
 	}
 	int	statusCode;
@@ -159,7 +159,7 @@ void	LocationBlock::setReturn(std::vector<std::string> args)
 	if (statusCode >= 300 && statusCode <= 399)
 		this->_return = std::make_pair(statusCode, args[1]);
 	else
-		std::cerr << RED "location error: return: invalid status code\n" RESET; 
+		LogStream::error() << "location error: return: invalid status code" << std::endl; 
 }
 
 /**
@@ -171,7 +171,7 @@ void	LocationBlock::setCgiPass(std::vector<std::string> args)
 	if (args.size() != 1)
 	{
 		if (!args.empty())
-			std::cerr << RED "cgi_pass error: invalid num of args.\n" RESET;
+			LogStream::error() << "cgi_pass error: invalid num of args." << std::endl;
 		return ;
 	}
 	this->_cgiPass = args[0];

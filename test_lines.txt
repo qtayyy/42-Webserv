@@ -1,0 +1,8 @@
+limit_except
+root
+alias
+index
+cgi_pass
+return
+autoindex
+client_max_body_size

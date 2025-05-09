@@ -26,7 +26,7 @@ void			Block::setErrorPage(std::vector<std::string> args)
 	{
 		// initDefaultErrorPage();
 		if (!args.empty())
-			std::cerr << RED "error_page error: invalid num of args. Resetting to default error pages...\n" RESET;
+			LogStream::error() << "[PARSING] error_page error: invalid num of args. Resetting to default error pages..." << std::endl;
 		return ;
 	}
 
@@ -38,7 +38,7 @@ void			Block::setErrorPage(std::vector<std::string> args)
 		if (errorCode < 400 || errorCode > 599)
 		{
 			// initDefaultErrorPage(); // generate dynamically
-			std::cerr << RED "error_page error: invalid error code.\n" RESET;
+			LogStream::error() << "[PARSING] error_page error: invalid error code." << std::endl;
 			continue ;
 		}
 		this->_errorPage[errorCode] = errorPagePath;
@@ -66,7 +66,7 @@ void	Block::setClientMaxBodySize(std::vector<std::string> args)
 	{
 		this->_clientMaxBodySize = 1000000;
 		if (!args.empty())
-			std::cerr << RED "client_max_body_size error: invalid num of arg. Resetting to default...\n" RESET;
+			LogStream::error() << "[PARSING] client_max_body_size error: invalid num of arg. Resetting to default..." << std::endl;
 		return ;
 	}
 	unsigned long long size;
@@ -75,11 +75,11 @@ void	Block::setClientMaxBodySize(std::vector<std::string> args)
 	if (iss.fail())
 	{
 		this->_clientMaxBodySize = 1000000;
-		std::cerr << RED "client_max_body_size: invalid arg type. Resetting to default...\n" RESET;
+		LogStream::error() << "[PARSING] client_max_body_size: invalid arg type. Resetting to default..." << std::endl;
 		return ;
 	}
 	if (this->_clientMaxBodySize != -1)
-		std::cerr << RED "Warning: client_max_body_size already exists. Overrding with new size\n" RESET;
+		LogStream::error() << "[PARSING] Warning: client_max_body_size already exists. Overrding with new size" << std::endl;
 	this->_clientMaxBodySize = size;
 }
 
@@ -92,7 +92,7 @@ void	Block::setClientMaxBodySize(std::vector<std::string> args)
 // 	if (args.size() < 2)
 // 	{
 // 		if (!args.empty())
-// 			std::cerr << RED "cgi_script error: invalid num of args.\n" RESET;
+// 			LogStream::error() << "[PARSING] cgi_script error: invalid num of args." << std::endl;
 // 		return ;
 // 	}
 // 	std::string	cgiPath = args.back();
@@ -114,7 +114,7 @@ void	Block::setIndex(std::vector<std::string> args)
 	else
 	{
 		if (!this->_index.empty())
-			std::cerr << RED "Warning: index already exists. Overriding with new indexes...\n" RESET;
+			LogStream::error() << "[PARSING] Warning: index already exists. Overriding with new indexes..." << std::endl;
 		this->_index.clear();
 		for (std::vector<std::string>::iterator it = args.begin(); it != args.end(); it++)
 		{
@@ -136,7 +136,7 @@ void Block::setAutoindex(std::vector<std::string> args)
 	{
 		this->_autoindex = 0;
 		if (!args.empty())
-			std::cerr << RED "autoindex error: invalid num of args. Autoindex set to 'off'\n" RESET;
+			LogStream::error() << "[PARSING] autoindex error: invalid num of args. Autoindex set to 'off'" << std::endl;
 	}
 	else if (args[0] == "on")
 		this->_autoindex = 1;
@@ -145,7 +145,7 @@ void Block::setAutoindex(std::vector<std::string> args)
 	else
 	{
 		this->_autoindex = 0;
-		std::cerr << RED "autoindex error: invalid arg type: " + args[0] + ". Autoindex set to 'off'\n" RESET;
+		LogStream::error() << "[PARSING] autoindex error: invalid arg type: " + args[0] + ". Autoindex set to 'off'" << std::endl;
 	}
 }
 
@@ -160,7 +160,7 @@ void			Block::setRoot(std::vector<std::string> args)
 	{
 		if (!args.empty())
 		{
-			std::cerr << RED "root error: invalid num of args. Root set to " << args.at(0) << ".\n" RESET;
+			LogStream::error() << "[PARSING] root error: invalid num of args. Root set to " << args.at(0) << "." << std::endl;
 			this->_root = args.at(0);
 		}
 		else
@@ -169,7 +169,7 @@ void			Block::setRoot(std::vector<std::string> args)
 	else
 	{
 		if (this->_root != "")
-			std::cerr << RED "Warning: root already exists. Overriding with new root...\n" RESET;
+			LogStream::error() << "[PARSING] Warning: root already exists. Overriding with new root..." << std::endl;
 		this->_root = args.at(0);	
 	}
 }
@@ -194,7 +194,7 @@ void	Block::setLimitExcept(std::vector<std::string> args)
 	else if (args.size() > Block::validMethods.size())
 	{
 		initDefaultLimitExcept();
-		std::cerr << RED "limit_except error: invalid num of args. Resetting to default methods...\n" RESET;
+		LogStream::error() << "[PARSING] limit_except error: invalid num of args. Resetting to default methods..." << std::endl;
 	}
 	else
 	{
@@ -204,7 +204,7 @@ void	Block::setLimitExcept(std::vector<std::string> args)
 			if (Block::validMethods.find(*it) == Block::validMethods.end())
 			{
 				initDefaultLimitExcept();
-				std::cerr << RED "limit_except error: invalid method: '" + *it + "'. Resetting to default methods...\n" RESET;
+				LogStream::error() << "[PARSING] limit_except error: invalid method: '" + *it + "'. Resetting to default methods..." << std::endl;
 				return ;
 			}
 			this->_limitExcept.push_back(*it);
