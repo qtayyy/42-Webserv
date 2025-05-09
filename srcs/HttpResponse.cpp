@@ -255,7 +255,6 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock)
 
     else if (method == "DELETE") {
         LogStream::pending() << "Handling DELETE" << std::endl;
-        LogStream::log("DELETE") << this->request.getRawRequest() << std::endl;
         this->handleDELETE();
     }
 

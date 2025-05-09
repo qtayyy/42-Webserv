@@ -39,3 +39,4 @@ logs/requests/
 logs/responses/
 
 public/volatile/
+format_test/
