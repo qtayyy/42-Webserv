@@ -78,6 +78,9 @@ void HttpResponse::handleGET(ServerBlock *serverBlock) {
     try {
 
         // if the _path is a directory
+        if (!_reroutedPath.empty() && _reroutedPath[0] == '/') {
+            _reroutedPath = _reroutedPath.substr(1);
+        }
         if (isDirectory(_reroutedPath)) { //fixme problem here. Doesn't detect an alias as directory
             std::cout << "Directory detected" << std::endl;
             string indexFile = _dirHasIndexFile(_reroutedPath); // fixme issue here also
@@ -134,27 +137,26 @@ void HttpResponse::handlePOST() {
 }
 
 
-void HttpResponse::handleDELETE(string path) {
+void HttpResponse::handleDELETE() {
 
-    path = reroutePath(path);
-    if (!isPathExist(path)) {
+    if (!isPathExist(_reroutedPath)) {
         this->initErrorHttpResponse(404);
-        std::cout << "FILE DOESN'T EXIST: " << path << std::endl;
+        std::cout << "FILE DOESN'T EXIST: " << _reroutedPath << std::endl;
         return; 
     } 
 
-    if (isDirectory(path)) {
+    if (isDirectory(_reroutedPath)) {
         this->initErrorHttpResponse(403);
     }
 
-    int status = remove(path.c_str());
+    int status = remove(_reroutedPath.c_str());
 
     if (status == 0) {
         this->initHttpResponse("File deleted successfully", CONTENT_TYPE_HTML, 200);
     } 
     
     else {
-        std::cout << path << " could not be deleted. Status: " << status << std::endl;
+        std::cout << _reroutedPath << " could not be deleted. Status: " << status << std::endl;
         this->initErrorHttpResponse(500);
     }
 }
@@ -217,8 +219,19 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock)
         this->initErrorHttpResponse(404);
 
     _path         = request.headerGet("path");
+    _path         = urlDecode(_path);
+    if (_path == applyAlias(_path))
+        _aliasApplied = false;
+    else
+        _aliasApplied = true;
     _path         = applyAlias(_path);
-    _reroutedPath = urlDecode(reroutePath(_path));
+    
+
+    if (_aliasApplied)
+        _reroutedPath = _path;
+    else {
+        _reroutedPath = reroutePath(_path);
+    }
 
     LogStream::log() << LogStream::log().setBordered(true) 
                      << "Original path: " << request.headerGet("path") << "\n"
@@ -243,7 +256,7 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock)
     else if (method == "DELETE") {
         LogStream::pending() << "Handling DELETE" << std::endl;
         LogStream::log("DELETE") << this->request.getRawRequest() << std::endl;
-        this->handleDELETE(path);
+        this->handleDELETE();
     }
 
     /* INVALID METHOD */
@@ -436,10 +449,19 @@ void HttpResponse::initRedirectResponse(string & redirectUrl, int statusCode) {
 
 
 void HttpResponse::initErrorHttpResponse(int statusCode, string error, string description) {
-    std::map<int, string> errorPages = this->_locationBlockRef->getErrorPage();
+    std::map<int, string> errorPages = this->getBlock()->getErrorPage();
 
     if (!errorPages.empty() && errorPages.find(statusCode) != errorPages.end()) {
-        string errorPage = joinPaths(getDirname(this->_reroutedPath), errorPages.find(statusCode)->second);
+        std::cout << "REROUTED PATH" << _reroutedPath << std::endl;
+        string basepath = this->getBlock()->getRoot();
+        if (_aliasApplied)
+            basepath = this->getBlock()->getAlias();
+
+        if (basepath[0] == '/')
+            basepath = basepath.substr(1);
+        string errorPage = joinPaths(basepath, errorPages.find(statusCode)->second);
+        
+
         try {
             this->initHttpResponse(readFileContent(errorPage), CONTENT_TYPE_HTML, statusCode);
             return ;

@@ -262,8 +262,6 @@ void Cluster::run(void) {
 
 	signal(SIGPIPE, SIG_IGN);
 
-std::ofstream cumulative_log("cumulative_request.log", std::ios::trunc);
-
 while (true) {
 
 LogStream::log() << "listening on " << _numOfFds << " sockets | " << formatTime("%I:%M%p %S") << std::endl;

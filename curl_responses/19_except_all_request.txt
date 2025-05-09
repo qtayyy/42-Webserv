@@ -1,0 +1,45 @@
+== Info:   Trying 127.0.0.1:8080...
+== Info: Connected to localhost (127.0.0.1) port 8080 (#0)
+=> Send header, 88 bytes (0x58)
+0000: GET /except_all HTTP/1.1
+001a: Host: localhost:8080
+0030: User-Agent: curl/7.81.0
+0049: Accept: */*
+0056: 
+== Info: Mark bundle as not supporting multiuse
+<= Recv header, 17 bytes (0x11)
+0000: HTTP/1.1 200 OK
+<= Recv header, 25 bytes (0x19)
+0000: Content-Type: text/html
+<= Recv header, 22 bytes (0x16)
+0000: Content-Length: 1230
+<= Recv header, 18 bytes (0x12)
+0000: Pragma: no-cache
+<= Recv header, 19 bytes (0x13)
+0000: Connection: close
+<= Recv header, 63 bytes (0x3f)
+0000: Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+<= Recv header, 2 bytes (0x2)
+0000: 
+<= Recv data, 1230 bytes (0x4ce)
+0000: <html>.        <head><style>.body {.    font-family: Arial, sans
+0040: -serif;.    background-color: #f4f4f4;.    margin: 0;.    paddin
+0080: g: 20px;.}.h1 {.    color: #4CAF50;.}.table {.    width: 100%;. 
+00c0:    border-collapse: collapse;.    border-radius: 10px;.    overf
+0100: low: hidden;.    padding: 10px;.}.th, td {.    text-align: left;
+0140: .    background: #fff;.    padding: 10px 5px;.}.a {.    color: #
+0180: 1E90FF;.}..folder {.    color:rgb(0, 255, 251);.}..error {.    c
+01c0: olor: red;.    font-weight: bold;.}..success {.    color: green;
+0200: .    font-weight: bold;.}.</style></head>.        <body>.       
+0240:      <h1>Directory Listing for public/upload</h1>.            <u
+0280: l><li><a data-file='tiny.txt'>tiny.txt</a></li><li><a data-file=
+02c0: 'large.pdf'>large.pdf</a></li><li><a data-file='large.txt'>large
+0300: .txt</a></li><li><a data-file='large.jpeg'>large.jpeg</a></li></
+0340: ul>..        <script>.        const basePath = window.location.p
+0380: athname;.        const normalizedPath = basePath.endsWith('/') ?
+03c0:  basePath : basePath + '/';.        document.querySelectorAll('a
+0400: [data-file]').forEach(link => {.            const fileName = lin
+0440: k.getAttribute('data-file');.            link.href = normalizedP
+0480: ath + fileName;.        });.        </script>..        </body>. 
+04c0:        </html>
+== Info: Closing connection 0

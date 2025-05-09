@@ -188,9 +188,19 @@ def exit_error(generic_msg, error_message, error_code=400):
 
 
 if request_method == "POST":
+    
     write_to("POST")
     if os.environ.get("CONTENT_LENGTH", "") == "0":
-        exit_error("Bad Request", "No data received.", 400)
+        response = generate_response_string(
+            content="",
+            status_code=204,
+            status_message="No Content",
+            content_type="text/plain",
+            **additional_args
+        )
+        sys.stdout.write(response)
+        sys.stdout.flush()
+        sys.exit(0)
 
     try:
         if not "file" in form:
@@ -200,11 +210,12 @@ if request_method == "POST":
         if file_item.file is None: 
             exit_error("Bad Request", "No file content.", 400)
         
-        file_path = os.path.join("/", os.getcwd().lstrip('/'), sys.argv[1].lstrip('/'), file_item.filename)
-        write_to(f"file_path: {file_path}")
+        write_to(f"cwd: {os.getcwd()}")
         write_to(f"argv[1]: {sys.argv[1]}")
+        write_to(f"file_item.filename: {file_item.filename}")
+        file_path = os.path.join("/", os.getcwd().lstrip('/'), sys.argv[1].lstrip('/'), file_item.filename)
         if os.path.exists(file_path): 
-            exit_error('Bad Request', f'"{bold(file_item.filename)}" already exists in "{bold(os.path.dirname(file_path))}"', 400)
+            exit_error('Bad Request', f'"{file_item.filename}" already exists in "{os.path.dirname(file_path)}"', 400)
         
         try:
             with open(file_path, 'wb') as f:
@@ -240,6 +251,7 @@ elif request_method == "GET":
 
     write_to(f"GET {route}")
     current_path = os.getcwd()
+    write_to(f"cwd: {os.getcwd()}")
     write_to(f"current_path: {current_path}")
     route = route.lstrip('/')  # Remove leading slash if present
     full_path = os.path.join(current_path, route)

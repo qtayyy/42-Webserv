@@ -1,0 +1,44 @@
+HTTP/1.1 303 See Other
+Content-Type: text/html
+Content-Length: 767
+Pragma: no-cache
+Connection: close
+Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+
+<html><head><style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+}
+h1 {
+    color: #4CAF50;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+    padding: 10px;
+}
+th, td {
+    text-align: left;
+    background: #fff;
+    padding: 10px 5px;
+}
+a {
+    color: #1E90FF;
+}
+.folder {
+    color:rgb(0, 255, 251);
+}
+.error {
+    color: red;
+    font-weight: bold;
+}
+.success {
+    color: green;
+    font-weight: bold;
+}
+</style></head><body><h2 class='success'>File Upload Successful</h2><p>File <strong>large.jpeg</strong> uploaded successfully to <strong>/home/cooper/coreProgram/webserv_proper/webserv1/public/upload/large.jpeg</strong>.</p></body></html>

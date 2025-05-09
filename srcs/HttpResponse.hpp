@@ -28,6 +28,7 @@ private:
     string        _method;
     string        _path;
     string        _reroutedPath;
+    bool          _aliasApplied;
 
     LocationBlock *_emptyBlock;
     ServerBlock   *_serverBlockRef;
@@ -79,7 +80,7 @@ public:
     /* METHOD HANDLERS */
     void handleGET(ServerBlock *serverBlock);
     void handlePOST();
-    void handleDELETE(string path);
+    void handleDELETE();
 
 
     /* RESPONSE INITIALIZERS */
