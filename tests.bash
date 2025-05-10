@@ -17,7 +17,7 @@ file_index=1  # Initialize the file index
 
 # COPY FILES FROM SRC TO VOLATILE
 rm -rf public/volatile/*
-SOURCE_DIR="source_tests"
+SOURCE_DIR="source_files"
 DEST_DIR="public/volatile"
 cp -r "$SOURCE_DIR"/* "$DEST_DIR"
 find "$DEST_DIR" -name "*no_perms*" -exec chmod -rwx {} +

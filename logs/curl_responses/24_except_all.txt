@@ -1,0 +1,60 @@
+HTTP/1.1 200 OK
+Content-Type: text/html
+Content-Length: 1277
+Pragma: no-cache
+Connection: close
+Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+
+<html>
+        <head><style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+}
+h1 {
+    color: #4CAF50;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+    padding: 10px;
+}
+th, td {
+    text-align: left;
+    background: #fff;
+    padding: 10px 5px;
+}
+a {
+    color: #1E90FF;
+}
+.folder {
+    color:rgb(0, 255, 251);
+}
+.error {
+    color: red;
+    font-weight: bold;
+}
+.success {
+    color: green;
+    font-weight: bold;
+}
+</style></head>
+        <body>
+            <h1>Directory Listing for public/upload</h1>
+            <ul><li><a data-file='tiny.txt'>tiny.txt</a></li><li><a data-file='large.pdf'>large.pdf</a></li><li><a data-file='large.txt'>large.txt</a></li><li><a data-file='empty.txt'>empty.txt</a></li><li><a data-file='large.jpeg'>large.jpeg</a></li></ul>
+
+        <script>
+        const basePath = window.location.pathname;
+        const normalizedPath = basePath.endsWith('/') ? basePath : basePath + '/';
+        document.querySelectorAll('a[data-file]').forEach(link => {
+            const fileName = link.getAttribute('data-file');
+            link.href = normalizedPath + fileName;
+        });
+        </script>
+
+        </body>
+        </html>

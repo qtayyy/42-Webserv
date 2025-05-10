@@ -164,7 +164,7 @@ void			Block::setRoot(std::vector<std::string> args)
 			this->_root = args.at(0);
 		}
 		else
-			this->_root = "/var/www";
+			this->_root = "/var/www"; //fixme is this the default?
 	}
 	else
 	{

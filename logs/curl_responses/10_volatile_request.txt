@@ -1,0 +1,80 @@
+== Info:   Trying 127.0.0.1:8080...
+== Info: Connected to localhost (127.0.0.1) port 8080 (#0)
+=> Send header, 86 bytes (0x56)
+0000: GET /volatile HTTP/1.1
+0018: Host: localhost:8080
+002e: User-Agent: curl/7.81.0
+0047: Accept: */*
+0054: 
+== Info: Mark bundle as not supporting multiuse
+<= Recv header, 22 bytes (0x16)
+0000: HTTP/1.1 200 Success
+<= Recv header, 19 bytes (0x13)
+0000: Connection: close
+<= Recv header, 22 bytes (0x16)
+0000: Content-Length: 3737
+<= Recv header, 25 bytes (0x19)
+0000: Content-Type: text/html
+<= Recv header, 2 bytes (0x2)
+0000: 
+<= Recv data, 3737 bytes (0xe99)
+0000: <html><head><title>Index of public/volatile</title><style>      
+0040:  body {           font-family: Arial, sans-serif;           back
+0080: ground-color: #f4f4f4;           margin: 0;           padding: 2
+00c0: 0px;       }       h1 {           color: #4CAF50;       }       
+0100: table {           width: 100%;           border-collapse: collap
+0140: se;           border-radius: 10px;           overflow: hidden;  
+0180:          padding: 10px;       }       th, td {           text-al
+01c0: ign: left;           background: #fff;           padding: 10px; 
+0200:       }       a {           color: #1E90FF;       }       .folde
+0240: r {           color:rgb(0, 160, 158);       }       .error {    
+0280:        color: red;           font-weight: bold;       }</style><
+02c0: script>async function deleteFile(filePath, rowId) {  if (!confir
+0300: m('Delete this file?')) return;  try {    const response = await
+0340:  fetch(filePath, { method: 'DELETE' });    if (response.ok) {   
+0380:    document.getElementById(rowId).remove();    } else {      ale
+03c0: rt('Failed to delete: ' + response.status);    }  } catch (err) 
+0400: {    alert('Error: ' + err);  }}</script></head><body><h1>Index 
+0440: of <a href="/">~</a><a href=""></a> / <a href="/volatile">volati
+0480: le</a> </h1><table><tr><th>Name</th><th>Size</th><th>Action</th>
+04c0: </tr><tr id="row0"><td><a href="/volatile/custom_error.html">cus
+0500: tom_error.html</a></td><td>12 bytes</td><td><button onclick="del
+0540: eteFile('/volatile/custom_error.html', 'row0')">Delete</button><
+0580: /td></tr><tr id="row1"><td><a href="/volatile/sheet.csv">sheet.c
+05c0: sv</a></td><td>131 bytes</td><td><button onclick="deleteFile('/v
+0600: olatile/sheet.csv', 'row1')">Delete</button></td></tr><tr id="ro
+0640: w2"><td><a href="/volatile/error_no_perms.html">error_no_perms.h
+0680: tml</a></td><td>0 bytes</td><td><button onclick="deleteFile('/vo
+06c0: latile/error_no_perms.html', 'row2')">Delete</button></td></tr><
+0700: tr id="row3"><td><a href="/volatile/tiny.txt">tiny.txt</a></td><
+0740: td>11 bytes</td><td><button onclick="deleteFile('/volatile/tiny.
+0780: txt', 'row3')">Delete</button></td></tr><tr id="row4"><td><a hre
+07c0: f="/volatile/large.pdf">large.pdf</a></td><td>3647755 bytes</td>
+0800: <td><button onclick="deleteFile('/volatile/large.pdf', 'row4')">
+0840: Delete</button></td></tr><tr id="row5"><td><a class="folder" hre
+0880: f="/volatile/dir_no_perms">dir_no_perms</a></td><td>- bytes</td>
+08c0: <td></td></tr><tr id="row6"><td><a href="/volatile/large.txt">la
+0900: rge.txt</a></td><td>27702 bytes</td><td><button onclick="deleteF
+0940: ile('/volatile/large.txt', 'row6')">Delete</button></td></tr><tr
+0980:  id="row7"><td><a href="/volatile/index.html">index.html</a></td
+09c0: ><td>5 bytes</td><td><button onclick="deleteFile('/volatile/inde
+0a00: x.html', 'row7')">Delete</button></td></tr><tr id="row8"><td><a 
+0a40: href="/volatile/index_no_perms.html">index_no_perms.html</a></td
+0a80: ><td>14 bytes</td><td><button onclick="deleteFile('/volatile/ind
+0ac0: ex_no_perms.html', 'row8')">Delete</button></td></tr><tr id="row
+0b00: 9"><td><a href="/volatile/custom_error2.html">custom_error2.html
+0b40: </a></td><td>13 bytes</td><td><button onclick="deleteFile('/vola
+0b80: tile/custom_error2.html', 'row9')">Delete</button></td></tr><tr 
+0bc0: id="row10"><td><a href="/volatile/empty.txt">empty.txt</a></td><
+0c00: td>0 bytes</td><td><button onclick="deleteFile('/volatile/empty.
+0c40: txt', 'row10')">Delete</button></td></tr><tr id="row11"><td><a h
+0c80: ref="/volatile/no_perms.txt">no_perms.txt</a></td><td>8 bytes</t
+0cc0: d><td><button onclick="deleteFile('/volatile/no_perms.txt', 'row
+0d00: 11')">Delete</button></td></tr><tr id="row12"><td><a href="/vola
+0d40: tile/tiny.pdf">tiny.pdf</a></td><td>13228 bytes</td><td><button 
+0d80: onclick="deleteFile('/volatile/tiny.pdf', 'row12')">Delete</butt
+0dc0: on></td></tr><tr id="row13"><td><a href="/volatile/large.jpeg">l
+0e00: arge.jpeg</a></td><td>1091887 bytes</td><td><button onclick="del
+0e40: eteFile('/volatile/large.jpeg', 'row13')">Delete</button></td></
+0e80: tr></table></body></html>
+== Info: Closing connection 0

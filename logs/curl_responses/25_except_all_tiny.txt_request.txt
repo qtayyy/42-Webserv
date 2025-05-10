@@ -1,6 +1,0 @@
-== Info:   Trying 127.0.0.1:8080...
-== Info: connect to 127.0.0.1 port 8080 failed: Connection refused
-== Info:   Trying ::1:8080...
-== Info: connect to ::1 port 8080 failed: Connection refused
-== Info: Failed to connect to localhost port 8080 after 0 ms: Connection refused
-== Info: Closing connection 0

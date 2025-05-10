@@ -132,6 +132,10 @@ void HttpResponse::handleGET(ServerBlock *serverBlock) {
 
 
 void HttpResponse::handlePOST() {
+    if (this->getBlock()->getCgiPass().empty()) {
+        this->initErrorHttpResponse(500);
+        return;
+    }
     string cgiPass = this->getBlock()->getCgiPass();
     this->initCGIResponse(cgiPass, request);
 }
@@ -444,9 +448,9 @@ void HttpResponse::initRedirectResponse(string &redirectUrl, int statusCode) {
         "Location",        redirectUrl.c_str(),
         "Content-Length",  "0",
         "Content-Type",    CONTENT_TYPE_HTML,
-        "Cache-Control", "no-cache; no-store; must-revalidate",
-        "Pragma", "no-cache",
-        "Connection", "close",
+        "Cache-Control",   "no-cache; no-store; must-revalidate",
+        "Pragma",          "no-cache",
+        "Connection",      "close",
         NULL);
 }
 

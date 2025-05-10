@@ -290,8 +290,8 @@ for (int i = 0; i < _numOfFds; i++) {
 					if (byteRecv == 0)
 						LogStream::error() << "Client disconnected [" << _pollFds[i].fd << "]" << std::endl;
 					
-					else if (errno == EAGAIN || errno == EWOULDBLOCK) {
-						LogStream::error() << "No data available yet, will try again next iteration [" << _pollFds[i].fd << "]" << std::endl;
+					else if (byteRecv == -1) {
+						LogStream::error() << byteRecv << "No data available yet, will try again next iteration [" << _pollFds[i].fd << "]" << std::endl;
 						break;
 					} 
 					
@@ -311,7 +311,7 @@ for (int i = 0; i < _numOfFds; i++) {
 					if (requestBuffer.find("Content-Length:") != string::npos) {
 						size_t start  = requestBuffer.find("Content-Length:") + 15;
 						size_t end	  = requestBuffer.find("\r\n", start);
-						contentLength = std::strtod(requestBuffer.substr(start, end - start).c_str(), NULL);
+						contentLength = std::atoi(requestBuffer.substr(start, end - start).c_str()); //todo 
 					}
 	
 					// Check if the entire body is received

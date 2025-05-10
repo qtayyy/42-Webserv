@@ -62,7 +62,7 @@ string CGIHandler::handleCgi(
     setEnvironmentVariables(this->envVars);
     // system("./ubuntu_cgi_tester");
 
-    LogStream::pending() << "Running CGI..." << std::endl;
+    LogStream::pending() << "Running CGI " << fullCGIPath <<  "..." << std::endl;
     LogStream::log()     << "Input PIPE: "    << inputPipe[0] << ", " << inputPipe[1] << " | Output PIPE: " << outputPipe[0] << ", " << outputPipe[1] << std::endl;
     LogStream::pending() << "Bytes to be written to CGI stdin: " << data.length() << std::endl;
     // LogStream::log("cgi_request.txt", std::ios::out | std::ios::trunc) << data << std::endl;
@@ -104,10 +104,6 @@ string CGIHandler::handleCgi(
         while (bytesWritten < length) {
             ssize_t result = write(inputPipe[1], data.c_str() + bytesWritten, length - bytesWritten);
             if (result == -1) {
-                if (errno == EPIPE) {
-                    LogStream::error() << "Broken pipe: CGI process terminated prematurely." << std::endl;
-                    break;
-                }
                 close(inputPipe[1]);
                 throw std::runtime_error("Failed to write to CGI stdin: " + string(strerror(errno)));
             }

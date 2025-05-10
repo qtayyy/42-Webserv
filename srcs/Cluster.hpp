@@ -16,6 +16,11 @@
 #include <netinet/in.h>
 #include <unistd.h>
 
+
+#include <poll.h>
+#include <iostream>
+#include <string>
+
 class Cluster
 {
 	public:
