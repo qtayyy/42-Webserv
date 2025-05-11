@@ -541,6 +541,7 @@ LocationBlock* HttpResponse::resolveLocationBlock(const string& path, ServerBloc
     for (std::vector<LocationBlock>::iterator it = locations->begin(); it != locations->end(); ++it) {
         const string& uri = it->getUri();
 
+        // Prioritize exact location matches over extensions
         if (startsWith(path, uri) &&
             (path.size() == uri.size() || path[uri.size()] == '/') &&
             (locationBlock == NULL || uri.size() > locationBlock->getUri().size()))
@@ -548,6 +549,19 @@ LocationBlock* HttpResponse::resolveLocationBlock(const string& path, ServerBloc
             locationBlock = &(*it);
         }
     }
+
+    // Check for extension-based matches only if no exact location match is found
+    if (locationBlock == NULL) {
+        for (std::vector<LocationBlock>::iterator it = locations->begin(); it != locations->end(); ++it) {
+            const string& uri = it->getUri();
+
+            if (startsWith(uri, ".") && endsWith(path, uri)) {
+                locationBlock = &(*it);
+                break;
+            }
+        }
+    }
+
     return locationBlock;
 }
 
