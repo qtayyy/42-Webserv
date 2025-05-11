@@ -29,6 +29,8 @@ private:
     string        _path;
     string        _reroutedPath;
     bool          _aliasApplied;
+    bool          _isExtension;
+    HttpRequest   &request;
 
     LocationBlock *_emptyBlock;
     ServerBlock   *_serverBlockRef;
@@ -43,7 +45,6 @@ private:
     std::vector<LocationBlock>::iterator getRelevantLocationBlock(ServerBlock *serverBlock, string path);
     string        createStatusPageStr(string errorPagePath, int statusCode) const;
     void          displayError() const;
-    HttpRequest &request;
 
 
 public:

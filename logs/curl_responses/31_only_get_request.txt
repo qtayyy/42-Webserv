@@ -1,11 +1,11 @@
 == Info:   Trying 127.0.0.1:8080...
 == Info: Connected to localhost (127.0.0.1) port 8080 (#0)
-=> Send header, 87 bytes (0x57)
-0000: GET /only_post HTTP/1.1
-0019: Host: localhost:8080
-002f: User-Agent: curl/7.81.0
-0048: Accept: */*
-0055: 
+=> Send header, 89 bytes (0x59)
+0000: DELETE /only_get HTTP/1.1
+001b: Host: localhost:8080
+0031: User-Agent: curl/7.81.0
+004a: Accept: */*
+0057: 
 == Info: Mark bundle as not supporting multiuse
 <= Recv header, 98 bytes (0x62)
 0000: HTTP/1.1 405 The request method is known by the server but has b

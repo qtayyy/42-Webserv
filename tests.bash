@@ -23,11 +23,7 @@ cp -r "$SOURCE_DIR"/* "$DEST_DIR"
 find "$DEST_DIR" -name "*no_perms*" -exec chmod -rwx {} +
 
 # Print all lines of the conf file, ignoring lines containing "#>>"
-while IFS= read -r line; do
-    if [[ ! $line =~ ^[[:space:]]*#\>\> ]]; then
-        echo "$line"
-    fi
-done < "$conf_file"
+grep -v '^[[:space:]]*#' "$conf_file"
 
 
 success_statuses=(200 201 202 204 303 302)

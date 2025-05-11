@@ -82,7 +82,6 @@ void Client::parseRequestLine(const string& requestLine) {
     request.preview();
 }
 
-// todo potential solution???
 void Client::parseHeaders(const std::string& headers) {
     std::istringstream stream(headers);
     std::string line;

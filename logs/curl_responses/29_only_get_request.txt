@@ -1,36 +1,45 @@
 == Info:   Trying 127.0.0.1:8080...
 == Info: Connected to localhost (127.0.0.1) port 8080 (#0)
-=> Send header, 89 bytes (0x59)
-0000: DELETE /only_get HTTP/1.1
-001b: Host: localhost:8080
-0031: User-Agent: curl/7.81.0
-004a: Accept: */*
-0057: 
+=> Send header, 86 bytes (0x56)
+0000: GET /only_get HTTP/1.1
+0018: Host: localhost:8080
+002e: User-Agent: curl/7.81.0
+0047: Accept: */*
+0054: 
 == Info: Mark bundle as not supporting multiuse
-<= Recv header, 98 bytes (0x62)
-0000: HTTP/1.1 405 The request method is known by the server but has b
-0040: een disabled and cannot be used.
-<= Recv header, 19 bytes (0x13)
-0000: Connection: close
-<= Recv header, 21 bytes (0x15)
-0000: Content-Length: 855
+<= Recv header, 17 bytes (0x11)
+0000: HTTP/1.1 200 OK
 <= Recv header, 25 bytes (0x19)
 0000: Content-Type: text/html
+<= Recv header, 22 bytes (0x16)
+0000: Content-Length: 1232
+<= Recv header, 18 bytes (0x12)
+0000: Pragma: no-cache
+<= Recv header, 19 bytes (0x13)
+0000: Connection: close
+<= Recv header, 63 bytes (0x3f)
+0000: Cache-Control: no-store, no-cache, must-revalidate, max-age=0
 <= Recv header, 2 bytes (0x2)
 0000: 
-<= Recv data, 855 bytes (0x357)
-0000: <html><head><title>Method Not Allowed</title><style>       body 
-0040: {           font-family: Arial, sans-serif;           background
-0080: -color: #f4f4f4;           margin: 0;           padding: 20px;  
-00c0:      }       h1 {           color: #4CAF50;       }       table 
-0100: {           width: 100%;           border-collapse: collapse;   
-0140:         border-radius: 10px;           overflow: hidden;        
-0180:    padding: 10px;       }       th, td {           text-align: l
-01c0: eft;           background: #fff;           padding: 10px;       
-0200: }       a {           color: #1E90FF;       }       .folder {   
-0240:         color:rgb(0, 160, 158);       }       .error {          
-0280:  color: red;           font-weight: bold;       }</style></head>
-02c0: <body><h1 class="error">Method Not Allowed</h1><p>The request me
-0300: thod is known by the server but has been disabled and cannot be 
-0340: used.</p></body></html>
+<= Recv data, 1232 bytes (0x4d0)
+0000: <html>.        <head><style>.body {.    font-family: Arial, sans
+0040: -serif;.    background-color: #f4f4f4;.    margin: 0;.    paddin
+0080: g: 20px;.}.h1 {.    color: #4CAF50;.}.table {.    width: 100%;. 
+00c0:    border-collapse: collapse;.    border-radius: 10px;.    overf
+0100: low: hidden;.    padding: 10px;.}.th, td {.    text-align: left;
+0140: .    background: #fff;.    padding: 10px 5px;.}.a {.    color: #
+0180: 1E90FF;.}..folder {.    color:rgb(0, 255, 251);.}..error {.    c
+01c0: olor: red;.    font-weight: bold;.}..success {.    color: green;
+0200: .    font-weight: bold;.}.</style></head>.        <body>.       
+0240:      <h1>Directory Listing for public/upload</h1>.            <u
+0280: l><li><a data-file='large.pdf'>large.pdf</a></li><li><a data-fil
+02c0: e='large.txt'>large.txt</a></li><li><a data-file='empty.txt'>emp
+0300: ty.txt</a></li><li><a data-file='large.jpeg'>large.jpeg</a></li>
+0340: </ul>..        <script>.        const basePath = window.location
+0380: .pathname;.        const normalizedPath = basePath.endsWith('/')
+03c0:  ? basePath : basePath + '/';.        document.querySelectorAll(
+0400: 'a[data-file]').forEach(link => {.            const fileName = l
+0440: ink.getAttribute('data-file');.            link.href = normalize
+0480: dPath + fileName;.        });.        </script>..        </body>
+04c0: .        </html>
 == Info: Closing connection 0

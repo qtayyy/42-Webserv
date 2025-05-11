@@ -111,8 +111,8 @@ void HttpResponse::handleGET(ServerBlock *serverBlock) {
             
             // if autoindex is disabled, return 403
             else {
-                std::cout << "403" << "" << std::endl;
-                throw HttpException(403);
+                std::cout << "404" << "" << std::endl;
+                throw HttpException(404);
             }
         }
         
@@ -133,6 +133,7 @@ void HttpResponse::handleGET(ServerBlock *serverBlock) {
 
 void HttpResponse::handlePOST() {
     if (this->getBlock()->getCgiPass().empty()) {
+        std::cout << "CANNOT FIND CGI " << this->getBlock()->getCgiPass() << std::endl;
         this->initErrorHttpResponse(500);
         return;
     }
@@ -170,7 +171,8 @@ void HttpResponse::handleDELETE() {
 /* CONSTRUCTOR */
 
 HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) 
-    : request(request) {
+    : _isExtension(false),
+      request(request) {
     LogStream::pending() << "Constructing response" << std::endl; 
 
     this->_emptyBlock        = new LocationBlock();
@@ -178,7 +180,31 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock)
     this->_serverBlockRef   = serverBlock;
     this->_locationBlockRef = resolveLocationBlock(path, serverBlock);
 
+    if (request.headerGet("Content-Length").empty()) {
+        if (request.getBody().empty()) {
+            this->_contentLength = 0;
+        }
+        else {
+            this->_contentLength = request.getBody().size();
+        }
+        
+    } else {
+        this->_contentLength = std::strtod(request.headerGet("Content-Length").c_str(), NULL);
+    }
 
+    // if (request.headerGet("Transfer-Encoding") == "chunked") {
+    //     if (!endsWith(request.getRawRequest(), "\r\n0\r\n\r\n")) {
+    //         this->initErrorHttpResponse(400);
+    //         return ;
+    //     }
+    // }
+
+    std::cout << "CONTENT LENGTH: " << _contentLength << std::endl;
+
+    if (this->_contentLength > serverBlock->getClientMaxBodySize()) {
+        this->initErrorHttpResponse(413);
+        return;
+    }
 
     /* RESOLVE LOCATION BLOCK */
 
@@ -483,9 +509,9 @@ void HttpResponse::initErrorHttpResponse(int statusCode, string error, string de
     string errorDescription = description.empty() ? details.second : description;
     
     std::stringstream output;
-    output  << "<html><head><title>" << errorMsg << "</title>"
+    output  << "<html><head><title>" << errorMsg << " (" << statusCode << ")</title>"
             << "<style>" << HttpResponse::css << "</style></head><body>"
-            << "<h1 class=\"error\">" << errorMsg << "</h1>"
+            << "<h1 class=\"error\">" << errorMsg << " (" << statusCode << ")</h1>"
             << "<p>" << errorDescription << "</p>"
             << "</body></html>";
     this->initHttpResponse(output.str(), CONTENT_TYPE_HTML, statusCode);
@@ -538,26 +564,27 @@ LocationBlock* HttpResponse::resolveLocationBlock(const string& path, ServerBloc
     std::vector<LocationBlock>* locations = serverBlock->getLocation();
     LocationBlock* locationBlock = NULL;
 
+    // Check for extension-based matches first
     for (std::vector<LocationBlock>::iterator it = locations->begin(); it != locations->end(); ++it) {
         const string& uri = it->getUri();
 
-        // Prioritize exact location matches over extensions
-        if (startsWith(path, uri) &&
-            (path.size() == uri.size() || path[uri.size()] == '/') &&
-            (locationBlock == NULL || uri.size() > locationBlock->getUri().size()))
-        {
+        if (startsWith(uri, ".") && endsWith(path, uri)) {
+            _isExtension = true;
             locationBlock = &(*it);
+            break;
         }
     }
 
-    // Check for extension-based matches only if no exact location match is found
+    // If no extension-based match is found, check for exact location matches
     if (locationBlock == NULL) {
         for (std::vector<LocationBlock>::iterator it = locations->begin(); it != locations->end(); ++it) {
             const string& uri = it->getUri();
 
-            if (startsWith(uri, ".") && endsWith(path, uri)) {
+            if (startsWith(path, uri) &&
+                (path.size() == uri.size() || path[uri.size()] == '/') &&
+                (locationBlock == NULL || uri.size() > locationBlock->getUri().size()))
+            {
                 locationBlock = &(*it);
-                break;
             }
         }
     }
@@ -572,33 +599,37 @@ string HttpResponse::getReroutedPath() {
 
 
 string HttpResponse::applyAlias(string& path) {
-    if (!this->_isLocation) {
+    if (!this->_isLocation)
         return path;
-    }
 
     string alias = this->getBlock()->getAlias();
     string uri = this->getBlock()->getUri();
 
-    if (!alias.empty() && startsWith(path, uri)) {
-        string suffix = path.length() > uri.length() ? path.substr(uri.length()) : "";
+    if (alias.empty())
+        return path;
+
+    // If it's an extension-based match (e.g. .bla), apply alias to the full path
+    if (_isExtension) {
+        return joinPaths(alias, getBasename(path)); // Append only the filename
+    }
+
+    // Standard alias replacement: substitute the matching location URI prefix
+    if (startsWith(path, uri)) {
+        string suffix = path.substr(uri.length()); // Keep the rest after matched location
         string newPath = alias;
 
-        // Ensure we don't end up with double slashes or missing slashes
-        if (!alias.empty() && alias[alias.size() - 1] != '/' && !suffix.empty() && suffix[0] != '/')
+        // Handle slash joining between alias and suffix
+        if (!newPath.empty() && *newPath.rbegin() != '/' && !suffix.empty() && *suffix.begin() != '/')
             newPath += '/';
 
         newPath += suffix;
-
-        // Check if it's a directory
-        if (isPathExist(newPath) && isDirectory(newPath)) {
-            return newPath;
-        }
 
         return newPath;
     }
 
     return path;
 }
+
 
 std::pair<string, string> HttpResponse::GetMsg(int statusCode) const {
     switch (statusCode) {
@@ -612,6 +643,7 @@ std::pair<string, string> HttpResponse::GetMsg(int statusCode) const {
         case 405: return std::make_pair("Method Not Allowed", "The request method is known by the server but has been disabled and cannot be used.");
         case 403: return std::make_pair("Forbidden", "The client does not have access rights to the content");
         case 404: return std::make_pair("Not Found", "The server can not find the requested resource.");
+        case 413: return std::make_pair("Payload Too Large", "The request is larger than the server is willing or able to process.");
         case 500: return std::make_pair("Internal Server Error", "Something went wrong on the server.");
         case 504: return std::make_pair("Gateway Timeout", "The server, while acting as a gateway or proxy, did not receive a timely response from an upstream server it needed to access in order to complete the request.");
     }
