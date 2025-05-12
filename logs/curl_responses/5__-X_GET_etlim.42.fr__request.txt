@@ -1,0 +1,41 @@
+== Info:   Trying 127.0.0.1:80...
+== Info: Connected to etlim.42.fr (127.0.0.1) port 80 (#0)
+=> Send header, 75 bytes (0x4b)
+0000: GET / HTTP/1.1
+0010: Host: etlim.42.fr
+0023: User-Agent: curl/7.81.0
+003c: Accept: */*
+0049: 
+== Info: Mark bundle as not supporting multiuse
+<= Recv header, 17 bytes (0x11)
+0000: HTTP/1.1 200 OK
+<= Recv header, 31 bytes (0x1f)
+0000: Server: nginx/1.18.0 (Ubuntu)
+<= Recv header, 37 bytes (0x25)
+0000: Date: Mon, 12 May 2025 12:06:24 GMT
+<= Recv header, 25 bytes (0x19)
+0000: Content-Type: text/html
+<= Recv header, 21 bytes (0x15)
+0000: Content-Length: 612
+<= Recv header, 46 bytes (0x2e)
+0000: Last-Modified: Fri, 09 May 2025 05:18:15 GMT
+<= Recv header, 24 bytes (0x18)
+0000: Connection: keep-alive
+<= Recv header, 22 bytes (0x16)
+0000: ETag: "681d9017-264"
+<= Recv header, 22 bytes (0x16)
+0000: Accept-Ranges: bytes
+<= Recv header, 2 bytes (0x2)
+0000: 
+<= Recv data, 612 bytes (0x264)
+0000: <!DOCTYPE html>.<html>.<head>.<title>Welcome to nginx!</title>.<
+0040: style>.    body {.        width: 35em;.        margin: 0 auto;. 
+0080:        font-family: Tahoma, Verdana, Arial, sans-serif;.    }.</
+00c0: style>.</head>.<body>.<h1>Welcome to nginx!</h1>.<p>If you see t
+0100: his page, the nginx web server is successfully installed and.wor
+0140: king. Further configuration is required.</p>..<p>For online docu
+0180: mentation and support please refer to.<a href="http://nginx.org/
+01c0: ">nginx.org</a>.<br/>.Commercial support is available at.<a href
+0200: ="http://nginx.com/">nginx.com</a>.</p>..<p><em>Thank you for us
+0240: ing nginx.</em></p>.</body>.</html>.
+== Info: Connection #0 to host etlim.42.fr left intact

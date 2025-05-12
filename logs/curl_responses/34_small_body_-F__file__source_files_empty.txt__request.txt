@@ -1,0 +1,45 @@
+== Info:   Trying 127.0.0.1:8080...
+== Info: Connected to localhost (127.0.0.1) port 8080 (#0)
+=> Send header, 196 bytes (0xc4)
+0000: POST /small_body HTTP/1.1
+001b: Host: localhost:8080
+0031: User-Agent: curl/7.81.0
+004a: Accept: */*
+0057: Content-Length: 187
+006c: Content-Type: multipart/form-data; boundary=--------------------
+00ac: ----440bc5376c100f10
+00c2: 
+=> Send data, 187 bytes (0xbb)
+0000: --------------------------440bc5376c100f10
+002c: Content-Disposition: form-data; name="file"; filename="empty.txt
+006c: "
+006f: Content-Type: text/plain
+0089: 
+008b: 
+008d: --------------------------440bc5376c100f10--
+== Info: We are completely uploaded and fine
+== Info: Mark bundle as not supporting multiuse
+<= Recv header, 109 bytes (0x6d)
+0000: HTTP/1.1 400 "empty.txt" already exists in "/home/cooper/corePro
+0040: gram/webserv_proper/webserv1/public/upload"
+<= Recv header, 25 bytes (0x19)
+0000: Content-Type: text/html
+<= Recv header, 21 bytes (0x15)
+0000: Content-Length: 810
+<= Recv header, 2 bytes (0x2)
+0000: 
+<= Recv data, 810 bytes (0x32a)
+0000: <html>.    <head>.        <style>..body {.    font-family: Arial
+0040: , sans-serif;.    background-color: #f4f4f4;.    margin: 0;.    
+0080: padding: 20px;.}.h1 {.    color: #4CAF50;.}.table {.    width: 1
+00c0: 00%;.    border-collapse: collapse;.    border-radius: 10px;.   
+0100:  overflow: hidden;.    padding: 10px;.}.th, td {.    text-align:
+0140:  left;.    background: #fff;.    padding: 10px 5px;.}.a {.    co
+0180: lor: #1E90FF;.}..folder {.    color:rgb(0, 255, 251);.}..error {
+01c0: .    color: red;.    font-weight: bold;.}..success {.    color: 
+0200: green;.    font-weight: bold;.}..            h2 {.              
+0240:   color: red;.            }.        </style>.    </head>.    <bo
+0280: dy>.        <h2>400 Bad Request</h2>.        <p>"empty.txt" alre
+02c0: ady exists in "/home/cooper/coreProgram/webserv_proper/webserv1/
+0300: public/upload"</p>.    </body>.    </html>
+== Info: Connection #0 to host localhost left intact

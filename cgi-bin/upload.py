@@ -191,13 +191,12 @@ if request_method == "POST":
     
     write_to("POST")
     if os.environ.get("CONTENT_LENGTH", "") == "0":
-        response = generate_response_string(
-            content="",
-            status_code=204,
-            status_message="No Content",
-            content_type="text/plain",
-            **additional_args
-        )
+        response = "HTTP/1.1 200 ok\r\n" \
+            "Content-Type: text/html\r\n" \
+            "Content-Length: 0\r\n" \
+            "Connection: close\r\n" \
+            "\r\n"
+        
         sys.stdout.write(response)
         sys.stdout.flush()
         sys.exit(0)

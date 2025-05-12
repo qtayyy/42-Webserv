@@ -1,0 +1,48 @@
+== Info:   Trying 127.0.0.1:8080...
+== Info: Connected to localhost (127.0.0.1) port 8080 (#0)
+=> Send header, 196 bytes (0xc4)
+0000: POST /except_all HTTP/1.1
+001b: Host: localhost:8080
+0031: User-Agent: curl/7.81.0
+004a: Accept: */*
+0057: Content-Length: 197
+006c: Content-Type: multipart/form-data; boundary=--------------------
+00ac: ----05792557aa508384
+00c2: 
+=> Send data, 197 bytes (0xc5)
+0000: --------------------------05792557aa508384
+002c: Content-Disposition: form-data; name="file"; filename="tiny.txt"
+006e: Content-Type: text/plain
+0088: 
+008a: hello world
+0097: --------------------------05792557aa508384--
+== Info: We are completely uploaded and fine
+== Info: Mark bundle as not supporting multiuse
+<= Recv header, 24 bytes (0x18)
+0000: HTTP/1.1 303 See Other
+<= Recv header, 25 bytes (0x19)
+0000: Content-Type: text/html
+<= Recv header, 21 bytes (0x15)
+0000: Content-Length: 763
+<= Recv header, 18 bytes (0x12)
+0000: Pragma: no-cache
+<= Recv header, 19 bytes (0x13)
+0000: Connection: close
+<= Recv header, 63 bytes (0x3f)
+0000: Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+<= Recv header, 2 bytes (0x2)
+0000: 
+<= Recv data, 763 bytes (0x2fb)
+0000: <html><head><style>.body {.    font-family: Arial, sans-serif;. 
+0040:    background-color: #f4f4f4;.    margin: 0;.    padding: 20px;.
+0080: }.h1 {.    color: #4CAF50;.}.table {.    width: 100%;.    border
+00c0: -collapse: collapse;.    border-radius: 10px;.    overflow: hidd
+0100: en;.    padding: 10px;.}.th, td {.    text-align: left;.    back
+0140: ground: #fff;.    padding: 10px 5px;.}.a {.    color: #1E90FF;.}
+0180: ..folder {.    color:rgb(0, 255, 251);.}..error {.    color: red
+01c0: ;.    font-weight: bold;.}..success {.    color: green;.    font
+0200: -weight: bold;.}.</style></head><body><h2 class='success'>File U
+0240: pload Successful</h2><p>File <strong>tiny.txt</strong> uploaded 
+0280: successfully to <strong>/home/cooper/coreProgram/webserv_proper/
+02c0: webserv1/public/upload/tiny.txt</strong>.</p></body></html>
+== Info: Closing connection 0

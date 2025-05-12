@@ -1,0 +1,42 @@
+== Info:   Trying 127.0.0.1:8080...
+== Info: Connected to localhost (127.0.0.1) port 8080 (#0)
+=> Send header, 90 bytes (0x5a)
+0000: GET /dir_no_perms HTTP/1.1
+001c: Host: localhost:8080
+0032: User-Agent: curl/7.81.0
+004b: Accept: */*
+0058: 
+== Info: Mark bundle as not supporting multiuse
+<= Recv header, 22 bytes (0x16)
+0000: HTTP/1.1 200 Success
+<= Recv header, 19 bytes (0x13)
+0000: Connection: close
+<= Recv header, 22 bytes (0x16)
+0000: Content-Length: 1318
+<= Recv header, 25 bytes (0x19)
+0000: Content-Type: text/html
+<= Recv header, 2 bytes (0x2)
+0000: 
+<= Recv data, 1318 bytes (0x526)
+0000: <html><head><title>Index of public/volatile/dir_no_perms</title>
+0040: <style>       body {           font-family: Arial, sans-serif;  
+0080:          background-color: #f4f4f4;           margin: 0;        
+00c0:    padding: 20px;       }       h1 {           color: #4CAF50;  
+0100:      }       table {           width: 100%;           border-col
+0140: lapse: collapse;           border-radius: 10px;           overfl
+0180: ow: hidden;           padding: 10px;       }       th, td {     
+01c0:       text-align: left;           background: #fff;           pa
+0200: dding: 10px;       }       a {           color: #1E90FF;       }
+0240:        .folder {           color:rgb(0, 160, 158);       }      
+0280:  .error {           color: red;           font-weight: bold;    
+02c0:    }</style><script>async function deleteFile(filePath, rowId) {
+0300:   if (!confirm('Delete this file?')) return;  try {    const res
+0340: ponse = await fetch(filePath, { method: 'DELETE' });    if (resp
+0380: onse.ok) {      document.getElementById(rowId).remove();    } el
+03c0: se {      alert('Failed to delete: ' + response.status);    }  }
+0400:  catch (err) {    alert('Error: ' + err);  }}</script></head><bo
+0440: dy><h1>Index of <a href="/">~</a><a href=""></a> / <a href="/dir
+0480: _no_perms">dir_no_perms</a> </h1><table><tr><th>Name</th><th>Siz
+04c0: e</th><th>Action</th></tr><tr><td colspan="3">Unable to open dir
+0500: ectory</td></tr></table></body></html>
+== Info: Closing connection 0

@@ -1,0 +1,34 @@
+== Info:   Trying 127.0.0.1:8080...
+== Info: Connected to localhost (127.0.0.1) port 8080 (#0)
+=> Send header, 92 bytes (0x5c)
+0000: GET /index_no_perms HTTP/1.1
+001e: Host: localhost:8080
+0034: User-Agent: curl/7.81.0
+004d: Accept: */*
+005a: 
+== Info: Mark bundle as not supporting multiuse
+<= Recv header, 62 bytes (0x3e)
+0000: HTTP/1.1 404 The server can not find the requested resource.
+<= Recv header, 19 bytes (0x13)
+0000: Connection: close
+<= Recv header, 21 bytes (0x15)
+0000: Content-Length: 813
+<= Recv header, 25 bytes (0x19)
+0000: Content-Type: text/html
+<= Recv header, 2 bytes (0x2)
+0000: 
+<= Recv data, 813 bytes (0x32d)
+0000: <html><head><title>Not Found (404)</title><style>       body {  
+0040:          font-family: Arial, sans-serif;           background-co
+0080: lor: #f4f4f4;           margin: 0;           padding: 20px;     
+00c0:   }       h1 {           color: #4CAF50;       }       table {  
+0100:          width: 100%;           border-collapse: collapse;      
+0140:      border-radius: 10px;           overflow: hidden;           
+0180: padding: 10px;       }       th, td {           text-align: left
+01c0: ;           background: #fff;           padding: 10px;       }  
+0200:      a {           color: #1E90FF;       }       .folder {      
+0240:      color:rgb(0, 160, 158);       }       .error {           co
+0280: lor: red;           font-weight: bold;       }</style></head><bo
+02c0: dy><h1 class="error">Not Found (404)</h1><p>The server can not f
+0300: ind the requested resource.</p></body></html>
+== Info: Closing connection 0

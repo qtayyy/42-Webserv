@@ -1,6 +1,0 @@
-HTTP/1.1 200 Success
-Connection: close
-Content-Length: 1231
-Content-Type: text/html
-
-<html><head><title>Index of public/dir3</title><style>       body {           font-family: Arial, sans-serif;           background-color: #f4f4f4;           margin: 0;           padding: 20px;       }       h1 {           color: #4CAF50;       }       table {           width: 100%;           border-collapse: collapse;           border-radius: 10px;           overflow: hidden;           padding: 10px;       }       th, td {           text-align: left;           background: #fff;           padding: 10px;       }       a {           color: #1E90FF;       }       .folder {           color:rgb(0, 160, 158);       }       .error {           color: red;           font-weight: bold;       }</style><script>async function deleteFile(filePath, rowId) {  if (!confirm('Delete this file?')) return;  try {    const response = await fetch(filePath, { method: 'DELETE' });    if (response.ok) {      document.getElementById(rowId).remove();    } else {      alert('Failed to delete: ' + response.status);    }  } catch (err) {    alert('Error: ' + err);  }}</script></head><body><h1>Index of <a href="/">~</a><a href=""></a> / <a href="/dir3">dir3</a> </h1><table><tr><th>Name</th><th>Size</th><th>Action</th></tr></table></body></html>

@@ -1,0 +1,54 @@
+HTTP/1.1 400 "empty.txt" already exists in "/home/cooper/coreProgram/webserv_proper/webserv1/public/upload"
+Content-Type: text/html
+Content-Length: 810
+
+<html>
+    <head>
+        <style>
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+}
+h1 {
+    color: #4CAF50;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+    padding: 10px;
+}
+th, td {
+    text-align: left;
+    background: #fff;
+    padding: 10px 5px;
+}
+a {
+    color: #1E90FF;
+}
+.folder {
+    color:rgb(0, 255, 251);
+}
+.error {
+    color: red;
+    font-weight: bold;
+}
+.success {
+    color: green;
+    font-weight: bold;
+}
+
+            h2 {
+                color: red;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>400 Bad Request</h2>
+        <p>"empty.txt" already exists in "/home/cooper/coreProgram/webserv_proper/webserv1/public/upload"</p>
+    </body>
+    </html>

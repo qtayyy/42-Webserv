@@ -1,0 +1,8 @@
+HTTP/1.1 302 The requested resource resides temporarily under a different URI.
+Cache-Control: no-cache; no-store; must-revalidate
+Connection: close
+Content-Length: 0
+Content-Type: text/html
+Location: https://localhost:8080
+Pragma: no-cache
+
