@@ -8,6 +8,7 @@
 #include "Log.hpp"
 
 #include "Utils.hpp"
+#include "Log.hpp"
 
 class HttpResponse;
 

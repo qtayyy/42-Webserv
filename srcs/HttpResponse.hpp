@@ -46,7 +46,15 @@ private:
     string        createStatusPageStr(string errorPagePath, int statusCode) const;
     void          displayError() const;
 
+    /* METHOD HANDLERS */
+    void _handleGET();
+    void _handlePOST();
+    void _handleDELETE();
 
+    /* RESPONSE INITIALIZERS */
+    void _initHttpResponse(string content, string resourceType, int statusCode);
+    void _initErrorHttpResponse(int statusCode, string error = "", string description = "");
+    void _initCGIResponse(string cgiPath, HttpRequest request);
 public:
     /* CONSTRUCTOR/DESTRUCTOR */
 
@@ -78,16 +86,7 @@ public:
     static string getContentType(const string& resourcePath);
 
 
-    /* METHOD HANDLERS */
-    void handleGET(ServerBlock *serverBlock);
-    void handlePOST();
-    void handleDELETE();
 
-
-    /* RESPONSE INITIALIZERS */
-    void initHttpResponse(string content, string resourceType, int statusCode);
-    void initErrorHttpResponse(int statusCode, string error = "", string description = "");
-    void initCGIResponse(string cgiPath, HttpRequest request);
 };
 
 #endif 

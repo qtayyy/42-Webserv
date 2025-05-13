@@ -329,5 +329,5 @@ elif request_method == "GET":
     sys.stdout.buffer.flush()
 
 else:
-    exit_error("Method not allowed.", "405 Method Not Allowed", 405)
+    exit_error("Method not allowed.", f"405 Method Not Allowed: {request_method}", 405)
 # todo post method handled incorrectly, doesnt consider set upload route

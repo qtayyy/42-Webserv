@@ -8,11 +8,14 @@ CGIHandler::~CGIHandler() {}
 
 void setEnvironmentVariables(stringDict envVars) {
     for (stringDict::const_iterator it = envVars.begin(); it != envVars.end(); ++it) {
-        setenv(it->first.c_str(), it->second.c_str(), 1);
-        std::cout << std::left << YELLOW << std::setw(20) << "\t" + it->first << RESET << it->second << std::endl;
+        if (unsetenv(it->first.c_str()) != 0)
+            LogStream::error() << "Failed to unset environment variable: " << it->first << std::endl;
+        if (setenv(it->first.c_str(), it->second.c_str(), 1) != 0)
+            LogStream::error() << "Failed to set environment variable: " << it->first << " = " << it->second << std::endl;
+        else
+            LogStream::error() << std::left << YELLOW << std::setw(20) << "\t" + it->first << RESET << it->second << std::endl;
     }
 }
-
 
 /* GETTER/SETTER */
 
@@ -59,7 +62,7 @@ string CGIHandler::handleCgi(
     this->setEnv("CONTENT_TYPE",    request.headerGet("Content-Type")); //fixme here???
     this->setEnv("SERVER_PROTOCOL", "HTTP/1.1");
 
-    setEnvironmentVariables(this->envVars);
+    // setEnvironmentVariables(this->envVars);
     // system("./ubuntu_cgi_tester");
 
     LogStream::pending() << "Running CGI " << fullCGIPath <<  "..." << std::endl;
@@ -86,10 +89,37 @@ string CGIHandler::handleCgi(
         close(inputPipe[0]);
         close(outputPipe[1]);
         string rootPath = locationBlock.getRoot();
-        string reroutedPath = response.getReroutedPath();
-        runCGIExecutable(fullCGIPath, reroutedPath);
-        
-        perror(("execl failed: " + fullCGIPath).c_str());
+        std::string reroutedPath = response.getReroutedPath();
+
+        // Set up environment
+        char **env = new char*[envVars.size() + 1];
+        int i = 0;
+        for (stringDict::const_iterator it = envVars.begin(); it != envVars.end(); ++it) {
+            std::string envVar = it->first + "=" + it->second;
+            env[i] = new char[envVar.length() + 1];
+            strcpy(env[i], envVar.c_str());
+            i++;
+        }
+        env[i] = NULL;
+
+        // Set up argv
+        char *args[] = {
+            (char*)"python3",                           // argv[0]
+            const_cast<char*>(fullCGIPath.c_str()),     // argv[1] = script path
+            const_cast<char*>(reroutedPath.c_str()),    // argv[2] = arg to script (optional)
+            NULL
+        };
+
+        // Optional: log env for debug
+        for (int j = 0; j < i; ++j) {
+            LogStream::log("cgi_env.txt", std::ios::out | std::ios::app) << env[j] << std::endl;
+        }
+
+        // Run Python interpreter with script
+        execve("/usr/bin/python3", args, env);
+
+        // Only reached on error
+        perror(("execve failed: " + fullCGIPath).c_str());
         exit(1);
     }
     else {

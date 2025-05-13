@@ -64,14 +64,10 @@ LocationBlock *HttpResponse::getBlock() {
 
 /* REQUEST HANDLERS */
 
-void HttpResponse::handleGET(ServerBlock *serverBlock) {
-    (void)serverBlock;
+void HttpResponse::_handleGET() {
 
-
-    //fixme /custom_error turns into /volatile, but then reroutes to public/volatile/te
-    //fixme check if alias applies. If so, don't reroute using root
     if (!this->getBlock()->getCgiPass().empty()) {
-        this->initCGIResponse(this->getBlock()->getCgiPass(), request);
+        this->_initCGIResponse(this->getBlock()->getCgiPass(), request);
         return;
     }
 
@@ -81,37 +77,34 @@ void HttpResponse::handleGET(ServerBlock *serverBlock) {
         if (!_reroutedPath.empty() && _reroutedPath[0] == '/') {
             _reroutedPath = _reroutedPath.substr(1);
         }
-        if (isDirectory(_reroutedPath)) { //fixme problem here. Doesn't detect an alias as directory
-            std::cout << "Directory detected" << std::endl;
-            string indexFile = _dirHasIndexFile(_reroutedPath); // fixme issue here also
+        if (isDirectory(_reroutedPath)) {
+            LogStream::log() << "Directory detected" << std::endl;
+            string indexFile = _dirHasIndexFile(_reroutedPath);
             
-            stringList indices;
-
             // if index file is found, serve it
-            indices = getBlock()->getIndex();
-            for (stringList::const_iterator it = indices.begin(); it != indices.end(); ++it) {
-                string potentialIndexFile = joinPaths(_reroutedPath, *it);
+            stringList indexFiles = getBlock()->getIndex();
+            for (stringList::const_iterator indexFile = indexFiles.begin(); indexFile != indexFiles.end(); ++indexFile) {
+                string potentialIndexFile = joinPaths(_reroutedPath, *indexFile);
                 try {
-                    std::cout << "Serving index file: " << potentialIndexFile << std::endl;
-                    this->initHttpResponse(readFileContent(potentialIndexFile), getContentType(potentialIndexFile), 200);
+                    this->_initHttpResponse(readFileContent(potentialIndexFile), getContentType(potentialIndexFile), 200);
+                    LogStream::log() << "Served index: " << potentialIndexFile << std::endl;
                     return ;
                 } 
                 
                 catch (const HttpException& e) {
-                    std::cout << "Error serving index file: " << e.getStatusCode() << " " << e.what() << std::endl;
+                    LogStream::error() << "Error serving index file: " << e.getStatusCode() << " " << e.what() << std::endl;
                 }
             }
             
             // if autoindex is enabled, serve the autoindex page
             if (getBlock()->getAutoindex()) {
-                std::cout << "Generating auto index... " << _reroutedPath<< std::endl;
+                LogStream::log() << "Generating auto index... " << _reroutedPath<< std::endl;
                 string autoIndex = createAutoIndexHtml(_reroutedPath, _path);
-                this->initHttpResponse(autoIndex, CONTENT_TYPE_HTML, 200);
+                this->_initHttpResponse(autoIndex, CONTENT_TYPE_HTML, 200);
             } 
             
-            // if autoindex is disabled, return 403
+            // if autoindex is disabled, return 404
             else {
-                std::cout << "404" << "" << std::endl;
                 throw HttpException(404);
             }
         }
@@ -119,50 +112,49 @@ void HttpResponse::handleGET(ServerBlock *serverBlock) {
         // if the path is a file
         else {
             string content = readFileContent((_reroutedPath));
-
-            this->initHttpResponse(content, getContentType(_reroutedPath), 200);
+            this->_initHttpResponse(content, getContentType(_reroutedPath), 200);
         }
     } 
 
     catch (const HttpException& e) {
         LogStream::error() << "error: " << e.getStatusCode() << " " << e.what() << std::endl;
-        this->initErrorHttpResponse(e.getStatusCode());
+        this->_initErrorHttpResponse(e.getStatusCode());
     }
 }
 
 
-void HttpResponse::handlePOST() {
+void HttpResponse::_handlePOST() {
     if (this->getBlock()->getCgiPass().empty()) {
         std::cout << "CANNOT FIND CGI " << this->getBlock()->getCgiPass() << std::endl;
-        this->initErrorHttpResponse(500);
+        this->_initErrorHttpResponse(500);
         return;
     }
     string cgiPass = this->getBlock()->getCgiPass();
-    this->initCGIResponse(cgiPass, request);
+    this->_initCGIResponse(cgiPass, request);
 }
 
 
-void HttpResponse::handleDELETE() {
+void HttpResponse::_handleDELETE() {
 
     if (!isPathExist(_reroutedPath)) {
-        this->initErrorHttpResponse(404);
+        this->_initErrorHttpResponse(404);
         std::cout << "FILE DOESN'T EXIST: " << _reroutedPath << std::endl;
         return; 
     } 
 
     if (isDirectory(_reroutedPath)) {
-        this->initErrorHttpResponse(403);
+        this->_initErrorHttpResponse(403);
     }
 
     int status = remove(_reroutedPath.c_str());
 
     if (status == 0) {
-        this->initHttpResponse("File deleted successfully", CONTENT_TYPE_HTML, 200);
+        this->_initHttpResponse("File deleted successfully", CONTENT_TYPE_HTML, 200);
     } 
     
     else {
         std::cout << _reroutedPath << " could not be deleted. Status: " << status << std::endl;
-        this->initErrorHttpResponse(500);
+        this->_initErrorHttpResponse(500);
     }
 }
 
@@ -175,34 +167,16 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock)
       request(request) {
     LogStream::pending() << "Constructing response" << std::endl; 
 
-    this->_emptyBlock        = new LocationBlock();
     string path             = request.headerGet("path");
     this->_serverBlockRef   = serverBlock;
     this->_locationBlockRef = resolveLocationBlock(path, serverBlock);
 
-    if (request.headerGet("Content-Length").empty()) {
-        if (request.getBody().empty()) {
-            this->_contentLength = 0;
-        }
-        else {
-            this->_contentLength = request.getBody().size();
-        }
-        
-    } else {
+    if (request.headerGet("Content-Length").empty())
+        this->_contentLength = request.getBody().size();
+    else
         this->_contentLength = std::strtod(request.headerGet("Content-Length").c_str(), NULL);
-    }
-
-    // if (request.headerGet("Transfer-Encoding") == "chunked") {
-    //     if (!endsWith(request.getRawRequest(), "\r\n0\r\n\r\n")) {
-    //         this->initErrorHttpResponse(400);
-    //         return ;
-    //     }
-    // }
-
-    std::cout << "CONTENT LENGTH: " << _contentLength << std::endl;
-
     if (this->_contentLength > serverBlock->getClientMaxBodySize()) {
-        this->initErrorHttpResponse(413);
+        this->_initErrorHttpResponse(413);
         return;
     }
 
@@ -228,7 +202,7 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock)
 
     // Check if the request method is allowed
     if (std::find(limitExcept.begin(), limitExcept.end(), this->request.getMethod()) == limitExcept.end()) {
-        this->initErrorHttpResponse(405);
+        this->_initErrorHttpResponse(405);
         return;
     }
 
@@ -246,15 +220,15 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock)
     }
 
     if (!isPathExist(this->getBlock()->getRoot()))
-        this->initErrorHttpResponse(404);
+        this->_initErrorHttpResponse(404);
 
-    _path         = request.headerGet("path");
-    _path         = urlDecode(_path);
+    _path = request.headerGet("path");
+    _path = urlDecode(_path);
     if (_path == applyAlias(_path))
         _aliasApplied = false;
     else
         _aliasApplied = true;
-    _path         = applyAlias(_path);
+    _path = applyAlias(_path);
     
 
     if (_aliasApplied)
@@ -272,26 +246,27 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock)
     //     throw HttpException(404, _reroutedPath);
 
     /* HANDLE METHODS */
+    
 
     if (method == "GET") {
         LogStream::pending() << "Handling GET" << std::endl;
-        this->handleGET(serverBlock);
+        this->_handleGET();
     }
 
     else if (method == "POST") {
         LogStream::pending() << "Handling POST" << std::endl;
-        this->handlePOST();
+        this->_handlePOST();
     }
 
     else if (method == "DELETE") {
         LogStream::pending() << "Handling DELETE" << std::endl;
-        this->handleDELETE();
+        this->_handleDELETE();
     }
 
     /* INVALID METHOD */
 
     else {
-        this->initErrorHttpResponse(400);
+        this->_initErrorHttpResponse(400);
     }
     std::cout << std::endl;
 }
@@ -325,10 +300,6 @@ string HttpResponse::reroutePath(string urlPath) {
 
 
 string HttpResponse::createAutoIndexHtml(string path, string root) {
-
-    // std::cout << "PATH:: " << path << std::endl;
-    // std::cout << "ROOT:: " << root << std::endl;
-
     std::stringstream output;
     output << "<html><head><title>Index of " << path << "</title>"
            << "<style>" << HttpResponse::css << "</style>"
@@ -370,11 +341,11 @@ string HttpResponse::createAutoIndexHtml(string path, string root) {
             if (*it == "." || *it == "..")
                 continue;
 
-            string rowId = "row" + to_string(rowCounter++);
-            string fullPath = joinPaths(path, *it);
+            string rowId        = "row" + to_string(rowCounter++);
+            string fullPath     = joinPaths(path, *it);
             string relativePath = joinPaths(root, *it); // Use relative path for DELETE
-            string fileSize = isDirectory(fullPath) ? "-" : to_string(getFileSize(fullPath));
-            string hrefPath = relativePath; // Full URL for display
+            string fileSize     = isDirectory(fullPath) ? "-" : to_string(getFileSize(fullPath));
+            string hrefPath     = relativePath; // Full URL for display
 
             output << "<tr id=\"" << rowId << "\"><td>";
 
@@ -448,7 +419,7 @@ string HttpResponse::composeHttpResponse(
 
 /* INITIALIZERS */
 
-void HttpResponse::initHttpResponse(string body, string resourceType, int statusCode) {
+void HttpResponse::_initHttpResponse(string body, string resourceType, int statusCode) {
     this->_rawContent       = body;
     this->_contentType      = resourceType;
     this->_statusCode       = statusCode;
@@ -480,7 +451,7 @@ void HttpResponse::initRedirectResponse(string &redirectUrl, int statusCode) {
         NULL);
 }
 
-void HttpResponse::initErrorHttpResponse(int statusCode, string error, string description) {
+void HttpResponse::_initErrorHttpResponse(int statusCode, string error, string description) {
     std::map<int, string> errorPages = this->getBlock()->getErrorPage();
 
     if (!errorPages.empty() && errorPages.find(statusCode) != errorPages.end()) {
@@ -495,7 +466,7 @@ void HttpResponse::initErrorHttpResponse(int statusCode, string error, string de
         
 
         try {
-            this->initHttpResponse(readFileContent(errorPage), CONTENT_TYPE_HTML, statusCode);
+            this->_initHttpResponse(readFileContent(errorPage), CONTENT_TYPE_HTML, statusCode);
             return ;
         }
         catch (const HttpException& e) { 
@@ -514,18 +485,18 @@ void HttpResponse::initErrorHttpResponse(int statusCode, string error, string de
             << "<h1 class=\"error\">" << errorMsg << " (" << statusCode << ")</h1>"
             << "<p>" << errorDescription << "</p>"
             << "</body></html>";
-    this->initHttpResponse(output.str(), CONTENT_TYPE_HTML, statusCode);
+    this->_initHttpResponse(output.str(), CONTENT_TYPE_HTML, statusCode);
 }
 
 
-void HttpResponse::initCGIResponse(string cgiPath, HttpRequest request) {
+void HttpResponse::_initCGIResponse(string cgiPath, HttpRequest request) {
 
     CGIHandler cgiHandler = CGIHandler();
     LogStream::pending() << "Initializing CGI: \"" << cgiPath << "\"" << std::endl;
 
     if (!isPathExist(makeAbsPath(cgiPath))) {
         LogStream::error() << "path doesn't exist: " << cgiPath << std::endl;
-        this->initErrorHttpResponse(500);
+        this->_initErrorHttpResponse(500);
         return;
     }
 
@@ -623,7 +594,6 @@ string HttpResponse::applyAlias(string& path) {
             newPath += '/';
 
         newPath += suffix;
-
         return newPath;
     }
 

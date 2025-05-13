@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <cstdio>
+#include "LocationBlock.hpp"
 
 void deleteLogs(const std::string& folderPath) {
 	DIR* dir = opendir(folderPath.c_str());
@@ -73,4 +74,6 @@ int	main(int argc, char **argv)
 	{
 		std::cerr << e.what() << '\n';
 	}
+
+	delete LocationBlock::emptyBlock;
 }

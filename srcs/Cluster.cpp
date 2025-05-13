@@ -215,12 +215,14 @@ void Cluster::removeFd(int i) {
 	int fd = _pollFds[i].fd;
 
 	close(fd);
+	delete _clients[fd];
 	_clients.erase(fd);
 
 	if (i != _numOfFds - 1) {
 		_pollFds[i] = _pollFds[_numOfFds - 1]; // Move last fd to current slot
 	}
 	_numOfFds--;
+
 
 	LogStream::success() << "Closed connection [" << fd << "]" << std::endl;
 }
@@ -344,8 +346,10 @@ for (int i = 0; i < _numOfFds; i++) {
 		LogStream::pending() << "Sending " << totalBytes << " Bytes to client [" << _pollFds[i].fd << "]" << std::endl;
 		LogStream::pending() << "Response message generated" << std::endl;
 
+		string responseFilename = generateLogFileName(string("logs/responses/"), request.getUid(), string("RESPONSE_") + request.headerGet("path"));
+
 		while (bytesLeft > 0) {
-			LogStream::log(generateLogFileName(string("logs/responses/"), request.getUid(), string("RESPONSE_") + request.headerGet("path"))) << finalMsg << std::endl;
+			LogStream::log(responseFilename) << finalMsg << std::endl;
 			ssize_t sent = send(_pollFds[i].fd, msgPtr + bytesSent, bytesLeft, 0);
 			if (sent == -1) {
 				int		  error = 0;
@@ -374,6 +378,8 @@ for (int i = 0; i < _numOfFds; i++) {
 			bytesSent += sent;
 			bytesLeft -= sent;
 		}
+
+		LogStream::success() << "Saved to " << responseFilename << std::endl;
 
 		// Check if the connection should be kept alive
 		if (request.headerGet("Connection") == "keep-alive" && response.getFinalResponseMsg().find("Connection: close") == string::npos) {
