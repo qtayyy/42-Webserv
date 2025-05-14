@@ -110,11 +110,6 @@ string CGIHandler::handleCgi(
             NULL
         };
 
-        // Optional: log env for debug
-        for (int j = 0; j < i; ++j) {
-            LogStream::log("cgi_env.txt", std::ios::out | std::ios::app) << env[j] << std::endl;
-        }
-
         // Run Python interpreter with script
         execve("/usr/bin/python3", args, env);
 

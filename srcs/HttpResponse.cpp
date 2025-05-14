@@ -77,7 +77,7 @@ void HttpResponse::_handleGET() {
             string potentialIndexFile = joinPaths(_reroutedPath, *indexFile);
             try {
                 this->_initHttpResponse(readFileContent(potentialIndexFile), _resolveContentType(potentialIndexFile), 200);
-                LogStream::log() << "Served index: " << potentialIndexFile << std::endl;
+                LogStream::success() << "Served index: " << potentialIndexFile << std::endl;
                 return ;
             }
             
@@ -121,7 +121,7 @@ void HttpResponse::_handleDELETE() {
 /* CONSTRUCTOR */
 
 HttpResponse::~HttpResponse() {
-    
+
 }
 
 HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) : 
@@ -137,7 +137,8 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) :
         /* RESOLVE LOCATION BLOCK */
 
         _resolvedLocationBlock = _resolveLocationBlock(request.headerGet("path"), serverBlock);
-        LogStream::log() << LogStream::log().setBordered(true) << getBlock()->getInfo() << std::endl;
+        // LogStream::log() << LogStream::log().setBordered(true) << getBlock()->getInfo() << std::endl;
+        LogStream::success() << "Using location block: " << getBlock()->getUri() << std::endl;
 
 
         /* CONTENT LENGTH */
@@ -192,8 +193,6 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) :
     catch (const HttpException& e) {
         this->_initErrorResponse(e.getStatusCode());
     }
-
-    std::cout << std::endl;
 }
 
 

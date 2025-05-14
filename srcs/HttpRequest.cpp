@@ -38,7 +38,6 @@ string HttpRequest::preview() {
 
     infoStream << "method: " << this->getMethod() << std::endl;
 
-    infoStream << "--------------------------|" << std::endl;
     stringDict::iterator it = this->headerParameters.begin();
     stringDict::iterator end = this->headerParameters.end();
 
@@ -49,10 +48,15 @@ string HttpRequest::preview() {
             maxKeyLength = it->first.length();
     }
 
+    std::string separatorLine(maxKeyLength + 1, '_'); // +3 for " |"
+    infoStream << separatorLine << "." << std::endl;
+
     for (it = headerParameters.begin(); it != end; ++it)
         infoStream << std::setw(maxKeyLength) << std::left << it->first << " | " << it->second << std::endl;
 
-    infoStream << "__________________________|" << std::endl;
+    // Adjust the width of the separator line based on maxKeyLength
+    separatorLine = string(maxKeyLength + 1, '_'); // +3 for " |"
+    infoStream << separatorLine << "|" << std::endl;
     infoStream << "body size (bytes): "         << this->body.size() << std::endl;
     infoStream << "raw request size (bytes): "  << this->rawRequest.size() << std::endl;
 

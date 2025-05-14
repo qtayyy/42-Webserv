@@ -314,6 +314,7 @@ for (int i = 0; i < _numOfFds; i++) {
 					HttpRequest &request = this->_clients[_pollFds[i].fd]->getRequest();
 					string outputFolder = generateLogFileName(REQUESTS_FOLDER, request.getUid(), request.getMethod() + "_request_" + request.headerGet("path"));
 					LogStream::log(outputFolder, std::ios::app) << request.getRawRequest() << std::endl;
+					LogStream::success() << "Full request saved to " << outputFolder << std::endl;
 					
 					this->_clients[_pollFds[i].fd]->getRecvBuffer().clear();
 					_pollFds[i].events = POLLOUT;
@@ -331,20 +332,20 @@ for (int i = 0; i < _numOfFds; i++) {
 			LogStream::error() << "No request to send for [" << _pollFds[i].fd << "]" << std::endl;
 			continue;
 		}
-		printBorderedBox(request.preview(), "Request parsed: ");
+		LogStream::log() << LogStream::log().setBordered(true) << request.preview() << std::endl;
 		
 		LogStream::pending() << "Handling request" << std::endl;
 
 		HttpResponse response  = HttpResponse(request, &_servers[0]);
-		string finalMsg		   = response.getFinalResponseMsg();
+		string 		 finalMsg  = response.getFinalResponseMsg();
 		
 		ssize_t 	totalBytes = finalMsg.size();
 		ssize_t 	bytesSent  = 0;
 		ssize_t 	bytesLeft  = totalBytes;
 		const char* msgPtr 	   = finalMsg.c_str();
 		
+		LogStream::success() << "Response message generated" << std::endl;
 		LogStream::pending() << "Sending " << totalBytes << " Bytes to client [" << _pollFds[i].fd << "]" << std::endl;
-		LogStream::pending() << "Response message generated" << std::endl;
 
 		string responseFilename = generateLogFileName(string("logs/responses/"), request.getUid(), string("RESPONSE_") + request.headerGet("path"));
 
@@ -374,12 +375,11 @@ for (int i = 0; i < _numOfFds; i++) {
 					break;
 				}
 			}
-			LogStream::success() << "Sent " << sent << " bytes" << std::endl;
 			bytesSent += sent;
 			bytesLeft -= sent;
 		}
 
-		LogStream::success() << "Saved to " << responseFilename << std::endl;
+		LogStream::success() << "Message sent successfully. Saved to " << responseFilename << std::endl;
 
 		// Check if the connection should be kept alive
 		if (request.headerGet("Connection") == "keep-alive" && response.getFinalResponseMsg().find("Connection: close") == string::npos) {
