@@ -55,6 +55,7 @@ class LogStream {
                 out = &std::cerr;
                 defaultStream = &std::cerr;
             }
+ 
         }
     
         template<typename T>
@@ -92,11 +93,14 @@ class LogStream {
 
         LogStream &setstream(const string& filepath, std::ios_base::openmode mode) {
             this->fileStream.close();
+
             this->fileStream.open(filepath.c_str(), mode);
             if (this->fileStream.is_open())
                 this->out = &this->fileStream;
-            else
+            else {
+                supress = true;
                 this->out = &std::cerr;
+            }
             return *this;
         }
     

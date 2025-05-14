@@ -84,8 +84,4 @@ typedef std::string string;
 typedef std::map<string, string> stringDict;
 typedef std::vector<string> stringList;
 
-#define AUTO_INDEX_ON true
-
-
-
 #endif
