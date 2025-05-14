@@ -1,14 +1,18 @@
-[2025-05-14 10:42:50] cgi called
-[2025-05-14 10:42:50] ENV CONTENT_LENGTH=0
-[2025-05-14 10:42:50] ENV CONTENT_TYPE=
-[2025-05-14 10:42:50] ENV PATH_INFO=/only_post
-[2025-05-14 10:42:50] ENV PATH_TRANSLATED=/home/cooper/coreProgram/webserv_proper/webserv1/cgi-bin/upload.py
-[2025-05-14 10:42:50] ENV QUERY_STRING=
-[2025-05-14 10:42:50] ENV REQUEST_METHOD=POST
-[2025-05-14 10:42:50] ENV REQUEST_URI=/home/cooper/coreProgram/webserv_proper/webserv1/cgi-bin/upload.py
-[2025-05-14 10:42:50] ENV SCRIPT_NAME=/cgi-bin/upload.py
-[2025-05-14 10:42:50] ENV SERVER_PORT=8080
-[2025-05-14 10:42:50] ENV SERVER_PROTOCOL=HTTP/1.1
-[2025-05-14 10:42:50] ENV LC_CTYPE=C.UTF-8
-[2025-05-14 10:42:50] Received data: {}
-[2025-05-14 10:42:50] POST
+[2025-05-14 15:39:13] cgi called
+[2025-05-14 15:39:13] ENV CONTENT_LENGTH=0
+[2025-05-14 15:39:13] ENV CONTENT_TYPE=
+[2025-05-14 15:39:13] ENV PATH_INFO=/upload
+[2025-05-14 15:39:13] ENV PATH_TRANSLATED=/home/cooper/coreProgram/webserv_proper/webserv1/cgi-bin/upload.py
+[2025-05-14 15:39:13] ENV QUERY_STRING=
+[2025-05-14 15:39:13] ENV REQUEST_METHOD=GET
+[2025-05-14 15:39:13] ENV REQUEST_URI=/home/cooper/coreProgram/webserv_proper/webserv1/cgi-bin/upload.py
+[2025-05-14 15:39:13] ENV SCRIPT_NAME=/cgi-bin/upload.py
+[2025-05-14 15:39:13] ENV SERVER_PORT=8080
+[2025-05-14 15:39:13] ENV SERVER_PROTOCOL=HTTP/1.1
+[2025-05-14 15:39:13] ENV LC_CTYPE=C.UTF-8
+[2025-05-14 15:39:13] Received data: {}
+[2025-05-14 15:39:13] GET public/upload
+[2025-05-14 15:39:13] cwd: /home/cooper/coreProgram/webserv_proper/webserv1
+[2025-05-14 15:39:13] current_path: /home/cooper/coreProgram/webserv_proper/webserv1
+[2025-05-14 15:39:13] full_path: /home/cooper/coreProgram/webserv_proper/webserv1/public/upload
+[2025-05-14 15:39:13] Directory listing for /home/cooper/coreProgram/webserv_proper/webserv1/public/upload

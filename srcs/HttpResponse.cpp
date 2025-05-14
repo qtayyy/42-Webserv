@@ -53,7 +53,15 @@ const string HttpResponse::css =
 
 string HttpResponse::getFinalResponseMsg() const { return _finalResponseMsg; }
 int    HttpResponse::getContentLength()    const { return _contentLength; }
-LocationBlock *HttpResponse::getBlock() { return this->_usingLocationBlock ? dynamic_cast<LocationBlock*>(this->_resolvedLocationBlock) : LocationBlock::emptyBlock; }
+LocationBlock *HttpResponse::getBlock() {
+    if (this->_usingLocationBlock) {
+        return dynamic_cast<LocationBlock*>(this->_resolvedLocationBlock);
+    } else {
+        return LocationBlock::emptyBlock;
+        // return this->emptyBlock;
+    }
+}
+
 string HttpResponse::getReroutedPath()  { return _reroutedPath; }
 
 
@@ -125,6 +133,7 @@ HttpResponse::~HttpResponse() {
 }
 
 HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) : 
+    _usingLocationBlock(false),
     _isAlias(false),
     _isExtension(false),
     _request(request),
@@ -137,9 +146,16 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) :
         /* RESOLVE LOCATION BLOCK */
 
         _resolvedLocationBlock = _resolveLocationBlock(request.headerGet("path"), serverBlock);
-        // LogStream::log() << LogStream::log().setBordered(true) << getBlock()->getInfo() << std::endl;
-        LogStream::success() << "Using location block: " << getBlock()->getUri() << std::endl;
+        
+        if (!_resolvedLocationBlock) {
+            _resolvedLocationBlock = serverBlock;
+        }
 
+        std::cout << "RESOLVED LOCATION BLOCK : " << _resolvedLocationBlock << std::endl;
+        LogStream::success() << "Using location block: " << getBlock()->getUri() << std::endl;
+        LogStream::log() << LogStream::log().setBordered(true) << getBlock()->getInfo() << std::endl;
+
+        
 
         /* CONTENT LENGTH */
 
@@ -151,7 +167,7 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) :
 
         /* LIMIT EXCEPT */
 
-        stringList limitExcept = getBlock()->getLimitExcept();
+        stringList limitExcept = _serverBlockRef->getLimitExcept();
         string          method = request.getMethod();
         if (std::find(limitExcept.begin(), limitExcept.end(), method) == limitExcept.end())
             throw HttpException(405);

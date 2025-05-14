@@ -24,27 +24,23 @@
 
 void deleteLogs(const std::string& folderPath) {
 	DIR* dir = opendir(folderPath.c_str());
-	if (!dir) {
-		std::cerr << "Error opening directory: " << folderPath << std::endl;
+	if (!dir)
 		return;
-	}
 
 	struct dirent* entry;
 	while ((entry = readdir(dir)) != NULL) {
-		std::string filePath = folderPath + "/" + entry->d_name;
+		string filePath = folderPath + "/" + entry->d_name;
 		if (entry->d_type == DT_DIR) {
 			if (std::string(entry->d_name) != "." && std::string(entry->d_name) != "..") {
 				deleteLogs(filePath);
 				rmdir(filePath.c_str());
 			}
-		} else {
-			if (remove(filePath.c_str()) != 0) {
-				std::cerr << "Error deleting file: " << filePath << std::endl;
-			}
-		}
+		} 
+		
+		else
+			remove(filePath.c_str());
 	}
 	closedir(dir);
-	std::cout << "Deleted files in: " << folderPath << std::endl;
 }
 
 int	main(int argc, char **argv)

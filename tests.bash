@@ -10,7 +10,7 @@ WHITE="\e[37m"
 RESET="\e[0m"
 
 conf_file="/home/cooper/coreProgram/webserv_proper/webserv1/conf/good/custom.conf"
-output_dir="logs/curl_responses"  # Global variable for output directory
+output_dir="tests/curl_responses"  # Global variable for output directory
 log_file="log_trace.log"
 file_index=1  # Initialize the file index
 

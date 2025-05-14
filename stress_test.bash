@@ -1,19 +1,21 @@
 #!/bin/bash
 
-# Start the web server in the background
-
+# disable logs so that log files are not created
 chmod -rwx logs/cgi logs/requests logs/responses
 
-./webserv &
-SERVER_PID=$!
+run_siege_test() {
+    local connections=$1
+    local duration=$2
+    siege -c "$connections" -t "$duration" -b http://localhost:8080/volatile/empty.txt
+}
 
-# Wait a moment to ensure the server starts
+valgrind ./webserv &
+SERVER_PID=$!
 sleep 2
 
-# Run the siege command
-siege -c 50 -t 1m -b http://localhost:8080/volatile/empty.txt
+# Run siege tests with different parameters
+run_siege_test 255 30s
+run_siege_test 100 1m
 
-# Terminate the web server after siege ends
 kill $SERVER_PID
-
 chmod +rwx logs/cgi logs/requests logs/responses

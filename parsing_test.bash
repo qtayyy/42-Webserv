@@ -4,7 +4,7 @@
 input_file="test_lines.txt"
 
 # Output directory
-output_dir="format_test"
+output_dir="tests/format_test"
 
 # Check if the file exists
 if [[ ! -f "$input_file" ]]; then

@@ -1,4 +1,0 @@
-== Info:   Trying 127.0.0.1:1234...
-== Info: connect to 127.0.0.1 port 1234 failed: Connection refused
-== Info: Failed to connect to etlim.42.fr port 1234 after 1 ms: Connection refused
-== Info: Closing connection 0
