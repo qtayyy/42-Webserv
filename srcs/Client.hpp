@@ -20,9 +20,8 @@ class Client
         bool isRequestReady() const; // Check if the request is fully parsed
         void reset(); // Reset the state for keep-alive connections
 
-		void		receiveRequest(ssize_t read_buf, char *buffer);
 		void		parseRequest();
-        void handleRequest(ssize_t read_buf, char *buffer);
+        void handleRequest(const std::string &buffer);
         HttpRequest &getRequest();
 		std::string &getRequestBuffer() { return request_buf; }
 

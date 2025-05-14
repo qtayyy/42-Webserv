@@ -1,6 +1,0 @@
-HTTP/1.1 405 The request method is known by the server but has been disabled and cannot be used.
-Connection: close
-Content-Length: 867
-Content-Type: text/html
-
-<html><head><title>Method Not Allowed (405)</title><style>       body {           font-family: Arial, sans-serif;           background-color: #f4f4f4;           margin: 0;           padding: 20px;       }       h1 {           color: #4CAF50;       }       table {           width: 100%;           border-collapse: collapse;           border-radius: 10px;           overflow: hidden;           padding: 10px;       }       th, td {           text-align: left;           background: #fff;           padding: 10px;       }       a {           color: #1E90FF;       }       .folder {           color:rgb(0, 160, 158);       }       .error {           color: red;           font-weight: bold;       }</style></head><body><h1 class="error">Method Not Allowed (405)</h1><p>The request method is known by the server but has been disabled and cannot be used.</p></body></html>

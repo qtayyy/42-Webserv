@@ -279,7 +279,8 @@ for (int i = 0; i < _numOfFds; i++) {
 			char	buffer[BUFFER_SIZE];
 			ssize_t byteRecv;
 			string& requestBuffer = this->_clients[_pollFds[i].fd]->getRecvBuffer();
-	
+			bool fdRemoved = false;
+
 			LogStream::pending() << "Reading from [" << _pollFds[i].fd << "]" << std::endl;
 	
 			while (true) {
@@ -287,14 +288,17 @@ for (int i = 0; i < _numOfFds; i++) {
 				if (byteRecv <= 0) {
 					if 		(byteRecv == 0)    LogStream::error() << "Client disconnected [" << _pollFds[i].fd << "]" << std::endl;
 					else if (byteRecv == -1) { LogStream::error() << "No data available yet, will try again next iteration [" << _pollFds[i].fd << "]" << std::endl; break; } 
-					else                       LogStream::error() << "Recv error: " << strerror(errno) << std::endl;
+					else                       LogStream::error() << "Recv error" << std::endl;
 					removeFd(i--);
+					fdRemoved = true;
 					break;
 				}
 	
 				// buffer[byteRecv] = '\0';
 				requestBuffer.append(buffer, byteRecv);
 			}
+
+			if (fdRemoved) break;
 
 			// Check if the full request is received
 			size_t headerEnd = requestBuffer.find("\r\n\r\n");
@@ -309,8 +313,9 @@ for (int i = 0; i < _numOfFds; i++) {
 				// Check if the entire body is received
 				if (requestBuffer.size() >= headerEnd + 4 + contentLength) {
 					LogStream::success() << "Full request received from [" << _pollFds[i].fd << "] with " << requestBuffer.size() << " bytes" << RESET << std::endl;
-					this->_clients[_pollFds[i].fd]->handleRequest(requestBuffer.size(), (char *)(requestBuffer.c_str()));
-					
+					// this->_clients[_pollFds[i].fd]->handleRequest(requestBuffer.size(), (char *)(requestBuffer.c_str()));
+					this->_clients[_pollFds[i].fd]->handleRequest(requestBuffer);
+
 					HttpRequest &request = this->_clients[_pollFds[i].fd]->getRequest();
 					string outputFolder = generateLogFileName(REQUESTS_FOLDER, request.getUid(), request.getMethod() + "_request_" + request.headerGet("path"));
 					LogStream::log(outputFolder, std::ios::app) << request.getRawRequest() << std::endl;

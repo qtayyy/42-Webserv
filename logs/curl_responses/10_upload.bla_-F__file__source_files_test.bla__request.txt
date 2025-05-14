@@ -1,44 +1,6 @@
 == Info:   Trying 127.0.0.1:8080...
-== Info: Connected to localhost (127.0.0.1) port 8080 (#0)
-=> Send header, 196 bytes (0xc4)
-0000: POST /upload.bla HTTP/1.1
-001b: Host: localhost:8080
-0031: User-Agent: curl/7.81.0
-004a: Accept: */*
-0057: Content-Length: 205
-006c: Content-Type: multipart/form-data; boundary=--------------------
-00ac: ----724ac42084f6a518
-00c2: 
-=> Send data, 205 bytes (0xcd)
-0000: --------------------------724ac42084f6a518
-002c: Content-Disposition: form-data; name="file"; filename="test.bla"
-006e: Content-Type: application/octet-stream
-0096: 
-0098: hi.hi
-009f: --------------------------724ac42084f6a518--
-== Info: We are completely uploaded and fine
-== Info: Mark bundle as not supporting multiuse
-<= Recv header, 121 bytes (0x79)
-0000: HTTP/1.1 400 "test.bla" already exists in "/home/cooper/coreProg
-0040: ram/webserv_proper/webserv1/public/volatile/upload.bla"
-<= Recv header, 25 bytes (0x19)
-0000: Content-Type: text/html
-<= Recv header, 21 bytes (0x15)
-0000: Content-Length: 822
-<= Recv header, 2 bytes (0x2)
-0000: 
-<= Recv data, 822 bytes (0x336)
-0000: <html>.    <head>.        <style>..body {.    font-family: Arial
-0040: , sans-serif;.    background-color: #f4f4f4;.    margin: 0;.    
-0080: padding: 20px;.}.h1 {.    color: #4CAF50;.}.table {.    width: 1
-00c0: 00%;.    border-collapse: collapse;.    border-radius: 10px;.   
-0100:  overflow: hidden;.    padding: 10px;.}.th, td {.    text-align:
-0140:  left;.    background: #fff;.    padding: 10px 5px;.}.a {.    co
-0180: lor: #1E90FF;.}..folder {.    color:rgb(0, 255, 251);.}..error {
-01c0: .    color: red;.    font-weight: bold;.}..success {.    color: 
-0200: green;.    font-weight: bold;.}..            h2 {.              
-0240:   color: red;.            }.        </style>.    </head>.    <bo
-0280: dy>.        <h2>400 Bad Request</h2>.        <p>"test.bla" alrea
-02c0: dy exists in "/home/cooper/coreProgram/webserv_proper/webserv1/p
-0300: ublic/volatile/upload.bla"</p>.    </body>.    </html>
-== Info: Connection #0 to host localhost left intact
+== Info: connect to 127.0.0.1 port 8080 failed: Connection refused
+== Info:   Trying ::1:8080...
+== Info: connect to ::1 port 8080 failed: Connection refused
+== Info: Failed to connect to localhost port 8080 after 0 ms: Connection refused
+== Info: Closing connection 0

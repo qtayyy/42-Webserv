@@ -32,19 +32,6 @@ void Client::reset() {
     request_ready = false;
 }
 
-void Client::receiveRequest(ssize_t read_buf, char *buffer) {
-    if (read_buf <= 0) {
-        if (read_buf == 0) {
-            std::cout << "hang" << read_buf << std::endl;
-        }
-        else {
-            std::cerr << "Error receiving data on socket fd " << socket_fd << ": " << strerror(errno) << std::endl;
-            perror("RECV");
-        }
-    }
-    request_buf = string(buffer, read_buf); // <- CORRECT way
-}
-
 
 //parses the first line into the 3 parts(methods, path, query)
 //this first part is to get the method(GET, POST)
@@ -209,8 +196,19 @@ void Client::parseRequest() {
 }
 
 
-void Client::handleRequest(ssize_t read_buf, char *buffer) {
-    request_buf = string(buffer, read_buf); // <- Again, use this
+void Client::handleRequest(const std::string &buffer) {
+    if (buffer.empty()) {
+        std::cerr << "Empty request buffer" << std::endl;
+        return;
+    }
+
+    try {
+        request_buf = buffer;  // Direct copy
+    } catch (const std::exception &e) {
+        std::cerr << "Exception while assigning to request_buf: " << e.what() << std::endl;
+        return;
+    }
+
     parseRequest();
     request.preview();
 }
