@@ -147,12 +147,7 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) :
 
         _resolvedLocationBlock = _resolveLocationBlock(request.headerGet("path"), serverBlock);
         
-        if (!_resolvedLocationBlock) {
-            _resolvedLocationBlock = serverBlock;
-        }
-
-        std::cout << "RESOLVED LOCATION BLOCK : " << _resolvedLocationBlock << std::endl;
-        LogStream::success() << "Using location block: " << getBlock()->getUri() << std::endl;
+        LogStream::success() << "Using location block: " << "\"" << getBlock()->getUri() << "\"" << std::endl;
         LogStream::log() << LogStream::log().setBordered(true) << getBlock()->getInfo() << std::endl;
 
         
@@ -167,9 +162,10 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) :
 
         /* LIMIT EXCEPT */
 
-        stringList limitExcept = _serverBlockRef->getLimitExcept();
+        stringList limitExcept = getBlock()->getLimitExcept();
         string          method = request.getMethod();
-        if (std::find(limitExcept.begin(), limitExcept.end(), method) == limitExcept.end())
+        if (limitExcept.size() == 0) {}
+        else if (std::find(limitExcept.begin(), limitExcept.end(), method) == limitExcept.end())
             throw HttpException(405);
 
 
@@ -411,6 +407,9 @@ Block* HttpResponse::_resolveLocationBlock(const string& path, ServerBlock* serv
         for (std::vector<LocationBlock>::iterator it = locations->begin(); it != locations->end(); ++it) {
             const string& uri = it->getUri();
 
+            // if (uri == "/" && locationBlock == NULL)
+            //     locationBlock = &(*it);
+
             if (startsWith(path, uri) &&
                 (path.size() == uri.size() || path[uri.size()] == '/') &&
                 (locationBlock == NULL || uri.size() > locationBlock->getUri().size()))
@@ -419,6 +418,7 @@ Block* HttpResponse::_resolveLocationBlock(const string& path, ServerBlock* serv
             }
         }
     }
+
 
     _usingLocationBlock = (locationBlock != NULL);
 

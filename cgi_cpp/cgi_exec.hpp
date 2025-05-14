@@ -11,7 +11,10 @@
 #include <sys/stat.h>
 #include <sstream>
 #include <vector>
+#include <map>
 #define RED "\033[31m"
 #define RESET "\033[0m"
+
+typedef std::string string;
 
 #endif

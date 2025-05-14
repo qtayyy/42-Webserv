@@ -91,9 +91,10 @@ string CGIHandler::handleCgi(
         string rootPath = locationBlock.getRoot();
         std::string reroutedPath = response.getReroutedPath();
 
-        // Set up environment
+
+        /* ENV */
         char **env = new char*[envVars.size() + 1];
-        int i = 0;
+        int      i = 0;
         for (stringDict::const_iterator it = envVars.begin(); it != envVars.end(); ++it) {
             std::string envVar = it->first + "=" + it->second;
             env[i] = new char[envVar.length() + 1];
@@ -102,18 +103,25 @@ string CGIHandler::handleCgi(
         }
         env[i] = NULL;
 
-        // Set up argv
-        char *args[] = {
-            (char*)"python3",                           // argv[0]
-            const_cast<char*>(fullCGIPath.c_str()),     // argv[1] = script path
-            const_cast<char*>(reroutedPath.c_str()),    // argv[2] = arg to script (optional)
-            NULL
-        };
 
-        // Run Python interpreter with script
-        execve("/usr/bin/python3", args, env);
+        /* EXECUTE PROGRAM */
+        char *args[4]; 
+        if (endsWith(fullCGIPath, ".py")) {
+            args[0] = (char *)"python3";
+            args[1] = (char *)(fullCGIPath.c_str());
+            args[2] = (char *)(reroutedPath.c_str());
+            args[3] = NULL;
+            execve("/usr/bin/python3", args, env);
+        }
 
-        // Only reached on error
+        else {
+            args[0] = (char *)(fullCGIPath.c_str());
+            args[1] = (char *)(reroutedPath.c_str());
+
+            args[2] = NULL;
+            execve(fullCGIPath.c_str(), args, env);
+        }
+
         perror(("execve failed: " + fullCGIPath).c_str());
         exit(1);
     }

@@ -109,7 +109,7 @@ void	Block::setClientMaxBodySize(std::vector<std::string> args)
 void	Block::setIndex(std::vector<std::string> args)
 {
 	if (args.empty()) {
-		// this->_index.push_back("index.html"); #fixme ERROR HERE? Not supposed to have default index
+		this->_index.push_back("index.html");
 	}
 	else
 	{
@@ -164,7 +164,7 @@ void			Block::setRoot(std::vector<std::string> args)
 			this->_root = args.at(0);
 		}
 		else
-			this->_root = "/var/www"; //fixme is this the default?
+			this->_root = "/html"; 
 	}
 	else
 	{
