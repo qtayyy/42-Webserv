@@ -407,11 +407,9 @@ void	Cluster::handleNewClient(int listenerFd)
 		perror("fcntl");
 	else
 	{
-		this->_clients[newClient] = new Client(newClient); // Ethan's `rt (prob need to pass info about config - ServerBlock)
+		this->_clients[newClient] = new Client(newClient);
 		_pollFds[_numOfFds].fd = newClient;
 		_pollFds[_numOfFds].events = POLLIN; // Explicitly set to POLLIN
-		// _pollFds[_numOfFds].revents = POLLIN; //fixme HERE?
-		LogStream::log() << "[DEBUG] New client added with fd [" << newClient << "] and events set to POLLIN" << std::endl;
 		LogStream::success() << "New client connection received: [" << _pollFds[_numOfFds].fd << "]" << std::endl; 
 		_pollFds[_numOfFds++].events = POLLIN;
 	}	

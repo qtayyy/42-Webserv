@@ -1,5 +1,4 @@
 #include "HttpResponse.hpp"
-#include "Utils.hpp"
 
 /* DEFAULT VALUES */
 
@@ -50,16 +49,13 @@ const string HttpResponse::css =
 "       }";
 
 
-/* CONSTRUCTORS */
+/* GETTERS */
 
-LocationBlock *HttpResponse::getBlock() {
-    if (this->_isLocation) {
-        return dynamic_cast<LocationBlock*>(this->_locationBlockRef);
-    } else {
-        return LocationBlock::emptyBlock;
-        // return this->emptyBlock;
-    }
-}
+string HttpResponse::getFinalResponseMsg() const { return _finalResponseMsg; }
+int    HttpResponse::getContentLength()    const { return _contentLength; }
+LocationBlock *HttpResponse::getBlock() { return this->_usingLocationBlock ? dynamic_cast<LocationBlock*>(this->_resolvedLocationBlock) : LocationBlock::emptyBlock; }
+string HttpResponse::getReroutedPath()  { return _reroutedPath; }
+
 
 
 /* REQUEST HANDLERS */
@@ -67,207 +63,136 @@ LocationBlock *HttpResponse::getBlock() {
 void HttpResponse::_handleGET() {
 
     if (!this->getBlock()->getCgiPass().empty()) {
-        this->_initCGIResponse(this->getBlock()->getCgiPass(), request);
+        this->_initCGIResponse(this->getBlock()->getCgiPass(), _request);
         return;
     }
-
-    try {
-
-        // if the _path is a directory
-        if (!_reroutedPath.empty() && _reroutedPath[0] == '/') {
-            _reroutedPath = _reroutedPath.substr(1);
-        }
-        if (isDirectory(_reroutedPath)) {
-            LogStream::log() << "Directory detected" << std::endl;
-            string indexFile = _dirHasIndexFile(_reroutedPath);
-            
-            // if index file is found, serve it
-            stringList indexFiles = getBlock()->getIndex();
-            for (stringList::const_iterator indexFile = indexFiles.begin(); indexFile != indexFiles.end(); ++indexFile) {
-                string potentialIndexFile = joinPaths(_reroutedPath, *indexFile);
-                try {
-                    this->_initHttpResponse(readFileContent(potentialIndexFile), getContentType(potentialIndexFile), 200);
-                    LogStream::log() << "Served index: " << potentialIndexFile << std::endl;
-                    return ;
-                } 
-                
-                catch (const HttpException& e) {
-                    LogStream::error() << "Error serving index file: " << e.getStatusCode() << " " << e.what() << std::endl;
-                }
+    
+    if (isDirectory(_reroutedPath)) {
+        LogStream::pending() << "Directory detected. Attempting to serve index" << std::endl;
+        string indexFile = _dirHasIndexFile(_reroutedPath);
+        
+        // if index file is found, serve it
+        stringList indexFiles = getBlock()->getIndex();
+        for (stringList::const_iterator indexFile = indexFiles.begin(); indexFile != indexFiles.end(); ++indexFile) {
+            string potentialIndexFile = joinPaths(_reroutedPath, *indexFile);
+            try {
+                this->_initHttpResponse(readFileContent(potentialIndexFile), _resolveContentType(potentialIndexFile), 200);
+                LogStream::log() << "Served index: " << potentialIndexFile << std::endl;
+                return ;
             }
             
-            // if autoindex is enabled, serve the autoindex page
-            if (getBlock()->getAutoindex()) {
-                LogStream::log() << "Generating auto index... " << _reroutedPath<< std::endl;
-                string autoIndex = createAutoIndexHtml(_reroutedPath, _path);
-                this->_initHttpResponse(autoIndex, CONTENT_TYPE_HTML, 200);
-            } 
-            
-            // if autoindex is disabled, return 404
-            else {
-                throw HttpException(404);
+            catch (const HttpException& e) {
+                LogStream::error() << "Error serving index file: " << e.getStatusCode() << " " << e.what() << std::endl;
             }
         }
         
-        // if the path is a file
-        else {
-            string content = readFileContent((_reroutedPath));
-            this->_initHttpResponse(content, getContentType(_reroutedPath), 200);
-        }
-    } 
+        // if autoindex is enabled, serve the autoindex page
+        if (getBlock()->getAutoindex()) 
+            this->_initHttpResponse(generateAutoIndexHtml(_reroutedPath, _path), CONTENT_TYPE_HTML, 200);
 
-    catch (const HttpException& e) {
-        LogStream::error() << "error: " << e.getStatusCode() << " " << e.what() << std::endl;
-        this->_initErrorHttpResponse(e.getStatusCode());
+        // if autoindex is disabled, return 404
+        else 
+            throw HttpException(404);
     }
+    
+    else
+        this->_initHttpResponse(readFileContent(_reroutedPath), _resolveContentType(_reroutedPath), 200);
 }
-
 
 void HttpResponse::_handlePOST() {
     if (this->getBlock()->getCgiPass().empty()) {
-        std::cout << "CANNOT FIND CGI " << this->getBlock()->getCgiPass() << std::endl;
-        this->_initErrorHttpResponse(500);
-        return;
+        throw HttpException(500);
     }
     string cgiPass = this->getBlock()->getCgiPass();
-    this->_initCGIResponse(cgiPass, request);
+    this->_initCGIResponse(cgiPass, _request);
 }
-
 
 void HttpResponse::_handleDELETE() {
 
-    if (!isPathExist(_reroutedPath)) {
-        this->_initErrorHttpResponse(404);
-        std::cout << "FILE DOESN'T EXIST: " << _reroutedPath << std::endl;
-        return; 
-    } 
-
-    if (isDirectory(_reroutedPath)) {
-        this->_initErrorHttpResponse(403);
-    }
-
-    int status = remove(_reroutedPath.c_str());
-
-    if (status == 0) {
-        this->_initHttpResponse("File deleted successfully", CONTENT_TYPE_HTML, 200);
-    } 
+    if (!isPathExist(_reroutedPath)) throw HttpException(404);
+    if (isDirectory(_reroutedPath))  throw HttpException(403);
     
-    else {
-        std::cout << _reroutedPath << " could not be deleted. Status: " << status << std::endl;
-        this->_initErrorHttpResponse(500);
-    }
+    if (remove(_reroutedPath.c_str()) == 0) this->_initHttpResponse("File deleted successfully", CONTENT_TYPE_HTML, 200);
+    else                                    throw HttpException(500);
 }
 
 
 
 /* CONSTRUCTOR */
 
-HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) 
-    : _isExtension(false),
-      request(request) {
+HttpResponse::~HttpResponse() {
+    
+}
+
+HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) : 
+    _isAlias(false),
+    _isExtension(false),
+    _request(request),
+    _serverBlockRef(serverBlock)
+    {
+
     LogStream::pending() << "Constructing response" << std::endl; 
+    try {
 
-    string path             = request.headerGet("path");
-    this->_serverBlockRef   = serverBlock;
-    this->_locationBlockRef = resolveLocationBlock(path, serverBlock);
+        /* RESOLVE LOCATION BLOCK */
 
-    if (request.headerGet("Content-Length").empty())
-        this->_contentLength = request.getBody().size();
-    else
-        this->_contentLength = std::strtod(request.headerGet("Content-Length").c_str(), NULL);
-    if (this->_contentLength > serverBlock->getClientMaxBodySize()) {
-        this->_initErrorHttpResponse(413);
-        return;
-    }
+        _resolvedLocationBlock = _resolveLocationBlock(request.headerGet("path"), serverBlock);
+        LogStream::log() << LogStream::log().setBordered(true) << getBlock()->getInfo() << std::endl;
 
-    /* RESOLVE LOCATION BLOCK */
 
-    if (this->_locationBlockRef == NULL) {
-        this->_locationBlockRef = serverBlock;
-        this->_isLocation        = false;
-        LogStream::success() << "Does not match any location. Defaulting" << std::endl; 
-        printBorderedBox(_locationBlockRef->getInfo(), "Using block");
-    }
-    else {
-        this->_isLocation = true;
-        LogStream::success() << "Location matches location block: " << this->getBlock()->getUri() << std::endl;
-        printBorderedBox(this->getBlock()->getInfo(), "Using block");
-    }
+        /* CONTENT LENGTH */
+
+        string contentLengthStr = request.headerGet("Content-Length");
+        _contentLength = contentLengthStr.empty() ? request.getBody().size() : std::strtod(contentLengthStr.c_str(), NULL);
+        if (_contentLength > serverBlock->getClientMaxBodySize())
+            throw HttpException(413);
+
+
+        /* LIMIT EXCEPT */
+
+        stringList limitExcept = getBlock()->getLimitExcept();
+        string          method = request.getMethod();
+        if (std::find(limitExcept.begin(), limitExcept.end(), method) == limitExcept.end())
+            throw HttpException(405);
+
+
+        /* REDIRECTION */
+
+        std::pair<int, string> redirectInfo = getBlock()->getReturn();
+        if (!redirectInfo.second.empty()) {
+            LogStream::pending() << "redirecting to :" << redirectInfo.second << std::endl;
+            _initRedirectResponse(redirectInfo.second, redirectInfo.first);
+            return;
+        }
+
+
+        /* PATH RESOLUTION */
+
+        if (!isPathExist(getBlock()->getRoot()))
+            _initErrorResponse(404);
+
+        _path = request.headerGet("path");
+        _reroutedPath = urlDecode(_path);
+        _reroutedPath = _applyAlias(_path);
+        _reroutedPath = _isAlias ? _reroutedPath : _applyRoot(_reroutedPath);
+        if (!_reroutedPath.empty() && _reroutedPath[0] == '/')
+            _reroutedPath = _reroutedPath.substr(1);
+
+        LogStream::success() << "Path resolved: " << request.headerGet("path") << " --> " << _reroutedPath << (_isAlias ? " (alias)" : " (root)") << std::endl;
+
+
+        /* HANDLE METHODS */
     
-
-    
-    /* LIMIT EXCEPT */
-
-    stringList limitExcept = this->_locationBlockRef->getLimitExcept();
-
-    // Check if the request method is allowed
-    if (std::find(limitExcept.begin(), limitExcept.end(), this->request.getMethod()) == limitExcept.end()) {
-        this->_initErrorHttpResponse(405);
-        return;
+        if      (method == "GET")    _handleGET();
+        else if (method == "POST")   _handlePOST();
+        else if (method == "DELETE") _handleDELETE();
+        else this->_initErrorResponse(400);
     }
 
-    string method = this->request.getMethod();
-
-
-    
-    /* REDIRECTION */
-
-    std::pair<int, string> redirectInfo = this->getBlock()->getReturn();
-    if (!redirectInfo.second.empty()) {
-        LogStream::pending() << "redirecting to :" << redirectInfo.second << std::endl;
-        this->initRedirectResponse(redirectInfo.second, redirectInfo.first);
-        return;
+    catch (const HttpException& e) {
+        this->_initErrorResponse(e.getStatusCode());
     }
 
-    if (!isPathExist(this->getBlock()->getRoot()))
-        this->_initErrorHttpResponse(404);
-
-    _path = request.headerGet("path");
-    _path = urlDecode(_path);
-    if (_path == applyAlias(_path))
-        _aliasApplied = false;
-    else
-        _aliasApplied = true;
-    _path = applyAlias(_path);
-    
-
-    if (_aliasApplied)
-        _reroutedPath = _path;
-    else {
-        _reroutedPath = reroutePath(_path);
-    }
-
-    LogStream::log() << LogStream::log().setBordered(true) 
-                     << "Original path: " << request.headerGet("path") << "\n"
-                     << "Alias path: "    << _path << "\n"
-                     << "Rerouted path: " << _reroutedPath << std::endl;
-
-    // if (!isPathExist(_reroutedPath))
-    //     throw HttpException(404, _reroutedPath);
-
-    /* HANDLE METHODS */
-    
-
-    if (method == "GET") {
-        LogStream::pending() << "Handling GET" << std::endl;
-        this->_handleGET();
-    }
-
-    else if (method == "POST") {
-        LogStream::pending() << "Handling POST" << std::endl;
-        this->_handlePOST();
-    }
-
-    else if (method == "DELETE") {
-        LogStream::pending() << "Handling DELETE" << std::endl;
-        this->_handleDELETE();
-    }
-
-    /* INVALID METHOD */
-
-    else {
-        this->_initErrorHttpResponse(400);
-    }
     std::cout << std::endl;
 }
 
@@ -275,31 +200,30 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock)
 
 /* GENERATORS */
 
-string HttpResponse::createStatusPageStr(string errorPagePath, int statusCode) const {
-    string errorFileContents = readFileContent(errorPagePath);
-        
-    std::pair<string, string> details = CodeToMessage(statusCode);
 
-    replaceIfFound(&errorFileContents, "{{ERROR_CODE}}", to_string(statusCode));
-    replaceIfFound(&errorFileContents, "{{ERROR_MESSAGE}}", details.first);
-    replaceIfFound(&errorFileContents, "{{DETAILS}}", details.second);
-    
-    return errorFileContents;
-}
-
-string HttpResponse::reroutePath(string urlPath) {
-    string reroutedPath = joinPaths(this->_serverBlockRef->getRoot(), urlPath);
-
-    if (this->_isLocation)
-        reroutedPath = joinPaths(this->getBlock()->getRoot(), urlPath);
-
-    return reroutedPath;
-}
-
-
-
-
-string HttpResponse::createAutoIndexHtml(string path, string root) {
+/**
+ * @brief Generates a HTML page listing the contents of a given directory path.
+ *
+ * This function creates an HTML page that lists the contents of a directory
+ * and its subdirectories, and clickable links to navigate to them
+ *
+ * @param path The absolute path of the directory to list.
+ * @param root The root path relative to the server's base directory, used for
+ *             generating breadcrumbs and relative paths.
+ * @return A string containing the generated HTML page.
+ *
+ * The generated HTML includes:
+ * - A breadcrumb navigation bar for easy navigation.
+ * - A table listing the directory contents, including:
+ *   - File or folder name (with a link to navigate).
+ *   - File size (or "-" for directories).
+ *   - A delete button for files (not available for directories).
+ *
+ * The delete functionality is implemented using JavaScript and sends an
+ * HTTP DELETE request to the server. If the deletion is successful, the
+ * corresponding row is removed from the table.
+ */
+string HttpResponse::generateAutoIndexHtml(string path, string root) {
     std::stringstream output;
     output << "<html><head><title>Index of " << path << "</title>"
            << "<style>" << HttpResponse::css << "</style>"
@@ -322,13 +246,13 @@ string HttpResponse::createAutoIndexHtml(string path, string root) {
     
     stringList breadcrumbList = splitString(root, '/');
     std::stringstream breadcrumbHtml;
-    breadcrumbHtml << "<a href=\"" << "/" << "\">" << "~" << "</a>";
-    for (stringList::iterator it = breadcrumbList.begin(); it != breadcrumbList.end(); it++) {
-        std::stringstream ss;
-        for (stringList::iterator it2 = breadcrumbList.begin(); it2 != (it + 1); it2++)
-            ss << *it2 << ((it2 != it) ? "/" : "");
-        breadcrumbHtml << "<a href=\"" << ss.str() << "\">" << *it << "</a>";
-        breadcrumbHtml << ((it + 1 != breadcrumbList.end()) ? " / " : " ");
+    breadcrumbHtml << "<a href=\"/\">~</a>";
+    for (stringList::iterator breadcrumbIt = breadcrumbList.begin(); breadcrumbIt != breadcrumbList.end(); breadcrumbIt++) {
+        std::stringstream pathStream;
+        for (stringList::iterator subPathIt = breadcrumbList.begin(); subPathIt != (breadcrumbIt + 1); subPathIt++)
+            pathStream << *subPathIt << ((subPathIt != breadcrumbIt) ? "/" : "");
+        breadcrumbHtml << "<a href=\"" << pathStream.str() << "\">" << *breadcrumbIt << "</a>";
+        breadcrumbHtml << ((breadcrumbIt + 1 != breadcrumbList.end()) ? " / " : " ");
     }
 
     output << "<h1>Index of " << breadcrumbHtml.str() << "</h1><table>";
@@ -337,31 +261,21 @@ string HttpResponse::createAutoIndexHtml(string path, string root) {
     stringList files = listFiles(path);
     if (!files.empty()) {
         int rowCounter = 0;
-        for (stringList::iterator it = files.begin(); it != files.end(); ++it) {
-            if (*it == "." || *it == "..")
+        for (stringList::iterator currentFile = files.begin(); currentFile != files.end(); ++currentFile) {
+            if (*currentFile == "." || *currentFile == "..")
                 continue;
 
             string rowId        = "row" + to_string(rowCounter++);
-            string fullPath     = joinPaths(path, *it);
-            string relativePath = joinPaths(root, *it); // Use relative path for DELETE
+            string fullPath     = joinPaths(path, *currentFile);
+            string relativePath = joinPaths(root, *currentFile); // Use relative path for DELETE
             string fileSize     = isDirectory(fullPath) ? "-" : to_string(getFileSize(fullPath));
             string hrefPath     = relativePath; // Full URL for display
 
-            output << "<tr id=\"" << rowId << "\"><td>";
-
-            if (isDirectory(fullPath))
-                output << "<a class=\"folder\" href=\"" << hrefPath << "\">" << *it << "</a>";
-            else
-                output << "<a href=\"" << hrefPath << "\">" << *it << "</a>";
-
-            output << "</td><td>" << fileSize << " bytes</td>";
-
-            if (!isDirectory(fullPath))
-                output << "<td><button onclick=\"deleteFile('" << hrefPath << "', '" << rowId << "')\">Delete</button></td>";
-            else
-                output << "<td></td>";
-
-            output << "</tr>";
+            output      << "<tr id=\"" + rowId + "\">"
+            /* name/uri      */ << "<td><a " << (isDirectory(fullPath) ? "class=\"folder\" " : "") << "href=\"" << hrefPath << "\">" << *currentFile << "</a></td>"
+            /* bytes         */ << "<td>" << fileSize << " bytes</td>" 
+            /* delete-button */ << "<td>" << (!isDirectory(fullPath) ? "<button onclick=\"deleteFile('" + hrefPath + "', '" + rowId + "')\">Delete</button>" : "") << "</td>" 
+                        << "</tr>";
         }
     } 
     
@@ -373,18 +287,19 @@ string HttpResponse::createAutoIndexHtml(string path, string root) {
     return output.str();
 }
 
-
-
-
-/* GETTERS */
-
-string HttpResponse::getFinalResponseMsg() const { return _finalResponseMsg; }
-string HttpResponse::getMethod()           const { return _method; }
-int    HttpResponse::getContentLength()    const { return _contentLength; }
-
-
-
-
+/**
+ * @brief Composes an HTTP response string.
+ * 
+ * Returns a complete HTTP response message, including the status line,
+ * headers, and body. It accepts a variable number of key-value pairs for headers.
+ * 
+ * @param body The body of the HTTP response.
+ * @param statusCode The HTTP status code (e.g., 200, 404).
+ * @param msg The status message corresponding to the status code (e.g., "OK", "Not Found").
+ * @param ... <key>, <value> representing HTTP headers. The list must be terminated with a NULL pointer.
+ * 
+ * @return A string containing the complete HTTP response.
+ */
 string HttpResponse::composeHttpResponse(
     const string& body,
     int           statusCode,
@@ -397,9 +312,11 @@ string HttpResponse::composeHttpResponse(
 
     while (true) {
         const char* key = va_arg(args, const char*);
-        if (!key) break; // NULL signals end of pairs
+        if (!key) 
+            break; // NULL signals end of pairs
         const char* value = va_arg(args, const char*);
-        if (!value) break; // malformed input
+        if (!value)
+            break; // malformed input
         headers[key] = value;
     }
 
@@ -417,31 +334,105 @@ string HttpResponse::composeHttpResponse(
 }
 
 
+
+/* PATH RESOLUTION */
+
+string HttpResponse::_applyRoot(string urlPath) {
+    string reroutedPath = joinPaths(this->_serverBlockRef->getRoot(), urlPath);
+
+    if (this->_usingLocationBlock)
+        reroutedPath = joinPaths(this->getBlock()->getRoot(), urlPath);
+
+    return reroutedPath;
+}
+
+string HttpResponse::_applyAlias(string& path) {
+    if (!this->_usingLocationBlock)
+        return path;
+
+    string alias = this->getBlock()->getAlias();
+    string uri   = this->getBlock()->getUri();
+
+    if (alias.empty())
+        return path;
+
+    if (_isExtension) {
+        _isAlias = true;
+        return joinPaths(alias, getBasename(path)); // Append only the filename
+    }
+
+    if (startsWith(path, uri)) {
+        string suffix = path.substr(uri.length()); // Keep the rest after matched location
+        string newPath = alias;
+
+        if (!newPath.empty() && *newPath.rbegin() != '/' && !suffix.empty() && *suffix.begin() != '/')
+            newPath += '/';
+
+        newPath += suffix;
+        _isAlias = true;
+        return newPath;
+    }
+
+    return path;
+}
+
+Block* HttpResponse::_resolveLocationBlock(const string& path, ServerBlock* serverBlock) {
+    std::vector<LocationBlock>* locations = serverBlock->getLocation();
+    LocationBlock* locationBlock = NULL;
+
+    // Check for extension-based matches first
+    for (std::vector<LocationBlock>::iterator it = locations->begin(); it != locations->end(); ++it) {
+        const string& uri = it->getUri();
+
+        if (startsWith(uri, ".") && endsWith(path, uri)) {
+            _isExtension = true;
+            locationBlock = &(*it);
+            break;
+        }
+    }
+
+    // If no extension-based match is found, check for exact location matches
+    if (locationBlock == NULL) {
+        for (std::vector<LocationBlock>::iterator it = locations->begin(); it != locations->end(); ++it) {
+            const string& uri = it->getUri();
+
+            if (startsWith(path, uri) &&
+                (path.size() == uri.size() || path[uri.size()] == '/') &&
+                (locationBlock == NULL || uri.size() > locationBlock->getUri().size()))
+            {
+                locationBlock = &(*it);
+            }
+        }
+    }
+
+    _usingLocationBlock = (locationBlock != NULL);
+
+    return locationBlock;
+}
+
+
+
 /* INITIALIZERS */
 
 void HttpResponse::_initHttpResponse(string body, string resourceType, int statusCode) {
-    this->_rawContent       = body;
     this->_contentType      = resourceType;
     this->_statusCode       = statusCode;
     this->_message          = CodeToMessage(statusCode).second;
     // this->finalResponseMsg = composeResponse(body, resourceType, to_string(statusCode), message);
-    this->_finalResponseMsg = composeHttpResponse(body, statusCode, _message, 
+    this->_finalResponseMsg = HttpResponse::composeHttpResponse(body, statusCode, _message, 
                                 "Content-Length",  to_string(body.size()).c_str(),
                                 "Connection",      "close",
                                 "Content-Type",    resourceType.c_str(),
                                 NULL);
 }
 
+void HttpResponse::_initRedirectResponse(string &redirectUrl, int statusCode) {
 
-
-void HttpResponse::initRedirectResponse(string &redirectUrl, int statusCode) {
-
-    this->_rawContent    = "";
     this->_contentType   = CONTENT_TYPE_HTML;
     this->_statusCode    = statusCode;
     this->_message       = CodeToMessage(statusCode).second;
 
-    this->_finalResponseMsg = composeHttpResponse("", statusCode, _message,
+    this->_finalResponseMsg = HttpResponse::composeHttpResponse("", statusCode, _message,
         "Location",        redirectUrl.c_str(),
         "Content-Length",  "0",
         "Content-Type",    CONTENT_TYPE_HTML,
@@ -451,19 +442,15 @@ void HttpResponse::initRedirectResponse(string &redirectUrl, int statusCode) {
         NULL);
 }
 
-void HttpResponse::_initErrorHttpResponse(int statusCode, string error, string description) {
+void HttpResponse::_initErrorResponse(int statusCode, string error, string description) {
     std::map<int, string> errorPages = this->getBlock()->getErrorPage();
 
     if (!errorPages.empty() && errorPages.find(statusCode) != errorPages.end()) {
-        std::cout << "REROUTED PATH" << _reroutedPath << std::endl;
         string basepath = this->getBlock()->getRoot();
-        if (_aliasApplied)
+        if (_isAlias)
             basepath = this->getBlock()->getAlias();
 
-        if (basepath[0] == '/')
-            basepath = basepath.substr(1);
         string errorPage = joinPaths(basepath, errorPages.find(statusCode)->second);
-        
 
         try {
             this->_initHttpResponse(readFileContent(errorPage), CONTENT_TYPE_HTML, statusCode);
@@ -496,7 +483,7 @@ void HttpResponse::_initCGIResponse(string cgiPath, HttpRequest request) {
 
     if (!isPathExist(makeAbsPath(cgiPath))) {
         LogStream::error() << "path doesn't exist: " << cgiPath << std::endl;
-        this->_initErrorHttpResponse(500);
+        this->_initErrorResponse(500);
         return;
     }
 
@@ -507,13 +494,12 @@ void HttpResponse::_initCGIResponse(string cgiPath, HttpRequest request) {
 
 
 
-
 /* OTHERS */
 
-string HttpResponse::getContentType(const string& resourcePath) {
+string HttpResponse::_resolveContentType(const string& path) {
     
     for (stringDict::const_iterator it = contentTypeMap.begin(); it != contentTypeMap.end(); ++it) {
-        if (endsWith(resourcePath, it->first))
+        if (endsWith(path, it->first))
             return it->second;
     }
     
@@ -531,75 +517,9 @@ string HttpResponse::_dirHasIndexFile(string path) {
     return "";
 }
 
-LocationBlock* HttpResponse::resolveLocationBlock(const string& path, ServerBlock* serverBlock) {
-    std::vector<LocationBlock>* locations = serverBlock->getLocation();
-    LocationBlock* locationBlock = NULL;
-
-    // Check for extension-based matches first
-    for (std::vector<LocationBlock>::iterator it = locations->begin(); it != locations->end(); ++it) {
-        const string& uri = it->getUri();
-
-        if (startsWith(uri, ".") && endsWith(path, uri)) {
-            _isExtension = true;
-            locationBlock = &(*it);
-            break;
-        }
-    }
-
-    // If no extension-based match is found, check for exact location matches
-    if (locationBlock == NULL) {
-        for (std::vector<LocationBlock>::iterator it = locations->begin(); it != locations->end(); ++it) {
-            const string& uri = it->getUri();
-
-            if (startsWith(path, uri) &&
-                (path.size() == uri.size() || path[uri.size()] == '/') &&
-                (locationBlock == NULL || uri.size() > locationBlock->getUri().size()))
-            {
-                locationBlock = &(*it);
-            }
-        }
-    }
-
-    return locationBlock;
-}
 
 
-string HttpResponse::getReroutedPath() {
-    return _reroutedPath;
-}
-
-
-string HttpResponse::applyAlias(string& path) {
-    if (!this->_isLocation)
-        return path;
-
-    string alias = this->getBlock()->getAlias();
-    string uri = this->getBlock()->getUri();
-
-    if (alias.empty())
-        return path;
-
-    // If it's an extension-based match (e.g. .bla), apply alias to the full path
-    if (_isExtension) {
-        return joinPaths(alias, getBasename(path)); // Append only the filename
-    }
-
-    // Standard alias replacement: substitute the matching location URI prefix
-    if (startsWith(path, uri)) {
-        string suffix = path.substr(uri.length()); // Keep the rest after matched location
-        string newPath = alias;
-
-        // Handle slash joining between alias and suffix
-        if (!newPath.empty() && *newPath.rbegin() != '/' && !suffix.empty() && *suffix.begin() != '/')
-            newPath += '/';
-
-        newPath += suffix;
-        return newPath;
-    }
-
-    return path;
-}
-
+/* ERROR CODE */
 
 std::pair<string, string> HttpResponse::GetMsg(int statusCode) const {
     switch (statusCode) {

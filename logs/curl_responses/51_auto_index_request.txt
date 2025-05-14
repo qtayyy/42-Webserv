@@ -12,12 +12,12 @@
 <= Recv header, 19 bytes (0x13)
 0000: Connection: close
 <= Recv header, 22 bytes (0x16)
-0000: Content-Length: 4269
+0000: Content-Length: 4085
 <= Recv header, 25 bytes (0x19)
 0000: Content-Type: text/html
 <= Recv header, 2 bytes (0x2)
 0000: 
-<= Recv data, 4269 bytes (0x10ad)
+<= Recv data, 4085 bytes (0xff5)
 0000: <html><head><title>Index of public/volatile</title><style>      
 0040:  body {           font-family: Arial, sans-serif;           back
 0080: ground-color: #f4f4f4;           margin: 0;           padding: 2
@@ -35,54 +35,51 @@
 0380:    document.getElementById(rowId).remove();    } else {      ale
 03c0: rt('Failed to delete: ' + response.status);    }  } catch (err) 
 0400: {    alert('Error: ' + err);  }}</script></head><body><h1>Index 
-0440: of <a href="/">~</a><a href=""></a> / <a href="/public">public</
-0480: a> / <a href="/public/volatile">volatile</a> </h1><table><tr><th
-04c0: >Name</th><th>Size</th><th>Action</th></tr><tr id="row0"><td><a 
-0500: href="/public/volatile/custom_error.html">custom_error.html</a><
-0540: /td><td>12 bytes</td><td><button onclick="deleteFile('/public/vo
-0580: latile/custom_error.html', 'row0')">Delete</button></td></tr><tr
-05c0:  id="row1"><td><a href="/public/volatile/sheet.csv">sheet.csv</a
-0600: ></td><td>131 bytes</td><td><button onclick="deleteFile('/public
-0640: /volatile/sheet.csv', 'row1')">Delete</button></td></tr><tr id="
-0680: row2"><td><a href="/public/volatile/error_no_perms.html">error_n
-06c0: o_perms.html</a></td><td>0 bytes</td><td><button onclick="delete
-0700: File('/public/volatile/error_no_perms.html', 'row2')">Delete</bu
-0740: tton></td></tr><tr id="row3"><td><a href="/public/volatile/test.
-0780: bla">test.bla</a></td><td>5 bytes</td><td><button onclick="delet
-07c0: eFile('/public/volatile/test.bla', 'row3')">Delete</button></td>
-0800: </tr><tr id="row4"><td><a href="/public/volatile/tiny.txt">tiny.
-0840: txt</a></td><td>11 bytes</td><td><button onclick="deleteFile('/p
-0880: ublic/volatile/tiny.txt', 'row4')">Delete</button></td></tr><tr 
-08c0: id="row5"><td><a href="/public/volatile/large.pdf">large.pdf</a>
-0900: </td><td>3647755 bytes</td><td><button onclick="deleteFile('/pub
-0940: lic/volatile/large.pdf', 'row5')">Delete</button></td></tr><tr i
-0980: d="row6"><td><a class="folder" href="/public/volatile/dir_no_per
-09c0: ms">dir_no_perms</a></td><td>- bytes</td><td></td></tr><tr id="r
-0a00: ow7"><td><a href="/public/volatile/large.txt">large.txt</a></td>
-0a40: <td>27702 bytes</td><td><button onclick="deleteFile('/public/vol
-0a80: atile/large.txt', 'row7')">Delete</button></td></tr><tr id="row8
-0ac0: "><td><a href="/public/volatile/index.html">index.html</a></td><
-0b00: td>5 bytes</td><td><button onclick="deleteFile('/public/volatile
-0b40: /index.html', 'row8')">Delete</button></td></tr><tr id="row9"><t
-0b80: d><a href="/public/volatile/index_no_perms.html">index_no_perms.
-0bc0: html</a></td><td>14 bytes</td><td><button onclick="deleteFile('/
-0c00: public/volatile/index_no_perms.html', 'row9')">Delete</button></
-0c40: td></tr><tr id="row10"><td><a href="/public/volatile/custom_erro
-0c80: r2.html">custom_error2.html</a></td><td>13 bytes</td><td><button
-0cc0:  onclick="deleteFile('/public/volatile/custom_error2.html', 'row
-0d00: 10')">Delete</button></td></tr><tr id="row11"><td><a href="/publ
-0d40: ic/volatile/empty.txt">empty.txt</a></td><td>0 bytes</td><td><bu
-0d80: tton onclick="deleteFile('/public/volatile/empty.txt', 'row11')"
-0dc0: >Delete</button></td></tr><tr id="row12"><td><a href="/public/vo
-0e00: latile/no_perms.txt">no_perms.txt</a></td><td>8 bytes</td><td><b
-0e40: utton onclick="deleteFile('/public/volatile/no_perms.txt', 'row1
-0e80: 2')">Delete</button></td></tr><tr id="row13"><td><a href="/publi
-0ec0: c/volatile/tiny.pdf">tiny.pdf</a></td><td>13228 bytes</td><td><b
-0f00: utton onclick="deleteFile('/public/volatile/tiny.pdf', 'row13')"
-0f40: >Delete</button></td></tr><tr id="row14"><td><a class="folder" h
-0f80: ref="/public/volatile/upload.bla">upload.bla</a></td><td>- bytes
-0fc0: </td><td></td></tr><tr id="row15"><td><a href="/public/volatile/
-1000: large.jpeg">large.jpeg</a></td><td>1091887 bytes</td><td><button
-1040:  onclick="deleteFile('/public/volatile/large.jpeg', 'row15')">De
-1080: lete</button></td></tr></table></body></html>
+0440: of <a href="/">~</a><a href=""></a> / <a href="/auto_index">auto
+0480: _index</a> </h1><table><tr><th>Name</th><th>Size</th><th>Action<
+04c0: /th></tr><tr id="row0"><td><a href="/auto_index/custom_error.htm
+0500: l">custom_error.html</a></td><td>12 bytes</td><td><button onclic
+0540: k="deleteFile('/auto_index/custom_error.html', 'row0')">Delete</
+0580: button></td></tr><tr id="row1"><td><a href="/auto_index/sheet.cs
+05c0: v">sheet.csv</a></td><td>131 bytes</td><td><button onclick="dele
+0600: teFile('/auto_index/sheet.csv', 'row1')">Delete</button></td></t
+0640: r><tr id="row2"><td><a href="/auto_index/error_no_perms.html">er
+0680: ror_no_perms.html</a></td><td>0 bytes</td><td><button onclick="d
+06c0: eleteFile('/auto_index/error_no_perms.html', 'row2')">Delete</bu
+0700: tton></td></tr><tr id="row3"><td><a href="/auto_index/test.bla">
+0740: test.bla</a></td><td>5 bytes</td><td><button onclick="deleteFile
+0780: ('/auto_index/test.bla', 'row3')">Delete</button></td></tr><tr i
+07c0: d="row4"><td><a href="/auto_index/tiny.txt">tiny.txt</a></td><td
+0800: >11 bytes</td><td><button onclick="deleteFile('/auto_index/tiny.
+0840: txt', 'row4')">Delete</button></td></tr><tr id="row5"><td><a hre
+0880: f="/auto_index/large.pdf">large.pdf</a></td><td>3647755 bytes</t
+08c0: d><td><button onclick="deleteFile('/auto_index/large.pdf', 'row5
+0900: ')">Delete</button></td></tr><tr id="row6"><td><a class="folder"
+0940:  href="/auto_index/dir_no_perms">dir_no_perms</a></td><td>- byte
+0980: s</td><td></td></tr><tr id="row7"><td><a href="/auto_index/large
+09c0: .txt">large.txt</a></td><td>27702 bytes</td><td><button onclick=
+0a00: "deleteFile('/auto_index/large.txt', 'row7')">Delete</button></t
+0a40: d></tr><tr id="row8"><td><a href="/auto_index/index.html">index.
+0a80: html</a></td><td>5 bytes</td><td><button onclick="deleteFile('/a
+0ac0: uto_index/index.html', 'row8')">Delete</button></td></tr><tr id=
+0b00: "row9"><td><a href="/auto_index/index_no_perms.html">index_no_pe
+0b40: rms.html</a></td><td>14 bytes</td><td><button onclick="deleteFil
+0b80: e('/auto_index/index_no_perms.html', 'row9')">Delete</button></t
+0bc0: d></tr><tr id="row10"><td><a href="/auto_index/custom_error2.htm
+0c00: l">custom_error2.html</a></td><td>13 bytes</td><td><button oncli
+0c40: ck="deleteFile('/auto_index/custom_error2.html', 'row10')">Delet
+0c80: e</button></td></tr><tr id="row11"><td><a href="/auto_index/empt
+0cc0: y.txt">empty.txt</a></td><td>0 bytes</td><td><button onclick="de
+0d00: leteFile('/auto_index/empty.txt', 'row11')">Delete</button></td>
+0d40: </tr><tr id="row12"><td><a href="/auto_index/no_perms.txt">no_pe
+0d80: rms.txt</a></td><td>8 bytes</td><td><button onclick="deleteFile(
+0dc0: '/auto_index/no_perms.txt', 'row12')">Delete</button></td></tr><
+0e00: tr id="row13"><td><a href="/auto_index/tiny.pdf">tiny.pdf</a></t
+0e40: d><td>13228 bytes</td><td><button onclick="deleteFile('/auto_ind
+0e80: ex/tiny.pdf', 'row13')">Delete</button></td></tr><tr id="row14">
+0ec0: <td><a class="folder" href="/auto_index/upload.bla">upload.bla</
+0f00: a></td><td>- bytes</td><td></td></tr><tr id="row15"><td><a href=
+0f40: "/auto_index/large.jpeg">large.jpeg</a></td><td>1091887 bytes</t
+0f80: d><td><button onclick="deleteFile('/auto_index/large.jpeg', 'row
+0fc0: 15')">Delete</button></td></tr></table></body></html>
 == Info: Closing connection 0

@@ -9,6 +9,7 @@
 #include <ctime>
 #include "CGI.hpp"
 #include "ServerBlock.hpp"
+#include "Utils.hpp"
 
 typedef std::map<string, string> stringDict;
 
@@ -18,75 +19,72 @@ private:
     static stringDict createContentTypeMap();
     static const string css;
 
-    string        _rawContent;
     int           _contentLength;
     int           _statusCode;
     string        _message;
     string        _contentType;
     string        _finalResponseMsg;
-    bool          _isLocation;
-    string        _method;
+    bool          _usingLocationBlock;
     string        _path;
     string        _reroutedPath;
-    bool          _aliasApplied;
+    bool          _isAlias;
     bool          _isExtension;
-    HttpRequest   &request;
+    HttpRequest   &_request;
 
     LocationBlock *_emptyBlock;
     ServerBlock   *_serverBlockRef;
-    Block         *_locationBlockRef;
+    Block         *_resolvedLocationBlock;
 
-    string         _dirHasIndexFile(string path);
-    LocationBlock *resolveLocationBlock(const string &path, ServerBlock *serverBlock);
-    void          initRedirectResponse(string &redirectUrl, int statusCode);
-    string        applyAlias(string &path);
-    std::pair<string, string> GetMsg(int statusCode) const;
-    std::pair<string, string> CodeToMessage(int statusCode, string message="", string description="") const;
+
+    /* PATH RESOLUTION */
+    static string _resolveContentType(const string& resourcePath);
+    Block  *_resolveLocationBlock(const string &path, ServerBlock *serverBlock);
     std::vector<LocationBlock>::iterator getRelevantLocationBlock(ServerBlock *serverBlock, string path);
-    string        createStatusPageStr(string errorPagePath, int statusCode) const;
-    void          displayError() const;
+    string _applyAlias(string &path);
+    string _applyRoot(string urlPath);
+    
+    string  _dirHasIndexFile(string path);
+    
 
     /* METHOD HANDLERS */
     void _handleGET();
     void _handlePOST();
     void _handleDELETE();
+    
 
     /* RESPONSE INITIALIZERS */
+    void _initRedirectResponse(string &redirectUrl, int statusCode);
     void _initHttpResponse(string content, string resourceType, int statusCode);
-    void _initErrorHttpResponse(int statusCode, string error = "", string description = "");
+    void _initErrorResponse(int statusCode, string error = "", string description = "");
     void _initCGIResponse(string cgiPath, HttpRequest request);
-public:
-    /* CONSTRUCTOR/DESTRUCTOR */
 
+
+    /*ERRORS*/
+    std::pair<string, string> GetMsg(int statusCode) const;
+    std::pair<string, string> CodeToMessage(int statusCode, string message="", string description="") const;
+
+public:
+
+    /* CONSTRUCTOR/DESTRUCTOR */
     HttpResponse(HttpRequest &request, ServerBlock *ServerBlock);
+    ~HttpResponse();
 
 
     /* GETTERS/SETTER */
-    string getRawContent() const;
-    int    getContentLength() const;
-    string getMessage() const;
-    string getContentType() const;
-    string getFinalResponseMsg() const;
-    string getMethod() const;
-    string getAbsolutePath() const;
-    string getTimestamp() const;
-    string getReroutedPath();
+    int            getContentLength() const;
+    string         getFinalResponseMsg() const;
+    string         getReroutedPath();
+    LocationBlock *getBlock();
 
-    string composeHttpResponse(
+
+    /* GENERATORS */
+    static string composeHttpResponse(
         const string& body,
         int statusCode,
         const string& msg,
         ... );
 
-    LocationBlock *getBlock();
-    bool isCGI(const string &resourcePath);
-    string decideCGIToUse(string resourcePath);
-    string reroutePath(string urlPath);
-    string createAutoIndexHtml(string path, string root);
-    static string getContentType(const string& resourcePath);
-
-
-
+    string generateAutoIndexHtml(string path, string root);
 };
 
 #endif 

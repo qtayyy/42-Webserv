@@ -311,7 +311,7 @@ elif request_method == "GET":
     content_type = CONTENT_TYPES.get(extension, "Content-Type: text/plain")
 
     if not os.path.exists(route):
-        exit_error("The requested file was not found.", "404 Not Found", 404)
+        exit_error(f"The requested file was not found: {route}", "Not Found", 404)
 
     with open(route, 'rb') as file:
         file_content = file.read()

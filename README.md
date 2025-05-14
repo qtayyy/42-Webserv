@@ -15,3 +15,7 @@
 
 # considerations:
 - priotize root or alias? (I would go with alias)
+
+
+add:
+127.0.0.1       qtay.42.fr shechong.42.fr etlim.42.fr
