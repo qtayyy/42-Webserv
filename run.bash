@@ -2,6 +2,7 @@
 
 clear
 
+chmod +rwx public/volatile/*
 rm -rf public/volatile/*
 SOURCE_DIR="source_files"
 DEST_DIR="public/volatile"

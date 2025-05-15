@@ -23,24 +23,33 @@
 #include "LocationBlock.hpp"
 
 void deleteLogs(const std::string& folderPath) {
-	DIR* dir = opendir(folderPath.c_str());
-	if (!dir)
-		return;
+    DIR* dir = opendir(folderPath.c_str());
+    if (!dir)
+        return;
 
-	struct dirent* entry;
-	while ((entry = readdir(dir)) != NULL) {
-		string filePath = folderPath + "/" + entry->d_name;
-		if (entry->d_type == DT_DIR) {
-			if (std::string(entry->d_name) != "." && std::string(entry->d_name) != "..") {
-				deleteLogs(filePath);
-				rmdir(filePath.c_str());
-			}
-		} 
-		
-		else
-			remove(filePath.c_str());
-	}
-	closedir(dir);
+    struct dirent* entry;
+    while ((entry = readdir(dir)) != NULL) {
+        std::string name = entry->d_name;
+
+        // Skip "." and ".."
+        if (name == "." || name == "..")
+            continue;
+
+        std::string filePath = folderPath + "/" + name;
+
+        if (entry->d_type == DT_DIR) {
+            // Recursively delete contents
+            deleteLogs(filePath);
+            // Remove the directory after it's emptied
+            rmdir(filePath.c_str());
+        } else {
+            // Check if file ends with ".log"
+            if (name.size() >= 4 && name.compare(name.size() - 4, 4, ".log") == 0) {
+                remove(filePath.c_str());
+            }
+        }
+    }
+    closedir(dir);
 }
 
 int	main(int argc, char **argv)
