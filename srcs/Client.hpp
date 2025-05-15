@@ -13,7 +13,7 @@
 class Client
 {
 	public:
-		Client(int fd);
+		Client();
 		~Client();
 
         std::string& getRecvBuffer(); // Get the buffer for accumulating data
@@ -33,7 +33,6 @@ class Client
 		size_t		parseChunkSize(const std::string& chunk_size);
 		size_t		hexToDec(const std::string& hex);
 		
-		int			socket_fd;
 		std::string request_buf; 
 		bool		headers_parsed;
 		bool		is_chunked; 

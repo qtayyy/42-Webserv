@@ -187,7 +187,7 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) :
 
         _path = request.headerGet("path");
         _reroutedPath = urlDecode(_path);
-        _reroutedPath = _applyAlias(_path);
+        _reroutedPath = _applyAlias(_reroutedPath);
         _reroutedPath = _isAlias ? _reroutedPath : _applyRoot(_reroutedPath);
         if (!_reroutedPath.empty() && _reroutedPath[0] == '/')
             _reroutedPath = _reroutedPath.substr(1);
@@ -315,7 +315,7 @@ string HttpResponse::generateAutoIndexHtml(string path, string root) {
 string HttpResponse::composeHttpResponse(
     const string& body,
     int           statusCode,
-    const string& msg,
+    const string msg,
     ... ) 
 {
     std::map<string, string> headers;

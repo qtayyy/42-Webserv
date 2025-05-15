@@ -14,7 +14,7 @@
 
 /* CONSTRUCTORS/DESTRUCTORS */
 
-Client::Client(int fd) : socket_fd(fd), request_buf("") {}
+Client::Client() : request_buf("") {}
 Client::~Client() {}
 
 

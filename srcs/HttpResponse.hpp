@@ -81,7 +81,7 @@ public:
     static string composeHttpResponse(
         const string& body,
         int statusCode,
-        const string& msg,
+        const string msg,
         ... );
 
     string generateAutoIndexHtml(string path, string root);

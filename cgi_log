@@ -1,14 +1,18 @@
-[2025-05-15 10:02:04] cgi called
-[2025-05-15 10:02:04] ENV CONTENT_LENGTH=0
-[2025-05-15 10:02:04] ENV CONTENT_TYPE=
-[2025-05-15 10:02:04] ENV PATH_INFO=/only_post
-[2025-05-15 10:02:04] ENV PATH_TRANSLATED=/home/cooper/coreProgram/webserv_proper/webserv1/cgi-bin/upload.py
-[2025-05-15 10:02:04] ENV QUERY_STRING=
-[2025-05-15 10:02:04] ENV REQUEST_METHOD=POST
-[2025-05-15 10:02:04] ENV REQUEST_URI=/home/cooper/coreProgram/webserv_proper/webserv1/cgi-bin/upload.py
-[2025-05-15 10:02:04] ENV SCRIPT_NAME=/cgi-bin/upload.py
-[2025-05-15 10:02:04] ENV SERVER_PORT=8080
-[2025-05-15 10:02:04] ENV SERVER_PROTOCOL=HTTP/1.1
-[2025-05-15 10:02:04] ENV LC_CTYPE=C.UTF-8
-[2025-05-15 10:02:04] Received data: {}
-[2025-05-15 10:02:04] POST
+[2025-05-15 10:20:48] cgi called
+[2025-05-15 10:20:48] ENV CONTENT_LENGTH=0
+[2025-05-15 10:20:48] ENV CONTENT_TYPE=
+[2025-05-15 10:20:48] ENV PATH_INFO=/upload
+[2025-05-15 10:20:48] ENV PATH_TRANSLATED=/home/shechong/coreProgram/webserv/cgi-bin/upload.py
+[2025-05-15 10:20:48] ENV QUERY_STRING=
+[2025-05-15 10:20:48] ENV REQUEST_METHOD=GET
+[2025-05-15 10:20:48] ENV REQUEST_URI=/home/shechong/coreProgram/webserv/cgi-bin/upload.py
+[2025-05-15 10:20:48] ENV SCRIPT_NAME=/cgi-bin/upload.py
+[2025-05-15 10:20:48] ENV SERVER_PORT=8080
+[2025-05-15 10:20:48] ENV SERVER_PROTOCOL=HTTP/1.1
+[2025-05-15 10:20:48] ENV LC_CTYPE=C.UTF-8
+[2025-05-15 10:20:48] Received data: {}
+[2025-05-15 10:20:48] GET public/upload
+[2025-05-15 10:20:48] cwd: /home/shechong/coreProgram/webserv
+[2025-05-15 10:20:48] current_path: /home/shechong/coreProgram/webserv
+[2025-05-15 10:20:48] full_path: /home/shechong/coreProgram/webserv/public/upload
+[2025-05-15 10:20:48] Directory listing for /home/shechong/coreProgram/webserv/public/upload

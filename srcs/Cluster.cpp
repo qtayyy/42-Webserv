@@ -146,13 +146,10 @@ void	Cluster::init(void)
 			Port = IPPort.substr(colonPos + 1);
 			if ((listener = createListenerSocket(IP, Port)) == -1)
 				throw ClusterException(RED "listener socket error" RESET);
-			if (_pollFds != NULL)
-			{
-				_pollFds[i].fd = listener;
-				_pollFds[i++].events = POLLIN;
-				_listenerToServer[listener] = it->second;
-				_numOfFds++;
-			}
+			_pollFds[i].fd = listener;
+			_pollFds[i++].events = POLLIN;
+			_listenerToServer[listener] = it->second;
+			_numOfFds++;
 		}
 	}
 	if (_numOfFds == 0)
@@ -413,7 +410,7 @@ void	Cluster::handleNewClient(int listenerFd)
 		perror("fcntl");
 	else
 	{
-		this->_clients[newClient] = new Client(newClient);
+		this->_clients[newClient] = new Client();
 		_pollFds[_numOfFds].fd = newClient;
 		_pollFds[_numOfFds].events = POLLIN; // Explicitly set to POLLIN
 		LogStream::success() << "New client connection received: [" << _pollFds[_numOfFds].fd << "]" << std::endl; 
