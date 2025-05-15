@@ -9,13 +9,14 @@ CYAN="\e[36m"
 WHITE="\e[37m"
 RESET="\e[0m"
 
-conf_file="/conf/good/custom.conf"
+conf_file="conf/good/custom.conf"
 output_dir="tests/curl_responses"  # Global variable for output directory
 log_file="log_trace.log"
 file_index=1  # Initialize the file index
 
 
 # COPY FILES FROM SRC TO VOLATILE
+chmod +rwx public/volatile/*
 rm -rf public/volatile/*
 SOURCE_DIR="source_files"
 DEST_DIR="public/volatile"

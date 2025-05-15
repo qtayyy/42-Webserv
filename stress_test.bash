@@ -10,7 +10,7 @@ run_siege_test() {
     siege -c "$connections" -t "$duration" -b http://localhost:8080/volatile/empty.txt > "$timestamp"
 }
 
-valgrind ./webserv &
+./webserv &
 SERVER_PID=$!
 sleep 2
 
