@@ -351,7 +351,7 @@ string generateLogFileName(const string &folder, const string &category, const s
 
     if (category != latestCategory) {
         latestCategory = category;
-        counter ++;
+        counter ++; 
     }
 
     string outputFolder = folder + to_string(counter) + "_" + (sanitizeFilename(prefix) + "_" + generateRandomID(5) + ".log");

@@ -14,7 +14,6 @@
 - server_name <name> ...
 
 # considerations:
-- priotize root or alias? (I would go with alias)
 
 
 add:

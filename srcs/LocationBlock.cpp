@@ -13,7 +13,6 @@
 #include "LocationBlock.hpp"
 
 
-LocationBlock* LocationBlock::emptyBlock = new LocationBlock();
 
 // ============================= PARSE CONFIG FILE ============================
 

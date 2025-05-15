@@ -260,6 +260,7 @@ void Cluster::run(void) {
 
 	signal(SIGPIPE, SIG_IGN);
 
+
 while (true) {
 
 LogStream::log() << "listening on " << _numOfFds << " sockets | " << formatTime("%I:%M%p %S") << std::endl;

@@ -28,7 +28,7 @@ class LocationBlock : public Block
 
 		int		parseLocation(stringList args, int i);
 		void	initDefaultLocationBlockConfig(void);
-		static LocationBlock *emptyBlock;
+		// static LocationBlock *emptyBlock;
 
 		// Setters
 		void	setUri(stringList args = stringList());

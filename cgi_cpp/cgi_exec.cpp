@@ -129,7 +129,7 @@ string extractHeader(const string& response, const string& boundary) {
     return response.substr(start_pos, header_end_pos - start_pos);
 }
 
-string getBoundary(const string& contentType) {
+string extractBoundary(const string& contentType) {
     string boundaryPrefix = "boundary=";
     size_t boundaryPos    = contentType.find(boundaryPrefix);
 
@@ -144,7 +144,6 @@ std::map<string, string> extractHeadersFromHeaderString(const string& headerStri
     string line;
     while (std::getline(headerStream, line)) {
 
-        std::cerr << "line: " << line << std::endl;
         size_t delimiterPos = line.find(": ");
         if (delimiterPos != string::npos) {
             string key = line.substr(0, delimiterPos);
@@ -157,15 +156,13 @@ std::map<string, string> extractHeadersFromHeaderString(const string& headerStri
 
 string readFileContent(const string& filePath) {
     std::ifstream file(filePath.c_str()); // Open the file
-    if (!file.is_open()) {
+    if (!file.is_open()) 
         return "";
-    }
 
     string content;
     string line;
-    while (std::getline(file, line)) {
+    while (std::getline(file, line)) 
         content += line + '\n'; // Append each line to the content with a newline character
-    }
 
     file.close(); // Close the file
     return content;
@@ -203,7 +200,7 @@ int main(int ac, char **av) {
         while (std::getline(std::cin, line)) 
             postData += line + "\n";
 
-        string boundary = getBoundary(content_type ? content_type : "");
+        string boundary = extractBoundary(content_type ? content_type : "");
         if (boundary.empty()) {
             std::cerr << "Error: Boundary not found in Content-Type header." << std::endl;
             return 1;
@@ -212,13 +209,26 @@ int main(int ac, char **av) {
         int status = appendLineToFile("log.txt", path_translated);
         std::map<string, string> headerItems = extractHeadersFromHeaderString(extractHeader(postData, boundary));
 
-        string output = "";
-        for (std::map<string, string>::iterator it = headerItems.begin(); it != headerItems.end(); ++it)
-            output += it->first + ": " + it->second + "\n";
+        string filename;
+        size_t chunk_start = postData.find("--" + boundary);
+        if (chunk_start != string::npos) {
+            size_t filename_pos = postData.find("filename=\"", chunk_start);
+            if (filename_pos != string::npos) {
+                filename_pos += 10; // Move past 'filename="'
+                size_t filename_end = postData.find("\"", filename_pos);
+                if (filename_end != string::npos)
+                    filename = postData.substr(filename_pos, filename_end - filename_pos);
+            } 
+        }
+        else {
+            std::cerr << "Error: Chunk start not found in the POST data." << std::endl;
+            return 1;
+        }
 
-        output += to_string(headerItems.size());
 
-        std::cout << constructResponse(extractHeader(postData, boundary), "text/plain", "200", "OK");
+        appendLineToFile("log.txt", "filename uploaded: " + filename);
+
+        std::cout << constructResponse(generateStatusPage("File logged successfully", path_translated, false), "text/html", "200", "OK");
         return 0;
         
         if (status == 0)
@@ -233,7 +243,11 @@ int main(int ac, char **av) {
 
     return 0;
 }
+   // string output = "";
+        // for (std::map<string, string>::iterator it = headerItems.begin(); it != headerItems.end(); ++it)
+        //     output += it->first + ": " + it->second + "\n";
 
+        // output += to_string(headerItems.size());
 
 // bool doesPathExist(const string& path) {
 //     struct stat buffer;

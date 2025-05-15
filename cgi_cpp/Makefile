@@ -9,7 +9,7 @@ EXEC = cgi_exec
 all: $(EXEC)
 
 $(EXEC): $(OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $^
+	$(CXX) $(CXXFLAGS) -o $@ $^ -fsanitize=address -g3
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@

@@ -57,8 +57,7 @@ LocationBlock *HttpResponse::getBlock() {
     if (this->_usingLocationBlock) {
         return dynamic_cast<LocationBlock*>(this->_resolvedLocationBlock);
     } else {
-        return LocationBlock::emptyBlock;
-        // return this->emptyBlock;
+        return &_emptyBlock;
     }
 }
 
@@ -139,6 +138,8 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) :
     _request(request),
     _serverBlockRef(serverBlock)
     {
+    this->_emptyBlock = LocationBlock(serverBlock);
+    this->_emptyBlock.initDefaultLocationBlockConfig();
 
     LogStream::pending() << "Constructing response" << std::endl; 
     try {
@@ -156,7 +157,7 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) :
 
         string contentLengthStr = request.headerGet("Content-Length");
         _contentLength = contentLengthStr.empty() ? request.getBody().size() : std::strtod(contentLengthStr.c_str(), NULL);
-        if (_contentLength > serverBlock->getClientMaxBodySize())
+        if (_contentLength > getBlock()->getClientMaxBodySize())
             throw HttpException(413);
 
 

@@ -31,7 +31,7 @@ private:
     bool          _isExtension;
     HttpRequest   &_request;
 
-    LocationBlock *_emptyBlock;
+    LocationBlock _emptyBlock;
     ServerBlock   *_serverBlockRef;
     Block         *_resolvedLocationBlock;
 

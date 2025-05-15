@@ -6,7 +6,8 @@ chmod -rwx logs/cgi logs/requests logs/responses
 run_siege_test() {
     local connections=$1
     local duration=$2
-    siege -c "$connections" -t "$duration" -b http://localhost:8080/volatile/empty.txt
+    local timestamp=$(date +"siege_test_%I:%M%p_%d-%m-%Y")
+    siege -c "$connections" -t "$duration" -b http://localhost:8080/volatile/empty.txt > "$timestamp"
 }
 
 valgrind ./webserv &
