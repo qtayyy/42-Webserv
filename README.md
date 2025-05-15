@@ -16,5 +16,7 @@
 # considerations:
 
 
-add:
+add for hostname support:
 127.0.0.1       qtay.42.fr shechong.42.fr etlim.42.fr
+
+fuser -k 1234/tcp

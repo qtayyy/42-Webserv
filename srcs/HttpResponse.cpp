@@ -165,8 +165,7 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) :
 
         stringList limitExcept = getBlock()->getLimitExcept();
         string          method = request.getMethod();
-        if (limitExcept.size() == 0) {}
-        else if (std::find(limitExcept.begin(), limitExcept.end(), method) == limitExcept.end())
+        if (std::find(limitExcept.begin(), limitExcept.end(), method) == limitExcept.end())
             throw HttpException(405);
 
 

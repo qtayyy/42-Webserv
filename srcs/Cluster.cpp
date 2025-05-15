@@ -192,6 +192,7 @@ int		Cluster::createListenerSocket(string IP, string Port)
 	if (ptr == NULL)
 	{
 		LogStream::error() << "socket, fcntl, setsockopt or bind error" << std::endl;
+		freeaddrinfo(addr_list);
 		return (-1);
 	}
 	struct sockaddr_in	actual_addr;
