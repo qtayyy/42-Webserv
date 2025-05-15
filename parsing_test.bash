@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # File to read lines from
-input_file="test_lines.txt"
+input_file="test_directives.txt"
 
 # Output directory
 output_dir="tests/format_test"
