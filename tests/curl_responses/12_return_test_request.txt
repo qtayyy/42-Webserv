@@ -1,0 +1,27 @@
+== Info:   Trying 127.0.0.1:8080...
+== Info: Connected to localhost (127.0.0.1) port 8080 (#0)
+=> Send header, 89 bytes (0x59)
+0000: GET /return_test HTTP/1.1
+001b: Host: localhost:8080
+0031: User-Agent: curl/7.81.0
+004a: Accept: */*
+0057: 
+== Info: Mark bundle as not supporting multiuse
+<= Recv header, 80 bytes (0x50)
+0000: HTTP/1.1 302 The requested resource resides temporarily under a 
+0040: different URI.
+<= Recv header, 52 bytes (0x34)
+0000: Cache-Control: no-cache; no-store; must-revalidate
+<= Recv header, 19 bytes (0x13)
+0000: Connection: close
+<= Recv header, 19 bytes (0x13)
+0000: Content-Length: 0
+<= Recv header, 25 bytes (0x19)
+0000: Content-Type: text/html
+<= Recv header, 31 bytes (0x1f)
+0000: Location: https://example.com
+<= Recv header, 18 bytes (0x12)
+0000: Pragma: no-cache
+<= Recv header, 2 bytes (0x2)
+0000: 
+== Info: Closing connection 0

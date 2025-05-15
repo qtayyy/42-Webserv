@@ -54,8 +54,8 @@ call_curl_and_save() {
     extracted_command=$(echo "$curl_command" | sed 's|.*://[^/]*/||')  # Extract starting from the first slash after the domain
     local sanitized_command=$(echo "$extracted_command" | sed 's/[^a-zA-Z0-9._-]/_/g')  # Sanitize for filename
     
-    local output_file="$output_dir/${file_index}_${sanitized_command}.txt"
-    local request_file="$output_dir/${file_index}_${sanitized_command}_request.txt"
+    local output_file="$output_dir/${file_index}_${sanitized_command}.log"
+    local request_file="$output_dir/${file_index}_${sanitized_command}_request.log"
     touch "$output_file"  # Create the output file if it doesn't exist
     touch "$request_file"  # Create the request file if it doesn't exist
 

@@ -1,0 +1,26 @@
+== Info:   Trying 127.0.0.1:8080...
+== Info: Connected to localhost (127.0.0.1) port 8080 (#0)
+=> Send header, 82 bytes (0x52)
+0000: GET /dir1 HTTP/1.1
+0014: Host: localhost:8080
+002a: User-Agent: curl/7.81.0
+0043: Accept: */*
+0050: 
+== Info: Mark bundle as not supporting multiuse
+<= Recv header, 22 bytes (0x16)
+0000: HTTP/1.1 200 Success
+<= Recv header, 19 bytes (0x13)
+0000: Connection: close
+<= Recv header, 21 bytes (0x15)
+0000: Content-Length: 302
+<= Recv header, 25 bytes (0x19)
+0000: Content-Type: text/html
+<= Recv header, 2 bytes (0x2)
+0000: 
+<= Recv data, 302 bytes (0x12e)
+0000: <!DOCTYPE html>.<html lang="en">.<head>.    <meta charset="UTF-8
+0040: ">.    <meta name="viewport" content="width=device-width, initia
+0080: l-scale=1.0">.    <title>Welcome to My Website</title>.</head>.<
+00c0: body>.    <h1>Hello, World!</h1>.    <p>Welcome to my website. T
+0100: his is a basic HTML page.</p>.</body>.</html>.
+== Info: Closing connection 0

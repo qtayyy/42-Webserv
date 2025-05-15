@@ -1,0 +1,50 @@
+== Info:   Trying 127.0.0.1:8080...
+== Info: Connected to localhost (127.0.0.1) port 8080 (#0)
+=> Send header, 85 bytes (0x55)
+0000: GET /upload2 HTTP/1.1
+0017: Host: localhost:8080
+002d: User-Agent: curl/7.81.0
+0046: Accept: */*
+0053: 
+== Info: Mark bundle as not supporting multiuse
+<= Recv header, 16 bytes (0x10)
+0000: HTTP/1.1 200 OK.
+<= Recv header, 25 bytes (0x19)
+0000: Content-Type: text/plain.
+<= Recv header, 18 bytes (0x12)
+0000: Connection: close.
+<= Recv header, 21 bytes (0x15)
+0000: Content-Length: 1799.
+<= Recv header, 1 bytes (0x1)
+0000: .
+<= Recv data, 1799 bytes (0x707)
+0000: /home/cooper/coreProgram/webserv_proper/webserv1/cgi_cpp/cgi_exe
+0040: c./home/cooper/coreProgram/webserv_proper/webserv1/cgi_cpp/cgi_e
+0080: xec./home/cooper/coreProgram/webserv_proper/webserv1/cgi_cpp/cgi
+00c0: _exec./home/cooper/coreProgram/webserv_proper/webserv1/cgi_cpp/c
+0100: gi_exec./home/cooper/coreProgram/webserv_proper/webserv1/cgi_cpp
+0140: /cgi_exec./home/cooper/coreProgram/webserv_proper/webserv1/cgi_c
+0180: pp/cgi_exec./home/cooper/coreProgram/webserv_proper/webserv1/cgi
+01c0: _cpp/cgi_exec./home/cooper/coreProgram/webserv_proper/webserv1/c
+0200: gi_cpp/cgi_exec./home/cooper/coreProgram/webserv_proper/webserv1
+0240: /cgi_cpp/cgi_exec./home/cooper/coreProgram/webserv_proper/webser
+0280: v1/cgi_cpp/cgi_exec./home/cooper/coreProgram/webserv_proper/webs
+02c0: erv1/cgi_cpp/cgi_exec./home/cooper/coreProgram/webserv_proper/we
+0300: bserv1/cgi_cpp/cgi_exec./home/cooper/coreProgram/webserv_proper/
+0340: webserv1/cgi_cpp/cgi_exec./home/cooper/coreProgram/webserv_prope
+0380: r/webserv1/cgi_cpp/cgi_exec./home/cooper/coreProgram/webserv_pro
+03c0: per/webserv1/cgi_cpp/cgi_exec./home/cooper/coreProgram/webserv_p
+0400: roper/webserv1/cgi_cpp/cgi_exec./home/cooper/coreProgram/webserv
+0440: _proper/webserv1/cgi_cpp/cgi_exec./home/cooper/coreProgram/webse
+0480: rv_proper/webserv1/cgi_cpp/cgi_exec./home/cooper/coreProgram/web
+04c0: serv_proper/webserv1/cgi_cpp/cgi_exec./home/cooper/coreProgram/w
+0500: ebserv_proper/webserv1/cgi_cpp/cgi_exec./home/cooper/coreProgram
+0540: /webserv_proper/webserv1/cgi_cpp/cgi_exec./home/cooper/coreProgr
+0580: am/webserv_proper/webserv1/cgi_cpp/cgi_exec./home/cooper/corePro
+05c0: gram/webserv_proper/webserv1/cgi_cpp/cgi_exec./home/cooper/coreP
+0600: rogram/webserv_proper/webserv1/cgi_cpp/cgi_exec.filename uploade
+0640: d: webp_file.webp./home/cooper/coreProgram/webserv_proper/webser
+0680: v1/cgi_cpp/cgi_exec.filename uploaded: Picture1.gif./home/shecho
+06c0: ng/coreProgram/webserv/cgi_cpp/cgi_exec.filename uploaded: firef
+0700: og.png.
+== Info: Closing connection 0

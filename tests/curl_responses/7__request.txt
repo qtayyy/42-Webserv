@@ -1,0 +1,69 @@
+== Info:   Trying 127.0.0.1:1234...
+== Info: Connected to localhost (127.0.0.1) port 1234 (#0)
+=> Send header, 78 bytes (0x4e)
+0000: GET / HTTP/1.1
+0010: Host: localhost:1234
+0026: User-Agent: curl/7.81.0
+003f: Accept: */*
+004c: 
+== Info: Mark bundle as not supporting multiuse
+<= Recv header, 22 bytes (0x16)
+0000: HTTP/1.1 200 Success
+<= Recv header, 19 bytes (0x13)
+0000: Connection: close
+<= Recv header, 22 bytes (0x16)
+0000: Content-Length: 3020
+<= Recv header, 25 bytes (0x19)
+0000: Content-Type: text/html
+<= Recv header, 2 bytes (0x2)
+0000: 
+<= Recv data, 3020 bytes (0xbcc)
+0000: <html><head><title>Index of public/</title><style>       body { 
+0040:           font-family: Arial, sans-serif;           background-c
+0080: olor: #f4f4f4;           margin: 0;           padding: 20px;    
+00c0:    }       h1 {           color: #4CAF50;       }       table { 
+0100:           width: 100%;           border-collapse: collapse;     
+0140:       border-radius: 10px;           overflow: hidden;          
+0180:  padding: 10px;       }       th, td {           text-align: lef
+01c0: t;           background: #fff;           padding: 10px;       } 
+0200:       a {           color: #1E90FF;       }       .folder {     
+0240:       color:rgb(0, 160, 158);       }       .error {           c
+0280: olor: red;           font-weight: bold;       }</style><script>a
+02c0: sync function deleteFile(filePath, rowId) {  if (!confirm('Delet
+0300: e this file?')) return;  try {    const response = await fetch(f
+0340: ilePath, { method: 'DELETE' });    if (response.ok) {      docum
+0380: ent.getElementById(rowId).remove();    } else {      alert('Fail
+03c0: ed to delete: ' + response.status);    }  } catch (err) {    ale
+0400: rt('Error: ' + err);  }}</script></head><body><h1>Index of <a hr
+0440: ef="/">~</a><a href=""></a> </h1><table><tr><th>Name</th><th>Siz
+0480: e</th><th>Action</th></tr><tr id="row0"><td><a class="folder" hr
+04c0: ef="/dir1">dir1</a></td><td>- bytes</td><td></td></tr><tr id="ro
+0500: w1"><td><a class="folder" href="/dir2">dir2</a></td><td>- bytes<
+0540: /td><td></td></tr><tr id="row2"><td><a href="/error.html">error.
+0580: html</a></td><td>267 bytes</td><td><button onclick="deleteFile('
+05c0: /error.html', 'row2')">Delete</button></td></tr><tr id="row3"><t
+0600: d><a href="/homepage.html">homepage.html</a></td><td>1017 bytes<
+0640: /td><td><button onclick="deleteFile('/homepage.html', 'row3')">D
+0680: elete</button></td></tr><tr id="row4"><td><a href="/test.css">te
+06c0: st.css</a></td><td>292 bytes</td><td><button onclick="deleteFile
+0700: ('/test.css', 'row4')">Delete</button></td></tr><tr id="row5"><t
+0740: d><a href="/upload.html">upload.html</a></td><td>2326 bytes</td>
+0780: <td><button onclick="deleteFile('/upload.html', 'row5')">Delete<
+07c0: /button></td></tr><tr id="row6"><td><a class="folder" href="/upl
+0800: oad">upload</a></td><td>- bytes</td><td></td></tr><tr id="row7">
+0840: <td><a class="folder" href="/volatile">volatile</a></td><td>- by
+0880: tes</td><td></td></tr><tr id="row8"><td><a href="/firefog.png">f
+08c0: irefog.png</a></td><td>337799 bytes</td><td><button onclick="del
+0900: eteFile('/firefog.png', 'row8')">Delete</button></td></tr><tr id
+0940: ="row9"><td><a href="/.secret">.secret</a></td><td>16 bytes</td>
+0980: <td><button onclick="deleteFile('/.secret', 'row9')">Delete</but
+09c0: ton></td></tr><tr id="row10"><td><a href="/cat.webp">cat.webp</a
+0a00: ></td><td>137076 bytes</td><td><button onclick="deleteFile('/cat
+0a40: .webp', 'row10')">Delete</button></td></tr><tr id="row11"><td><a
+0a80:  href="/message.txt">message.txt</a></td><td>9687 bytes</td><td>
+0ac0: <button onclick="deleteFile('/message.txt', 'row11')">Delete</bu
+0b00: tton></td></tr><tr id="row12"><td><a href="/upload2.html">upload
+0b40: 2.html</a></td><td>2327 bytes</td><td><button onclick="deleteFil
+0b80: e('/upload2.html', 'row12')">Delete</button></td></tr></table></
+0bc0: body></html>
+== Info: Closing connection 0

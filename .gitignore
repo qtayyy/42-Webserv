@@ -34,11 +34,12 @@
 .vscode/settings.json
 .vscode/c_cpp_properties.json
 
-logs/cgi/*
-logs/requests/*
-logs/responses/*
+# logs/cgi/*
+# logs/requests/*
+# logs/responses/*
+# tests/curl_responses/*
+# tests/format_test/*
+# tests/seige_responses/*
 
 public/volatile/*
-tests/curl_responses/*
-tests/format_test/*
-tests/seige_responses/*
+*.log

@@ -1,0 +1,22 @@
+== Info:   Trying 127.0.0.1:8080...
+== Info: Connected to localhost (127.0.0.1) port 8080 (#0)
+=> Send header, 99 bytes (0x63)
+0000: GET /auto_index_with_index HTTP/1.1
+0025: Host: localhost:8080
+003b: User-Agent: curl/7.81.0
+0054: Accept: */*
+0061: 
+== Info: Mark bundle as not supporting multiuse
+<= Recv header, 22 bytes (0x16)
+0000: HTTP/1.1 200 Success
+<= Recv header, 19 bytes (0x13)
+0000: Connection: close
+<= Recv header, 19 bytes (0x13)
+0000: Content-Length: 6
+<= Recv header, 25 bytes (0x19)
+0000: Content-Type: text/html
+<= Recv header, 2 bytes (0x2)
+0000: 
+<= Recv data, 6 bytes (0x6)
+0000: index.
+== Info: Closing connection 0

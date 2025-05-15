@@ -1,0 +1,34 @@
+HTTP/1.1 200 OK
+Content-Type: text/plain
+Connection: close
+Content-Length: 1799
+
+/home/cooper/coreProgram/webserv_proper/webserv1/cgi_cpp/cgi_exec
+/home/cooper/coreProgram/webserv_proper/webserv1/cgi_cpp/cgi_exec
+/home/cooper/coreProgram/webserv_proper/webserv1/cgi_cpp/cgi_exec
+/home/cooper/coreProgram/webserv_proper/webserv1/cgi_cpp/cgi_exec
+/home/cooper/coreProgram/webserv_proper/webserv1/cgi_cpp/cgi_exec
+/home/cooper/coreProgram/webserv_proper/webserv1/cgi_cpp/cgi_exec
+/home/cooper/coreProgram/webserv_proper/webserv1/cgi_cpp/cgi_exec
+/home/cooper/coreProgram/webserv_proper/webserv1/cgi_cpp/cgi_exec
+/home/cooper/coreProgram/webserv_proper/webserv1/cgi_cpp/cgi_exec
+/home/cooper/coreProgram/webserv_proper/webserv1/cgi_cpp/cgi_exec
+/home/cooper/coreProgram/webserv_proper/webserv1/cgi_cpp/cgi_exec
+/home/cooper/coreProgram/webserv_proper/webserv1/cgi_cpp/cgi_exec
+/home/cooper/coreProgram/webserv_proper/webserv1/cgi_cpp/cgi_exec
+/home/cooper/coreProgram/webserv_proper/webserv1/cgi_cpp/cgi_exec
+/home/cooper/coreProgram/webserv_proper/webserv1/cgi_cpp/cgi_exec
+/home/cooper/coreProgram/webserv_proper/webserv1/cgi_cpp/cgi_exec
+/home/cooper/coreProgram/webserv_proper/webserv1/cgi_cpp/cgi_exec
+/home/cooper/coreProgram/webserv_proper/webserv1/cgi_cpp/cgi_exec
+/home/cooper/coreProgram/webserv_proper/webserv1/cgi_cpp/cgi_exec
+/home/cooper/coreProgram/webserv_proper/webserv1/cgi_cpp/cgi_exec
+/home/cooper/coreProgram/webserv_proper/webserv1/cgi_cpp/cgi_exec
+/home/cooper/coreProgram/webserv_proper/webserv1/cgi_cpp/cgi_exec
+/home/cooper/coreProgram/webserv_proper/webserv1/cgi_cpp/cgi_exec
+/home/cooper/coreProgram/webserv_proper/webserv1/cgi_cpp/cgi_exec
+filename uploaded: webp_file.webp
+/home/cooper/coreProgram/webserv_proper/webserv1/cgi_cpp/cgi_exec
+filename uploaded: Picture1.gif
+/home/shechong/coreProgram/webserv/cgi_cpp/cgi_exec
+filename uploaded: firefog.png
