@@ -54,6 +54,7 @@ class Cluster
 		void	mapIPPortToServer(void);
 		int		createListenerSocket(std::string IP, std::string Port);
 		void	handleNewClient(int listenerFd);
+		ServerBlock *resolveServer(HttpRequest &request);
 };
 
 std::string	strTrim(std::string str, std::string delims);

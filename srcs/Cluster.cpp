@@ -248,6 +248,71 @@ void printFdEvents(const struct pollfd& pfd) {
 }
 
 
+ServerBlock *Cluster::resolveServer(HttpRequest &request) {
+	ServerBlock *serverBlock = NULL;
+
+	string hostHeader = request.headerGet("Host");
+	if (hostHeader.empty()) {
+		LogStream::error() << "Host header is missing in the request." << std::endl;
+		serverBlock = &_servers[0];
+	} 
+	
+	else {
+
+		size_t colonPos = hostHeader.find(":");
+		string hostName;
+		string portNumber;
+		if (colonPos != std::string::npos) {
+			hostName = hostHeader.substr(0, colonPos);
+			portNumber = hostHeader.substr(colonPos + 1);
+		} 
+		
+		else {
+			hostName = hostHeader;
+			portNumber = "";
+		}
+
+		
+
+		std::vector<ServerBlock *> matchingServers;
+		
+		for (size_t serverIndex = 0; serverIndex < _servers.size(); serverIndex++) {
+			std::vector<std::pair<uint32_t, int> > ports = _servers[serverIndex].getListen();
+
+			for (size_t j = 0; j < ports.size(); j++) {
+				if (portNumber == to_string(ports[j].second))
+					matchingServers.push_back(&_servers[serverIndex]);
+			}
+		}
+
+		serverBlock = matchingServers.empty() ? &_servers[0] : matchingServers[0];
+
+		for (std::vector<ServerBlock *>::iterator it = matchingServers.begin(); it != matchingServers.end(); ++it) {
+			const stringList& serverNames = (*it)->getServerName();
+			
+			if (serverNames.empty())
+				continue;
+				
+			if (std::find(serverNames.begin(), serverNames.end(), hostName) != serverNames.end()) {
+				LogStream::success() << "Matching server block found for Host: " << hostHeader << " to server [" << hostName << "]" << std::endl;
+				serverBlock = *it;
+				break;
+			}
+		}
+		
+
+		if (!serverBlock) {
+			LogStream::error() << "No matching server block found for Host: " << hostHeader << std::endl;
+			serverBlock = &_servers[0]; 
+		}
+	}
+	LogStream::success() << "Resolved host " << hostHeader << " --> server " << (serverBlock - &_servers[0]) << std::endl;
+
+
+	return serverBlock;
+}
+
+
 /**
  * @brief	Monitors each socket for incoming connections, request or reponses
  * 			(I/O operations).
@@ -337,10 +402,11 @@ for (int i = 0; i < _numOfFds; i++) {
 			continue;
 		}
 		LogStream::log() << LogStream::log().setBordered(true) << request.preview() << std::endl;
-		
 		LogStream::pending() << "Handling request" << std::endl;
 
-		HttpResponse response  = HttpResponse(request, &_servers[0]);
+		ServerBlock* serverBlock = resolveServer(request);
+
+		HttpResponse response  = HttpResponse(request, serverBlock);
 		string 		 finalMsg  = response.getFinalResponseMsg();
 		
 		ssize_t 	totalBytes = finalMsg.size();
@@ -393,7 +459,7 @@ for (int i = 0; i < _numOfFds; i++) {
 		
 		else {
 			LogStream::pending() << "Closing connection for client [" << _pollFds[i].fd << "]" << std::endl;
-			removeFd(i--); // Properly close and clean up the socket
+			removeFd(i--); // close and clean up the socket
 		}
 	}
 }
