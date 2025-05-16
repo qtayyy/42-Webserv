@@ -1,17 +1,19 @@
-[2025-05-16 14:17:19] cgi called
-[2025-05-16 14:17:19] ENV CONTENT_LENGTH=394280
-[2025-05-16 14:17:19] ENV CONTENT_TYPE=multipart/form-data; boundary=----WebKitFormBoundaryQZZ36ppj6sA9tSsp
-[2025-05-16 14:17:19] ENV PATH_INFO=/upload/
-[2025-05-16 14:17:19] ENV PATH_TRANSLATED=/home/cooper/coreProgram/webserv_proper/webserv1/cgi-bin/upload.py
-[2025-05-16 14:17:19] ENV QUERY_STRING=
-[2025-05-16 14:17:19] ENV REQUEST_METHOD=POST
-[2025-05-16 14:17:19] ENV REQUEST_URI=/home/cooper/coreProgram/webserv_proper/webserv1/cgi-bin/upload.py
-[2025-05-16 14:17:19] ENV SCRIPT_NAME=/cgi-bin/upload.py
-[2025-05-16 14:17:19] ENV SERVER_PORT=
-[2025-05-16 14:17:19] ENV SERVER_PROTOCOL=HTTP/1.1
-[2025-05-16 14:17:19] ENV LC_CTYPE=C.UTF-8
-[2025-05-16 14:17:19] Received data: {}
-[2025-05-16 14:17:19] POST
-[2025-05-16 14:17:19] cwd: /home/cooper/coreProgram/webserv_proper/webserv1
-[2025-05-16 14:17:19] argv[1]: public/upload/
-[2025-05-16 14:17:19] file_item.filename: Screenshot 2025-05-16 080627.png
+[2025-05-16 14:58:46] cgi called
+[2025-05-16 14:58:46] ENV CONTENT_LENGTH=0
+[2025-05-16 14:58:46] ENV CONTENT_TYPE=
+[2025-05-16 14:58:46] ENV PATH_INFO=/upload
+[2025-05-16 14:58:46] ENV PATH_TRANSLATED=/home/shechong/coreProgram/webserv/cgi-bin/upload.py
+[2025-05-16 14:58:46] ENV QUERY_STRING=
+[2025-05-16 14:58:46] ENV REQUEST_METHOD=GET
+[2025-05-16 14:58:46] ENV REQUEST_URI=/home/shechong/coreProgram/webserv/cgi-bin/upload.py
+[2025-05-16 14:58:46] ENV SCRIPT_NAME=/cgi-bin/upload.py
+[2025-05-16 14:58:46] ENV SERVER_PORT=
+[2025-05-16 14:58:46] ENV SERVER_PROTOCOL=HTTP/1.1
+[2025-05-16 14:58:46] ENV LC_CTYPE=C.UTF-8
+[2025-05-16 14:58:46] Received data: {}
+[2025-05-16 14:58:46] GET public/upload
+[2025-05-16 14:58:46] current_path: /home/shechong/coreProgram/webserv
+[2025-05-16 14:58:46] full_path: /home/shechong/coreProgram/webserv/public/upload
+[2025-05-16 14:58:46] Directory listing for /home/shechong/coreProgram/webserv/public/upload
+[2025-05-16 14:58:46] Item: large.jpeg
+[2025-05-16 14:58:46] Item: 4k-arcane-season-2-wallpapers-v0-39t58hlgr7nd1.png

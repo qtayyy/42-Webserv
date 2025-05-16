@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   HttpResponse.cpp                                   :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: shechong <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/05/16 14:38:32 by shechong          #+#    #+#             */
+/*   Updated: 2025/05/16 14:38:40 by shechong         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "HttpResponse.hpp"
 
 /* DEFAULT VALUES */
@@ -53,15 +65,15 @@ const string HttpResponse::css =
 
 string HttpResponse::getFinalResponseMsg() const { return _finalResponseMsg; }
 int    HttpResponse::getContentLength()    const { return _contentLength; }
+string HttpResponse::getReroutedPath()  { return _reroutedPath; }
 LocationBlock *HttpResponse::getBlock() {
     if (this->_usingLocationBlock) {
         return dynamic_cast<LocationBlock*>(this->_resolvedLocationBlock);
     } else {
-        return &_emptyBlock;
+        return &_defaultBlock;
     }
 }
 
-string HttpResponse::getReroutedPath()  { return _reroutedPath; }
 
 
 
@@ -140,8 +152,8 @@ HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) :
     _request(request),
     _serverBlockRef(serverBlock)
     {
-    this->_emptyBlock = LocationBlock(serverBlock);
-    this->_emptyBlock.initDefaultLocationBlockConfig();
+    this->_defaultBlock = LocationBlock(serverBlock);
+    this->_defaultBlock.initDefaultLocationBlockConfig();
 
     LogStream::pending() << "Constructing response" << std::endl; 
     try {

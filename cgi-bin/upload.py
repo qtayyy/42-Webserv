@@ -214,7 +214,7 @@ if request_method == "POST":
         write_to(f"file_item.filename: {file_item.filename}")
         file_path = os.path.join("/", os.getcwd().lstrip('/'), sys.argv[1].lstrip('/'), file_item.filename)
         if os.path.exists(file_path): 
-            exit_error('Bad Request', f'"{file_item.filename}" already exists in "{os.path.dirname(file_path)}"', 409)
+            exit_error('Bad Request', f'"{file_item.filename}" already exists in "{os.path.dirname(file_path)}"', 405)
         
         try:
             with open(file_path, 'wb') as f:

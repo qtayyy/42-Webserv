@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   HttpResponse.hpp                                   :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: shechong <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/05/16 14:38:55 by shechong          #+#    #+#             */
+/*   Updated: 2025/05/16 14:38:55 by shechong         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef HTTP_RESPONSE_HPP
 #define HTTP_RESPONSE_HPP
 
@@ -31,7 +43,7 @@ private:
     bool          _isExtension;
     HttpRequest   &_request;
 
-    LocationBlock _emptyBlock;
+    LocationBlock _defaultBlock;
     ServerBlock   *_serverBlockRef;
     Block         *_resolvedLocationBlock;
 
