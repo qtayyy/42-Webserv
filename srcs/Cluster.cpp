@@ -257,11 +257,15 @@ ServerBlock *Cluster::resolveServer(HttpRequest &request) {
 		serverBlock = &_servers[0];
 	} 
 	
+
 	else {
 
 		size_t colonPos = hostHeader.find(":");
 		string hostName;
 		string portNumber;
+
+		request.setHost(portNumber);
+
 		if (colonPos != std::string::npos) {
 			hostName = hostHeader.substr(0, colonPos);
 			portNumber = hostHeader.substr(colonPos + 1);
