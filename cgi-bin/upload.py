@@ -89,23 +89,9 @@ CONTENT_TYPES = {
 
 cgitb.enable()
 
-class DummyField:
-    def __init__(self, value=None):
-        self.file = self
-        self._value = value
-
-    def read(self):
-        if isinstance(self._value, bytes):
-            return self._value
-        elif isinstance(self._value, str):
-            return self._value.encode('utf-8')
-        return b''
-
 class DummyForm(dict):
     def __init__(self, data=None):
         super().__init__()
-        if data is not None:
-            self["file"] = None
 
     def __getitem__(self, key):
         return None
@@ -246,8 +232,6 @@ if request_method == "POST":
             exit_error("Bad Request", "No file was uploaded.", 400)
         
         file_item = form["file"]
-        if not file_item:
-            exit_error("Bad Request", "No file was uploaded.", 400)
 
         if file_item.file is None: 
             exit_error("Bad Request", "No file content.", 400)
@@ -256,7 +240,7 @@ if request_method == "POST":
         write_to(f"argv[1]: {sys.argv[1]}")
         file_path = os.path.join("/", os.getcwd().lstrip('/'), sys.argv[1].lstrip('/'), file_item.filename)
         if os.path.exists(file_path): 
-            exit_error('Bad Request', f'"{file_item.filename}" already exists in "{os.path.dirname(file_path)}"', 405)
+            exit_error('Bad Request', f'"{file_item.filename}" already exists in "{os.path.dirname(file_path)}"', 400)
         
         try:
             with open(file_path, 'wb') as f:
