@@ -27,3 +27,5 @@ filename uploaded: webp_file.webp
 filename uploaded: Picture1.gif
 /home/shechong/coreProgram/webserv/cgi_cpp/cgi_exec
 filename uploaded: firefog.png
+/home/shechong/coreProgram/webserv/cgi_cpp/cgi_exec
+filename uploaded: firefog.png
