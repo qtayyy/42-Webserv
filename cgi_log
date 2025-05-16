@@ -1,17 +1,17 @@
-[2025-05-16 11:30:52] cgi called
-[2025-05-16 11:30:52] ENV CONTENT_LENGTH=74781
-[2025-05-16 11:30:52] ENV CONTENT_TYPE=multipart/form-data; boundary=----geckoformboundary6c1c42b74c1ca6e22b57fad51a6d535c
-[2025-05-16 11:30:52] ENV PATH_INFO=/upload/
-[2025-05-16 11:30:52] ENV PATH_TRANSLATED=/home/shechong/coreProgram/webserv/cgi-bin/upload.py
-[2025-05-16 11:30:52] ENV QUERY_STRING=
-[2025-05-16 11:30:52] ENV REQUEST_METHOD=POST
-[2025-05-16 11:30:52] ENV REQUEST_URI=/home/shechong/coreProgram/webserv/cgi-bin/upload.py
-[2025-05-16 11:30:52] ENV SCRIPT_NAME=/cgi-bin/upload.py
-[2025-05-16 11:30:52] ENV SERVER_PORT=
-[2025-05-16 11:30:52] ENV SERVER_PROTOCOL=HTTP/1.1
-[2025-05-16 11:30:52] ENV LC_CTYPE=C.UTF-8
-[2025-05-16 11:30:52] Received data: {}
-[2025-05-16 11:30:52] POST
-[2025-05-16 11:30:52] cwd: /home/shechong/coreProgram/webserv
-[2025-05-16 11:30:52] argv[1]: public/upload/
-[2025-05-16 11:30:52] file_item.filename: unnamed.png
+[2025-05-16 14:17:19] cgi called
+[2025-05-16 14:17:19] ENV CONTENT_LENGTH=394280
+[2025-05-16 14:17:19] ENV CONTENT_TYPE=multipart/form-data; boundary=----WebKitFormBoundaryQZZ36ppj6sA9tSsp
+[2025-05-16 14:17:19] ENV PATH_INFO=/upload/
+[2025-05-16 14:17:19] ENV PATH_TRANSLATED=/home/cooper/coreProgram/webserv_proper/webserv1/cgi-bin/upload.py
+[2025-05-16 14:17:19] ENV QUERY_STRING=
+[2025-05-16 14:17:19] ENV REQUEST_METHOD=POST
+[2025-05-16 14:17:19] ENV REQUEST_URI=/home/cooper/coreProgram/webserv_proper/webserv1/cgi-bin/upload.py
+[2025-05-16 14:17:19] ENV SCRIPT_NAME=/cgi-bin/upload.py
+[2025-05-16 14:17:19] ENV SERVER_PORT=
+[2025-05-16 14:17:19] ENV SERVER_PROTOCOL=HTTP/1.1
+[2025-05-16 14:17:19] ENV LC_CTYPE=C.UTF-8
+[2025-05-16 14:17:19] Received data: {}
+[2025-05-16 14:17:19] POST
+[2025-05-16 14:17:19] cwd: /home/cooper/coreProgram/webserv_proper/webserv1
+[2025-05-16 14:17:19] argv[1]: public/upload/
+[2025-05-16 14:17:19] file_item.filename: Screenshot 2025-05-16 080627.png

@@ -14,26 +14,61 @@
 
 /* CONSTRUCTORS/DESTRUCTORS */
 
-Client::Client() : request_buf("") {
+Client::Client() : _requestBuf("") {
     
 }
 Client::~Client() {}
 
 
-string& Client::getRecvBuffer() { return request_buf; }
-
-bool Client::isRequestReady() const {
-    return request_ready;
+void Client::prepareForResponse(HttpResponse &response) {
+    this->responseBuffer = response.getFinalResponseMsg();
+    this->_bytesSent = 0;
+    this->_bytesLeft = responseBuffer.size();
+    this->sendingResponse = true;
+    this->_keepConnectionAlive = (_request.headerGet("Connection") == "keep-alive" && response.getFinalResponseMsg().find("Connection: close") == string::npos);
 }
 
-void Client::reset() {
-    request_buf.clear();
-    headers_parsed = false;
-    is_chunked = false;
-    content_length = 0;
-    request_ready = false;
+int Client::extractBodySize() {
+    size_t headerEnd = _requestBuf.find("\r\n\r\n");
+    if (headerEnd == string::npos)
+        return -1;
+
+    return _requestBuf.size() - headerEnd - 4; // 4 for "\r\n\r\n"
 }
 
+ssize_t Client::getBytesLeft() {
+    return _bytesLeft;
+}
+
+bool Client::isKeepAlive() {
+    return _keepConnectionAlive;
+}
+
+ssize_t Client::sendTo(int fd) {
+    ssize_t sent = send(fd, responseBuffer.c_str() + _bytesSent, _bytesLeft, 0);
+
+    if (sent != -1) {
+        _bytesSent += sent;
+        _bytesLeft -= sent;
+    } 
+
+    return sent;
+}
+
+int Client::extractContentLength() {
+    int contentLength = 0;
+
+    size_t headerEnd = _requestBuf.find("\r\n\r\n");
+    if (headerEnd == string::npos)
+        return -1; // Invalid request format
+
+    if (_requestBuf.find("Content-Length:") != string::npos) {
+        int start  = _requestBuf.find("Content-Length:") + 15;
+        int end    = _requestBuf.find("\r\n", start);
+        contentLength = std::atoi(_requestBuf.substr(start, end - start).c_str()); 
+    }
+    return contentLength;
+}
 
 //parses the first line into the 3 parts(methods, path, query)
 //this first part is to get the method(GET, POST)
@@ -45,7 +80,7 @@ void Client::parseRequestLine(const string& requestLine) {
     }
     
     string method = requestLine.substr(0, methodEnd);
-    request.setMethod(method);
+    _request.setMethod(method);
     // this second part is to get the path (with or without ? [query string])
     size_t pathStart = methodEnd + 1;
     size_t pathEnd = requestLine.find(" ", pathStart);
@@ -66,9 +101,9 @@ void Client::parseRequestLine(const string& requestLine) {
     }
 
     // Store path information in key value pair(map)
-    request.headerSet("path", path);
-    request.setQueryString(queryString);
-    request.preview();
+    _request.headerSet("path", path);
+    _request.setQueryString(queryString);
+    _request.preview();
 }
 
 void Client::parseHeaders(const std::string& headers) {
@@ -87,7 +122,7 @@ void Client::parseHeaders(const std::string& headers) {
             std::string value = line.substr(colonPos + 1);
             // Trim leading whitespace
             value.erase(0, value.find_first_not_of(" \t"));
-            request.headerSet(key, value);
+            _request.headerSet(key, value);
         }
     }
 }
@@ -96,7 +131,7 @@ void Client::parseHeaders(const std::string& headers) {
 void Client::parseChunkedBody() {
     size_t headerEnd;
     string fullBody;
-    headerEnd = request_buf.find("\r\n\r\n");
+    headerEnd = _requestBuf.find("\r\n\r\n");
     if (headerEnd == string::npos) {
         std::cerr << "Invalid chunked request format" << std::endl;
         return;
@@ -108,25 +143,25 @@ void Client::parseChunkedBody() {
 
     size_t lineEnd;
     while (chunkSize != 0) {
-        lineEnd = request_buf.find("\r\n", pos);
+        lineEnd = _requestBuf.find("\r\n", pos);
         if (lineEnd == string::npos) {
             std::cerr << "Invalid chunk format" << std::endl;
             return;
         }
 		string hexSize;
-        hexSize = request_buf.substr(pos, lineEnd - pos);
+        hexSize = _requestBuf.substr(pos, lineEnd - pos);
         chunkSize = parseChunkSize(hexSize);
         pos = lineEnd + 2;
-        if (pos + chunkSize > request_buf.length()) {
+        if (pos + chunkSize > _requestBuf.length()) {
             std::cerr << "Read over chunk data length" << std::endl;
             return;
         }
         if (chunkSize > 0) {
-            fullBody += request_buf.substr(pos, chunkSize);
+            fullBody += _requestBuf.substr(pos, chunkSize);
             pos += chunkSize + 2;
         }
     }
-    request.setBody(fullBody);
+    _request.setBody(fullBody);
 }
 
 size_t Client::parseChunkSize(const string& hexChunk) {
@@ -159,42 +194,42 @@ size_t Client::hexToDec(const string& hex) {
 
 //parses the body and stores it
 void Client::parseBody(size_t headerEnd) {
-    if (headerEnd + 4 < request_buf.length()) {
-        string body = request_buf.substr(headerEnd + 4);
-        request.setBody(body);
+    if (headerEnd + 4 < _requestBuf.length()) {
+        string body = _requestBuf.substr(headerEnd + 4);
+        _request.setBody(body);
     }
 }
 
 void Client::parseRequest() {
     // Find end of first line
-    size_t firstLineEnd = request_buf.find("\r\n");
+    size_t firstLineEnd = _requestBuf.find("\r\n");
     if (firstLineEnd == string::npos) {
         std::cerr << "Invalid request format" << std::endl;
         return;
     }
 
     // Parse request line
-    string requestLine = request_buf.substr(0, firstLineEnd);
+    string requestLine = _requestBuf.substr(0, firstLineEnd);
     parseRequestLine(requestLine);
 
     // Parse headers
     size_t headerStart = firstLineEnd + 2;
-    size_t headerEnd = request_buf.find("\r\n\r\n", headerStart);
+    size_t headerEnd = _requestBuf.find("\r\n\r\n", headerStart);
     if (headerEnd == string::npos) {
         std::cerr << "No headers found" << std::endl;
         return;
     }
-    string headers = request_buf.substr(headerStart, headerEnd - headerStart);
+    string headers = _requestBuf.substr(headerStart, headerEnd - headerStart);
     parseHeaders(headers);
 	
 	// Check if there is chunked transfer encoding
-	if (request.headerGet("Transfer-Encoding") == "chunked") {
+	if (_request.headerGet("Transfer-Encoding") == "chunked") {
 		parseChunkedBody(); 
 	}
 	else {
 		parseBody(headerEnd);
 	}
-    request.setRawRequest(request_buf);
+    _request.setRawRequest(_requestBuf);
 }
 
 
@@ -205,18 +240,18 @@ void Client::handleRequest(const std::string &buffer) {
     }
 
     try {
-        request_buf = buffer;  // Direct copy
+        _requestBuf = buffer;  // Direct copy
     } catch (const std::exception &e) {
         std::cerr << "Exception while assigning to request_buf: " << e.what() << std::endl;
         return;
     }
 
     parseRequest();
-    request.preview();
+    _request.preview();
 }
 
 
 HttpRequest& Client::getRequest() {
-    return request;
+    return _request;
 }
 

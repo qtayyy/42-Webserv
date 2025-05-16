@@ -9,42 +9,55 @@
 #include <sys/socket.h>
 #include "Log.hpp"
 #include "Utils.hpp"
+#include "HttpResponse.hpp"
 
 class Client
 {
 	public:
+
+		bool 		sendingResponse;
+		string 		responseBuffer;
+
+		// -- CONSTRUCTORS/DESTRUCTORS --
 		Client();
 		~Client();
 
-		ssize_t bytesSent;
-    	ssize_t bytesLeft;
-		bool sendingResponse;
-		string responseBuffer;
-		bool responseKeepAlive;
-
-        std::string& getRecvBuffer(); // Get the buffer for accumulating data
-        bool isRequestReady() const; // Check if the request is fully parsed
-        void reset(); // Reset the state for keep-alive connections
-
-		void		parseRequest();
-        void handleRequest(const std::string &buffer);
+		
+        // -- GETTERS/EXTRACTORS --
+		ssize_t 	getBytesLeft();
+        int 		extractContentLength();
+        int     	extractBodySize();
+        bool 		isKeepAlive();
         HttpRequest &getRequest();
-		std::string &getRequestBuffer() { return request_buf; }
-
+		string 		&getRequestBuffer() { return _requestBuf; }
+        
+		// -- SETTERS --
+        ssize_t 	sendTo(int fd);
+		
+		// -- REQUEST HANDLING --
+        void		parseRequest();
+        void		handleRequest(const string &buffer);
+		
+		// -- RESPONSE HANDLING --
+        void		prepareForResponse(HttpResponse &response);
+		
 	private:
-		void		parseRequestLine(const std::string& request_line);
-		void		parseHeaders(const std::string& headers);
+
+		// -- PARSING FUNCTIONS --
+		void		parseRequestLine(const string& request_line);
+		void		parseHeaders(const string& headers);
 		void		parseBody(size_t header_end);
 		void		parseChunkedBody();
-		size_t		parseChunkSize(const std::string& chunk_size);
-		size_t		hexToDec(const std::string& hex);
+		size_t		parseChunkSize(const string& chunk_size);
+		size_t		hexToDec(const string& hex);
 		
-		std::string request_buf; 
-		bool		headers_parsed;
-		bool		is_chunked; 
-		size_t		content_length; 
-		bool		request_ready; 
-		HttpRequest request;
+		string		_requestBuf; 
+		bool 		_keepConnectionAlive;
+		HttpRequest _request;
+		ssize_t 	_bytesSent;
+    	ssize_t 	_bytesLeft;
+
+
 };
 
 #endif
