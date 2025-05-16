@@ -3,7 +3,6 @@
 
 #include "../includes/Webserv.hpp"
 #include "HttpRequest.hpp"
-#include "StatusHandler.hpp"
 #include "Utils.hpp"
 #include "HttpException.hpp"
 #include <ctime>

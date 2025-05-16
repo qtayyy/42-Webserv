@@ -1,6 +1,19 @@
 #include "Utils.hpp"
-#include "HttpException.hpp"
-#include "Log.hpp"
+
+
+/**
+ * @brief	Converts IP addresses from integer to string.
+ */
+std::string	intToIp(uint32_t ip)
+{
+	struct in_addr	addr;
+	addr.s_addr = htonl(ip);
+
+	const char*	ipStr = inet_ntoa(addr);
+	if (ipStr == NULL)
+		return ("");
+    return (std::string(ipStr));
+}
 
 void createFileWithContents(const string& filePath, const string& contents) {
     std::ofstream outFile(filePath.c_str());

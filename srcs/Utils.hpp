@@ -6,6 +6,8 @@
 #include <cctype>
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include "HttpException.hpp"
+#include "Log.hpp"
 
 bool isDirectory(const string& path);
 bool endsWith(const string& str, const string& suffix);

@@ -53,7 +53,7 @@ string CGIHandler::handleCgi(
 
     this->setEnv("REQUEST_METHOD",  request.getMethod());
     this->setEnv("QUERY_STRING",    request.getQueryString());
-    this->setEnv("SERVER_PORT",     "8080"); //fixme
+    this->setEnv("SERVER_PORT",     request.getHost());
     this->setEnv("PATH_INFO",       request.headerGet("path"));
     this->setEnv("PATH_TRANSLATED", fullCGIPath);
     this->setEnv("REQUEST_URI",     fullCGIPath);

@@ -3,7 +3,6 @@
 
 #include <stdexcept>
 #include <string>
-#include "StatusHandler.hpp"
 
 class HttpException : public std::runtime_error {
 public:

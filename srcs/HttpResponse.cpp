@@ -128,8 +128,10 @@ void HttpResponse::_handleDELETE() {
 /* CONSTRUCTOR */
 
 HttpResponse::~HttpResponse() {
-
+    
 }
+
+
 
 HttpResponse::HttpResponse(HttpRequest &request, ServerBlock *serverBlock) : 
     _usingLocationBlock(false),

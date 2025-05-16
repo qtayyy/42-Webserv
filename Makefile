@@ -24,11 +24,9 @@ SRC		= 	Block.cpp \
 			LocationBlock.cpp \
 			main.cpp \
 			ServerBlock.cpp \
-			utils.cpp \
 			HttpResponse.cpp \
 			Utils.cpp \
 			CGI.cpp \
-			StatusHandler.cpp \
 			HttpRequest.cpp \
 			Log.cpp
 

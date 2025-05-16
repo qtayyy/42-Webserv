@@ -5,6 +5,8 @@
 #include "Webserv.hpp"
 #include "Utils.hpp"
 
+void printBorderedBox(const string& message, const string& title);
+
 class LogStream {
     protected:
         std::ostringstream buffer;

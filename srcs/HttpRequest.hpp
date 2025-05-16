@@ -15,6 +15,7 @@ private:
     string     absolutePath;
     string     _path;
     string     _uid;
+    string     hostNumber;
 
 public:
     
@@ -40,6 +41,8 @@ public:
     
     void   setPath(string path);
     string getPath() const;
+    void   setHost(string host);
+    string getHost();
 
     void   headerSet(string key, string value);
     string headerGet(string key);
