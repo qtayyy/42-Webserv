@@ -9,6 +9,57 @@ from textwrap import dedent
 import traceback
 from datetime import datetime
 
+def generate_response_string(
+        content: str,
+        status_code: int    = 404,
+        status_message: str = "Not Found",
+        content_length: int = None,
+        content_type: str   = "text/html",
+        **kwargs
+    ):
+    
+    content = content.strip()  # Remove unintended whitespace or newlines
+    additional_headers = "".join(f"{key}: {value}\r\n" for key, value in kwargs.items())
+    return (
+        f"HTTP/1.1 {status_code} {status_message}\r\n"
+        f"Content-Type: {content_type}\r\n"
+        f"Content-Length: {len(content) if content_length is None else content_length}\r\n"
+        f"{additional_headers}"
+        f"\r\n"
+        f"{content}"
+    )
+
+
+def generate_error_page(
+        title, 
+        message, 
+        error_code=400,
+        error_message="Bad Request"):
+    raw_fail_page = dedent(f'''
+    <html>
+    <head>
+        <style>
+            {style}
+            h2 {{
+                color: red;
+            }}
+        </style>
+    </head>
+    <body>
+        <h2>{title}</h2>
+        <p>{message}</p>
+    </body>
+    </html>
+    ''')
+    return generate_response_string(
+        content        = raw_fail_page,
+        status_code    = error_code,
+        status_message = error_message,
+        content_type   = "text/html"
+    )
+
+
+
 FILE = "cgi_log"
 
 # Clear the cgi_log file
@@ -38,12 +89,48 @@ CONTENT_TYPES = {
 
 cgitb.enable()
 
-try:
-    form = cgi.FieldStorage()
-except Exception as e:
-    error_message = traceback.format_exc()
-    write_to(f"Error: {error_message}")
-    sys.exit(1)
+class DummyField:
+    def __init__(self, value=None):
+        self.file = self
+        self._value = value
+
+    def read(self):
+        if isinstance(self._value, bytes):
+            return self._value
+        elif isinstance(self._value, str):
+            return self._value.encode('utf-8')
+        return b''
+
+class DummyForm(dict):
+    def __init__(self, data=None):
+        super().__init__()
+        if data is not None:
+            self["file"] = None
+
+    def __getitem__(self, key):
+        return None
+
+content_type = os.environ.get("CONTENT_TYPE", "")
+if content_type.startswith("multipart/form-data"):
+    try:
+        form = cgi.FieldStorage()
+    except Exception as e:
+        error_message = traceback.format_exc()
+        write_to(f"Error: {error_message}")
+        sys.stdout.write(generate_response_string(
+            content="Internal Server Error",
+            status_code=500,
+            status_message="Internal Server Error",
+            content_type="text/plain",
+        ))
+        sys.exit(1)
+else:
+    length = int(os.environ.get("CONTENT_LENGTH", 0))
+    post_data = sys.stdin.read(length)
+    form = DummyForm(post_data)
+    write_to(f"POST data: {post_data}")
+
+
 
 # Get request method and route
 request_method = os.environ.get("REQUEST_METHOD", "").upper()
@@ -99,53 +186,6 @@ raw_success_page = (
 )
 
 
-def generate_error_page(
-        title, 
-        message, 
-        error_code=400,
-        error_message="Bad Request"):
-    raw_fail_page = dedent(f'''
-    <html>
-    <head>
-        <style>
-            {style}
-            h2 {{
-                color: red;
-            }}
-        </style>
-    </head>
-    <body>
-        <h2>{title}</h2>
-        <p>{message}</p>
-    </body>
-    </html>
-    ''')
-    return generate_response_string(
-        content        = raw_fail_page,
-        status_code    = error_code,
-        status_message = error_message,
-        content_type   = "text/html"
-    )
-
-def generate_response_string(
-        content: str,
-        status_code: int    = 404,
-        status_message: str = "Not Found",
-        content_length: int = None,
-        content_type: str   = "text/html",
-        **kwargs
-    ):
-    
-    content = content.strip()  # Remove unintended whitespace or newlines
-    additional_headers = "".join(f"{key}: {value}\r\n" for key, value in kwargs.items())
-    return (
-        f"HTTP/1.1 {status_code} {status_message}\r\n"
-        f"Content-Type: {content_type}\r\n"
-        f"Content-Length: {len(content) if content_length is None else content_length}\r\n"
-        f"{additional_headers}"
-        f"\r\n"
-        f"{content}"
-    )
 
 
 def print_and_write_to(msg, file_path:str=FILE):
@@ -206,12 +246,14 @@ if request_method == "POST":
             exit_error("Bad Request", "No file was uploaded.", 400)
         
         file_item = form["file"]
+        if not file_item:
+            exit_error("Bad Request", "No file was uploaded.", 400)
+
         if file_item.file is None: 
             exit_error("Bad Request", "No file content.", 400)
         
         write_to(f"cwd: {os.getcwd()}")
         write_to(f"argv[1]: {sys.argv[1]}")
-        write_to(f"file_item.filename: {file_item.filename}")
         file_path = os.path.join("/", os.getcwd().lstrip('/'), sys.argv[1].lstrip('/'), file_item.filename)
         if os.path.exists(file_path): 
             exit_error('Bad Request', f'"{file_item.filename}" already exists in "{os.path.dirname(file_path)}"', 405)

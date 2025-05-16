@@ -1,19 +1,15 @@
-[2025-05-16 15:11:56] cgi called
-[2025-05-16 15:11:56] ENV CONTENT_LENGTH=0
-[2025-05-16 15:11:56] ENV CONTENT_TYPE=
-[2025-05-16 15:11:56] ENV PATH_INFO=/upload/
-[2025-05-16 15:11:56] ENV PATH_TRANSLATED=/home/cooper/coreProgram/webserv_proper/webserv1/cgi-bin/upload.py
-[2025-05-16 15:11:56] ENV QUERY_STRING=
-[2025-05-16 15:11:56] ENV REQUEST_METHOD=GET
-[2025-05-16 15:11:56] ENV REQUEST_URI=/home/cooper/coreProgram/webserv_proper/webserv1/cgi-bin/upload.py
-[2025-05-16 15:11:56] ENV SCRIPT_NAME=/cgi-bin/upload.py
-[2025-05-16 15:11:56] ENV SERVER_PORT=
-[2025-05-16 15:11:56] ENV SERVER_PROTOCOL=HTTP/1.1
-[2025-05-16 15:11:56] ENV LC_CTYPE=C.UTF-8
-[2025-05-16 15:11:56] Received data: {}
-[2025-05-16 15:11:56] GET public/upload/
-[2025-05-16 15:11:56] current_path: /home/cooper/coreProgram/webserv_proper/webserv1
-[2025-05-16 15:11:56] full_path: /home/cooper/coreProgram/webserv_proper/webserv1/public/upload/
-[2025-05-16 15:11:56] Directory listing for /home/cooper/coreProgram/webserv_proper/webserv1/public/upload/
-[2025-05-16 15:11:56] Item: large.jpeg
-[2025-05-16 15:11:56] Item: 4k-arcane-season-2-wallpapers-v0-39t58hlgr7nd1.png
+[2025-05-16 15:55:04] cgi called
+[2025-05-16 15:55:04] ENV CONTENT_LENGTH=62
+[2025-05-16 15:55:04] ENV CONTENT_TYPE=plain/text
+[2025-05-16 15:55:04] ENV PATH_INFO=/upload
+[2025-05-16 15:55:04] ENV PATH_TRANSLATED=/home/cooper/coreProgram/webserv_proper/webserv1/cgi-bin/upload.py
+[2025-05-16 15:55:04] ENV QUERY_STRING=
+[2025-05-16 15:55:04] ENV REQUEST_METHOD=POST
+[2025-05-16 15:55:04] ENV REQUEST_URI=/home/cooper/coreProgram/webserv_proper/webserv1/cgi-bin/upload.py
+[2025-05-16 15:55:04] ENV SCRIPT_NAME=/cgi-bin/upload.py
+[2025-05-16 15:55:04] ENV SERVER_PORT=
+[2025-05-16 15:55:04] ENV SERVER_PROTOCOL=HTTP/1.1
+[2025-05-16 15:55:04] ENV LC_CTYPE=C.UTF-8
+[2025-05-16 15:55:04] Received data: {}
+[2025-05-16 15:55:04] POST data: BODY IS HERE write something shorter or longer than body limit
+[2025-05-16 15:55:04] POST

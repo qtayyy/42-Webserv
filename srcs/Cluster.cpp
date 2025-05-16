@@ -344,9 +344,8 @@ for (int i = 0; i < _numOfFds; i++) {
 		} 
 		else {
 			char 		buffer[BUFFER_SIZE];
-			Client* 	client 			= this->_clients[_pollFds[i].fd];
-			string& 	requestBuffer 	= client->getRequestBuffer();
-			HttpRequest &request  		= client->getRequest();
+			string& 	requestBuffer 	= _clients[_pollFds[i].fd]->getRequestBuffer();
+			HttpRequest &request  		= _clients[_pollFds[i].fd]->getRequest();
 
 			LogStream::pending() << "Reading from [" << _pollFds[i].fd << "]" << std::endl;
 
@@ -363,13 +362,13 @@ for (int i = 0; i < _numOfFds; i++) {
 				
 
 			// -- EXTRACT CONTENT LENGTH --
-			int contentLength = client->extractContentLength();
+			int contentLength = _clients[_pollFds[i].fd]->extractContentLength();
 			if (contentLength == -1)
 				continue;
 			
 
 			// -- CHECK IF FULL REQUEST RECEIVED --
-			if (client->extractBodySize() < contentLength) {
+			if (_clients[_pollFds[i].fd]->extractBodySize() < contentLength) {
 				LogStream::pending() << "Waiting for more data from [" << _pollFds[i].fd << "]" << std::endl;
 				continue;
 			}
@@ -378,7 +377,7 @@ for (int i = 0; i < _numOfFds; i++) {
 			
 
 			// --- PARSE REQUEST ---
-			client->handleRequest(requestBuffer);
+			_clients[_pollFds[i].fd]->handleRequest(requestBuffer);
 			
 
 			// --- SAVE REQUEST ---
@@ -390,7 +389,7 @@ for (int i = 0; i < _numOfFds; i++) {
 
 			// --- PREPARE RESPONSE ---
 			HttpResponse response    = HttpResponse(request, resolveServer(request));
-			client->prepareForResponse(response);
+			_clients[_pollFds[i].fd]->prepareForResponse(response);
 			_pollFds[i].events = POLLOUT;
 			break;
 		}
@@ -410,6 +409,7 @@ for (int i = 0; i < _numOfFds; i++) {
 			if (client->getBytesLeft() != 0) 
 				continue;
 
+			LogStream::success(generateLogFileName("logs/responses/", client->getRequest().getUid(), client->getRequest().headerGet("path")), std::ios::app) << client->responseBuffer << std::endl;
 			client->sendingResponse = false;
 			LogStream::success() << "Message sent successfully." << std::endl;
 			if (client->isKeepAlive()) {

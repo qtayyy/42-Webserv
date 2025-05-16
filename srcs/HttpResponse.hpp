@@ -88,6 +88,7 @@ public:
     string         getFinalResponseMsg() const;
     string         getReroutedPath();
     LocationBlock *getBlock();
+    void           setFinalResponseMsg(string msg) { this->_finalResponseMsg = msg; }
 
 
     /* GENERATORS */
