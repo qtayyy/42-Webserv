@@ -479,6 +479,9 @@ void HttpResponse::_initErrorResponse(int statusCode, string error, string descr
         if (_isAlias)
             basepath = this->getBlock()->getAlias();
 
+        if (basepath[0] == '/')
+            basepath = basepath.substr(1);
+
         string errorPage = joinPaths(basepath, errorPages.find(statusCode)->second);
 
         try {

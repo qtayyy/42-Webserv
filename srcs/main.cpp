@@ -59,7 +59,7 @@ int	main(int argc, char **argv)
 	deleteLogs("logs/responses");
 	LogStream::log("log_trace.log", std::ios::trunc) << std::endl;
 
-	std::string	defaultPath = "conf/good/custom.conf";
+	std::string	defaultPath = "conf/good/default.conf";
 	if (argc > 2)
 	{
 		std::cerr << RED "Usage error: invalid num o f args\n" <<

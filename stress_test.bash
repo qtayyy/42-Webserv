@@ -5,7 +5,7 @@
 # disable logs so that log files are not created
 chmod -rwx logs/cgi logs/requests logs/responses
 
-output_dir=""
+output_dir="tests/siege_tests"
 
 run_siege_test() {
     local connections=$1
