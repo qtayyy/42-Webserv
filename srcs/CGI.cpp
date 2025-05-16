@@ -62,11 +62,8 @@ string CGIHandler::handleCgi(
     this->setEnv("CONTENT_TYPE",    request.headerGet("Content-Type")); //fixme here???
     this->setEnv("SERVER_PROTOCOL", "HTTP/1.1");
 
-    // setEnvironmentVariables(this->envVars);
-    // system("./ubuntu_cgi_tester");
 
     LogStream::pending() << "Running CGI " << fullCGIPath <<  "..." << std::endl;
-    // LogStream::log()     << "Input PIPE: "    << inputPipe[0] << ", " << inputPipe[1] << " | Output PIPE: " << outputPipe[0] << ", " << outputPipe[1] << std::endl;
     LogStream::pending() << "Bytes to be written to CGI stdin: " << data.length() << std::endl;
     // LogStream::log("cgi_request.txt", std::ios::out | std::ios::trunc) << data << std::endl;
 
