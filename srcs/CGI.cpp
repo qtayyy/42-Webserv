@@ -43,7 +43,7 @@ string CGIHandler::handleCgi(
     int outputPipe[2]; // Pipe for capturing CGI output (stdout from CGI)
 
     if (pipe(inputPipe) == -1 || pipe(outputPipe) == -1) 
-        throw std::runtime_error("pipe failed: " + string(strerror(errno)));
+        throw std::runtime_error("pipe failed");
 
     string data = request.getBody();
 
@@ -74,7 +74,7 @@ string CGIHandler::handleCgi(
 
     pid_t pid = fork();
     if (pid < 0)
-        throw std::runtime_error("fork failed: " + string(strerror(errno)));
+        throw std::runtime_error("fork failed");
 
     if (pid == 0) {
         // **CHILD PROCESS** (Executes CGI)
@@ -138,7 +138,7 @@ string CGIHandler::handleCgi(
             ssize_t result = write(inputPipe[1], data.c_str() + bytesWritten, length - bytesWritten);
             if (result == -1) {
                 close(inputPipe[1]);
-                throw std::runtime_error("Failed to write to CGI stdin: " + string(strerror(errno)));
+                throw std::runtime_error("Failed to write to CGI stdin: ");
             }
             bytesWritten += result;
         }
@@ -158,7 +158,7 @@ string CGIHandler::handleCgi(
         }
         if (bytesRead == -1) {
             close(outputPipe[0]);
-            throw std::runtime_error("Failed to read from CGI stdout: " + string(strerror(errno)));
+            throw std::runtime_error("Failed to read from CGI stdout");
         }
 
         string finalMsg(responseBuffer.begin(), responseBuffer.end());

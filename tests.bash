@@ -77,9 +77,9 @@ call_curl_and_save() {
     # Define an array of success statuses
 
     if [[ " ${success_statuses[@]} " =~ " $http_status " ]]; then
-        echo -e "\nReceived success status: \e[32mHTTP $http_status - $http_status_message\e[0m"  # Print in green for success
+        echo -e "\nReceived: \e[32mHTTP $http_status - $http_status_message\e[0m"  # Print in green for success
     else
-        echo -e "\nReceived error status: \e[33mHTTP $http_status - $http_status_message\e[0m"  # Print in orange for failure
+        echo -e "\nReceived: \e[33mHTTP $http_status - $http_status_message\e[0m"  # Print in orange for failure
     fi
 
 

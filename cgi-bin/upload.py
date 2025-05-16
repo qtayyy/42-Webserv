@@ -249,8 +249,7 @@ elif request_method == "GET":
         exit_error("Bad Request", "No file path provided in the request.", 400)
 
     write_to(f"GET {route}")
-    current_path = os.getcwd()
-    write_to(f"cwd: {os.getcwd()}")
+    current_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     write_to(f"current_path: {current_path}")
     route = route.lstrip('/')  # Remove leading slash if present
     full_path = os.path.join(current_path, route)

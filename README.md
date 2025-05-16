@@ -17,6 +17,12 @@
 
 
 add for hostname support:
-127.0.0.1       qtay.42.fr shechong.42.fr etlim.42.fr
 
+# Edit dns
+127.0.0.1       qtay.42.fr shechong.42.fr etlim.42.fr webserv.my webserv2.my non_handled
+
+# kill port using 1234
 fuser -k 1234/tcp
+
+# kill nginx
+sudo systemctl stop nginx
