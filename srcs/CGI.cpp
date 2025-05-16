@@ -59,7 +59,7 @@ string CGIHandler::handleCgi(
     this->setEnv("REQUEST_URI",     fullCGIPath);
     this->setEnv("SCRIPT_NAME",     cgiScriptPath);
     this->setEnv("CONTENT_LENGTH",  to_string(data.length()));
-    this->setEnv("CONTENT_TYPE",    request.headerGet("Content-Type")); //fixme here???
+    this->setEnv("CONTENT_TYPE",    request.headerGet("Content-Type"));
     this->setEnv("SERVER_PROTOCOL", "HTTP/1.1");
 
 

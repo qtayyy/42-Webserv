@@ -1,14 +1,17 @@
-[2025-05-16 09:36:38] cgi called
-[2025-05-16 09:36:38] ENV CONTENT_LENGTH=0
-[2025-05-16 09:36:38] ENV CONTENT_TYPE=
-[2025-05-16 09:36:38] ENV PATH_INFO=/only_post
-[2025-05-16 09:36:38] ENV PATH_TRANSLATED=/home/shechong/coreProgram/webserv/cgi-bin/upload.py
-[2025-05-16 09:36:38] ENV QUERY_STRING=
-[2025-05-16 09:36:38] ENV REQUEST_METHOD=POST
-[2025-05-16 09:36:38] ENV REQUEST_URI=/home/shechong/coreProgram/webserv/cgi-bin/upload.py
-[2025-05-16 09:36:38] ENV SCRIPT_NAME=/cgi-bin/upload.py
-[2025-05-16 09:36:38] ENV SERVER_PORT=8080
-[2025-05-16 09:36:38] ENV SERVER_PROTOCOL=HTTP/1.1
-[2025-05-16 09:36:38] ENV LC_CTYPE=C.UTF-8
-[2025-05-16 09:36:38] Received data: {}
-[2025-05-16 09:36:38] POST
+[2025-05-16 11:30:52] cgi called
+[2025-05-16 11:30:52] ENV CONTENT_LENGTH=74781
+[2025-05-16 11:30:52] ENV CONTENT_TYPE=multipart/form-data; boundary=----geckoformboundary6c1c42b74c1ca6e22b57fad51a6d535c
+[2025-05-16 11:30:52] ENV PATH_INFO=/upload/
+[2025-05-16 11:30:52] ENV PATH_TRANSLATED=/home/shechong/coreProgram/webserv/cgi-bin/upload.py
+[2025-05-16 11:30:52] ENV QUERY_STRING=
+[2025-05-16 11:30:52] ENV REQUEST_METHOD=POST
+[2025-05-16 11:30:52] ENV REQUEST_URI=/home/shechong/coreProgram/webserv/cgi-bin/upload.py
+[2025-05-16 11:30:52] ENV SCRIPT_NAME=/cgi-bin/upload.py
+[2025-05-16 11:30:52] ENV SERVER_PORT=
+[2025-05-16 11:30:52] ENV SERVER_PROTOCOL=HTTP/1.1
+[2025-05-16 11:30:52] ENV LC_CTYPE=C.UTF-8
+[2025-05-16 11:30:52] Received data: {}
+[2025-05-16 11:30:52] POST
+[2025-05-16 11:30:52] cwd: /home/shechong/coreProgram/webserv
+[2025-05-16 11:30:52] argv[1]: public/upload/
+[2025-05-16 11:30:52] file_item.filename: unnamed.png

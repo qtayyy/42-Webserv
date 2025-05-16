@@ -351,22 +351,25 @@ for (int i = 0; i < _numOfFds; i++) {
 
 			LogStream::pending() << "Reading from [" << _pollFds[i].fd << "]" << std::endl;
 	
-			while (true) {
-				byteRecv = recv(_pollFds[i].fd, buffer, BUFFER_SIZE - 1, 0);
-				if (byteRecv <= 0) {
-					if 		(byteRecv == 0)    LogStream::error() << "Client disconnected [" << _pollFds[i].fd << "]" << std::endl;
-					else if (byteRecv == -1) { LogStream::error() << "No data available yet, will try again next iteration [" << _pollFds[i].fd << "]" << std::endl; break; } 
-					else                       LogStream::error() << "Recv error" << std::endl;
-					removeFd(i--);
-					fdRemoved = true;
-					break;
-				}
-	
-				// buffer[byteRecv] = '\0';
-				requestBuffer.append(buffer, byteRecv);
+			// while (true) {
+				
+			// }
+			byteRecv = recv(_pollFds[i].fd, buffer, BUFFER_SIZE - 1, 0);
+			if (byteRecv <= 0) {
+				if 		(byteRecv == 0)    LogStream::error() << "Client disconnected [" << _pollFds[i].fd << "]" << std::endl;
+				else if (byteRecv == -1) { LogStream::error() << "No data available yet, will try again next iteration [" << _pollFds[i].fd << "]" << std::endl; break; } 
+				else                       LogStream::error() << "Recv error" << std::endl;
+				removeFd(i--);
+				fdRemoved = true;
+				break;
 			}
 
-			if (fdRemoved) break;
+			// buffer[byteRecv] = '\0';
+			requestBuffer.append(buffer, byteRecv);
+
+
+			if (fdRemoved)
+				break;
 
 			// Check if the full request is received
 			size_t headerEnd = requestBuffer.find("\r\n\r\n");
@@ -424,7 +427,6 @@ for (int i = 0; i < _numOfFds; i++) {
 		string responseFilename = generateLogFileName(string("logs/responses/"), request.getUid(), string("RESPONSE_") + request.headerGet("path"));
 
 		while (bytesLeft > 0) {
-			LogStream::log(responseFilename) << finalMsg << std::endl;
 			ssize_t sent = send(_pollFds[i].fd, msgPtr + bytesSent, bytesLeft, 0);
 			if (sent == -1) {
 				int		  error = 0;
