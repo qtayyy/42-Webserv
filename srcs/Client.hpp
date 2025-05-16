@@ -16,6 +16,12 @@ class Client
 		Client();
 		~Client();
 
+		ssize_t bytesSent;
+    	ssize_t bytesLeft;
+		bool sendingResponse;
+		string responseBuffer;
+		bool responseKeepAlive;
+
         std::string& getRecvBuffer(); // Get the buffer for accumulating data
         bool isRequestReady() const; // Check if the request is fully parsed
         void reset(); // Reset the state for keep-alive connections

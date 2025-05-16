@@ -14,7 +14,9 @@
 
 /* CONSTRUCTORS/DESTRUCTORS */
 
-Client::Client() : request_buf("") {}
+Client::Client() : request_buf("") {
+    
+}
 Client::~Client() {}
 
 

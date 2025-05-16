@@ -337,62 +337,61 @@ if ((ready = poll(_pollFds, _numOfFds, timeout)) == -1) {
 }
 
 for (int i = 0; i < _numOfFds; i++) {
-	if (_pollFds[i].revents & (POLLIN | POLLHUP)) { // If an fd is ready for reading
+	if (_pollFds[i].revents & (POLLIN | POLLHUP)) {
 		if (_listenerToServer.find(_pollFds[i].fd) != _listenerToServer.end()) {
 			LogStream::pending() << "Handling new client " << _pollFds[i].fd << std::endl;
 			handleNewClient(_pollFds[i].fd);
 		} 
-		
 		else {
-			char	buffer[BUFFER_SIZE];
+			char buffer[BUFFER_SIZE];
 			ssize_t byteRecv;
 			string& requestBuffer = this->_clients[_pollFds[i].fd]->getRecvBuffer();
 			bool fdRemoved = false;
-
 			LogStream::pending() << "Reading from [" << _pollFds[i].fd << "]" << std::endl;
-	
-			// while (true) {
-				
-			// }
 			byteRecv = recv(_pollFds[i].fd, buffer, BUFFER_SIZE - 1, 0);
 			if (byteRecv <= 0) {
-				if 		(byteRecv == 0)    LogStream::error() << "Client disconnected [" << _pollFds[i].fd << "]" << std::endl;
+				if (byteRecv == 0)    LogStream::error() << "Client disconnected [" << _pollFds[i].fd << "]" << std::endl;
 				else if (byteRecv == -1) { LogStream::error() << "No data available yet, will try again next iteration [" << _pollFds[i].fd << "]" << std::endl; break; } 
-				else                       LogStream::error() << "Recv error" << std::endl;
+				else                   LogStream::error() << "Recv error" << std::endl;
 				removeFd(i--);
 				fdRemoved = true;
 				break;
 			}
-
-			// buffer[byteRecv] = '\0';
 			requestBuffer.append(buffer, byteRecv);
-
-
 			if (fdRemoved)
-				break;
-
-			// Check if the full request is received
+				continue; // Immediately continue to avoid using invalidated fd/client
 			size_t headerEnd = requestBuffer.find("\r\n\r\n");
 			if (headerEnd != string::npos) {
 				size_t contentLength = 0;
 				if (requestBuffer.find("Content-Length:") != string::npos) {
 					size_t start  = requestBuffer.find("Content-Length:") + 15;
-					size_t end	  = requestBuffer.find("\r\n", start);
+					size_t end    = requestBuffer.find("\r\n", start);
 					contentLength = std::atoi(requestBuffer.substr(start, end - start).c_str()); 
 				}
-
-				// Check if the entire body is received
 				if (requestBuffer.size() >= headerEnd + 4 + contentLength) {
 					LogStream::success() << "Full request received from [" << _pollFds[i].fd << "] with " << requestBuffer.size() << " bytes" << RESET << std::endl;
-					// this->_clients[_pollFds[i].fd]->handleRequest(requestBuffer.size(), (char *)(requestBuffer.c_str()));
-					this->_clients[_pollFds[i].fd]->handleRequest(requestBuffer);
-
-					HttpRequest &request = this->_clients[_pollFds[i].fd]->getRequest();
+					Client* client = NULL;
+					if (this->_clients.count(_pollFds[i].fd))
+						client = this->_clients[_pollFds[i].fd];
+					if (!client) {
+						LogStream::error() << "Client pointer is null after request received!" << std::endl;
+						continue;
+					}
+					client->handleRequest(requestBuffer);
+					HttpRequest &request = client->getRequest();
 					string outputFolder = generateLogFileName(REQUESTS_FOLDER, request.getUid(), request.getMethod() + "_request_" + request.headerGet("path"));
 					LogStream::log(outputFolder, std::ios::app) << request.getRawRequest() << std::endl;
 					LogStream::success() << "Full request saved to " << outputFolder << std::endl;
-					
-					this->_clients[_pollFds[i].fd]->getRecvBuffer().clear();
+					client->getRecvBuffer().clear();
+					// --- Prepare response for sending ---
+					ServerBlock* serverBlock = resolveServer(request);
+					HttpResponse response  = HttpResponse(request, serverBlock);
+					string finalMsg = response.getFinalResponseMsg();
+					client->responseBuffer = finalMsg;
+					client->bytesSent = 0;
+					client->bytesLeft = finalMsg.size();
+					client->sendingResponse = true;
+					client->responseKeepAlive = (request.headerGet("Connection") == "keep-alive" && response.getFinalResponseMsg().find("Connection: close") == string::npos);
 					_pollFds[i].events = POLLOUT;
 					break;
 				}
@@ -402,70 +401,27 @@ for (int i = 0; i < _numOfFds; i++) {
 		}
 	}
 
-	if (_pollFds[i].revents & POLLOUT) { // If an fd is ready for writing
-		HttpRequest request = this->_clients[_pollFds[i].fd]->getRequest();
-		if (request.getRawRequest().empty()) {
-			LogStream::error() << "No request to send for [" << _pollFds[i].fd << "]" << std::endl;
-			continue;
-		}
-		LogStream::log() << LogStream::log().setBordered(true) << request.preview() << std::endl;
-		LogStream::pending() << "Handling request" << std::endl;
-
-		ServerBlock* serverBlock = resolveServer(request);
-
-		HttpResponse response  = HttpResponse(request, serverBlock);
-		string 		 finalMsg  = response.getFinalResponseMsg();
-		
-		ssize_t 	totalBytes = finalMsg.size();
-		ssize_t 	bytesSent  = 0;
-		ssize_t 	bytesLeft  = totalBytes;
-		const char* msgPtr 	   = finalMsg.c_str();
-		
-		LogStream::success() << "Response message generated" << std::endl;
-		LogStream::pending() << "Sending " << totalBytes << " Bytes to client [" << _pollFds[i].fd << "]" << std::endl;
-
-		string responseFilename = generateLogFileName(string("logs/responses/"), request.getUid(), string("RESPONSE_") + request.headerGet("path"));
-
-		while (bytesLeft > 0) {
-			ssize_t sent = send(_pollFds[i].fd, msgPtr + bytesSent, bytesLeft, 0);
+	if (_pollFds[i].revents & POLLOUT) {
+		Client* client = this->_clients[_pollFds[i].fd];
+		if (client->sendingResponse && client->bytesLeft > 0) {
+			ssize_t sent = send(_pollFds[i].fd, client->responseBuffer.c_str() + client->bytesSent, client->bytesLeft, 0);
 			if (sent == -1) {
-				int		  error = 0;
-				socklen_t len	= sizeof(error);
-				
-				// Check for EAGAIN or EWOULDBLOCK errors
-				if (getsockopt(_pollFds[i].fd, SOL_SOCKET, SO_ERROR, &error, &len) == 0) {
-					if (error == EAGAIN || error == EWOULDBLOCK) {
-						usleep(10);
-						continue;
-					}
-					
-					else {
-						LogStream::error() << "send error: " << strerror(error) << std::endl;
-						removeFd(i--);
-						break;
-					}
-				} 
-				else {
-					perror("getsockopt");
+				// handle error (optional)
+			} else {
+				client->bytesSent += sent;
+				client->bytesLeft -= sent;
+			}
+			if (client->bytesLeft == 0) {
+				client->sendingResponse = false;
+				LogStream::success() << "Message sent successfully." << std::endl;
+				if (client->responseKeepAlive) {
+					LogStream::pending() << "Keeping connection alive for client [" << _pollFds[i].fd << "]" << std::endl;
+					_pollFds[i].events = POLLIN;
+				} else {
+					LogStream::pending() << "Closing connection for client [" << _pollFds[i].fd << "]" << std::endl;
 					removeFd(i--);
-					break;
 				}
 			}
-			bytesSent += sent;
-			bytesLeft -= sent;
-		}
-
-		LogStream::success() << "Message sent successfully. Saved to " << responseFilename << std::endl;
-
-		// Check if the connection should be kept alive
-		if (request.headerGet("Connection") == "keep-alive" && response.getFinalResponseMsg().find("Connection: close") == string::npos) {
-			LogStream::pending() << "Keeping connection alive for client [" << _pollFds[i].fd << "]" << std::endl;
-			_pollFds[i].events = POLLIN; // Set back to POLLIN for further requests
-		} 
-		
-		else {
-			LogStream::pending() << "Closing connection for client [" << _pollFds[i].fd << "]" << std::endl;
-			removeFd(i--); // close and clean up the socket
 		}
 	}
 }

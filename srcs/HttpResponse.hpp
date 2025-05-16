@@ -18,6 +18,7 @@ private:
     static stringDict createContentTypeMap();
     static const string css;
 
+    
     int           _contentLength;
     int           _statusCode;
     string        _message;
@@ -68,7 +69,8 @@ public:
     HttpResponse(HttpRequest &request, ServerBlock *ServerBlock);
     ~HttpResponse();
 
-
+    int bytesSent;
+    int bytesLeft;
     /* GETTERS/SETTER */
     int            getContentLength() const;
     string         getFinalResponseMsg() const;
