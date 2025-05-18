@@ -82,7 +82,7 @@ string CGIHandler::handleCgi(
     signal(SIGPIPE, SIG_IGN); // Ignore SIGPIPE to prevent crashes when writing to a closed pipe
 
     pid_t pid = fork();
-    if (pid < 0)
+    if (pid < 0) 
         throw std::runtime_error("fork failed");
 
     if (pid == 0) {
